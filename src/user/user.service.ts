@@ -1,12 +1,14 @@
-import { BadRequestException, ConflictException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDao } from 'src/infrastructure/database/dao/user.dao';
+import { RefreshTokenService } from 'src/auth/refresh-token.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userDao: UserDao,
+     private readonly refreshTokenService: RefreshTokenService,
   ) { }
 
   async createUser(createUserDto: CreateUserDto) {
@@ -87,6 +89,29 @@ export class UserService {
         error: `Internal Error`,
       });
     }
+  }
+
+  async deleteUser(req) {
+    const { userId } = req.user
+
+    const user = await this.userDao.getUserById(userId)
+
+    if (!user) {
+      throw new UnauthorizedException('User not fount')
+    }
+
+    const refresh = await this.refreshTokenService.findRefreshTokenbyUser(userId)
+
+    if (refresh) {
+      await this.refreshTokenService.deleteRefreshToken(refresh.rft_token)
+    }
+
+    await this.userDao.deleteUser(userId)
+
+    return {
+      message: 'User delete',
+      statusCode: HttpStatus.OK,
+    };
   }
 
 }

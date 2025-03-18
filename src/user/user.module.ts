@@ -4,10 +4,13 @@ import { UserController } from './user.controller';
 import { UserDao } from 'src/infrastructure/database/dao/user.dao';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { RefreshTokenService } from 'src/auth/refresh-token.service';
+import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([User])],
+  imports:[TypeOrmModule.forFeature([User, RefreshToken])],
   controllers: [UserController],
-  providers: [UserService, UserDao],
+  providers: [UserService, UserDao, RefreshTokenService, JwtService],
 })
 export class UserModule {}

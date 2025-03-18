@@ -137,4 +137,24 @@ export class UserDao {
         }
     }
 
+    async deleteUser(usrId: number) {
+        return await this.userRepository
+            .update({ usr_id: usrId }, {
+                usr_delete: new Date(),
+            })
+            .then(() => {
+                return {
+                    message: 'User delete successfully',
+                    statusCode: HttpStatus.CREATED,
+                };
+            })
+            .catch((error) => {
+                throw new BadRequestException({
+                    statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                    message: [`${error.message}`],
+                    error: 'Internal Server Error',
+                });
+            });
+    }
+
 }
