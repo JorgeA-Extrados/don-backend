@@ -1,4 +1,4 @@
-import { IsDateString, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { RefreshToken } from "src/auth/entities/refresh-token.entity";
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 
@@ -108,6 +108,19 @@ export class User {
     @IsOptional()
     @IsString()
     usr_active?: string;
+
+    @Column({
+        name: 'usr_verified',
+        default: false,
+    })
+    @IsBoolean()
+    usr_verified: boolean;
+
+    @Column({
+        name: 'usr_verification_code'
+    })
+    @IsNumber()
+    usr_verification_code: number;
 
     @Column({
         name: 'usr_create',

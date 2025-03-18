@@ -53,6 +53,14 @@ export class AuthService {
 
       const { usr_id, usr_email, usr_role } = user
 
+      const validateAccount = await this.userDao.isConfirmUser(user.usr_id);
+
+      if (!validateAccount) {
+        throw new UnauthorizedException(
+          'Your account is not valid, you must validate your account with the code.',
+        );
+      }
+
       const payload = { userId: usr_id, email: usr_email, rol: usr_role };
       const tokens = await this.getTokens(payload)
       const response = await this.refreshTokenService.createRefreshToken((await tokens).refreshToken, usr_id);

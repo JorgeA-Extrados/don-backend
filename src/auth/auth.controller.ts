@@ -4,6 +4,7 @@ import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ConfirmUserDto } from './dto/confirm-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -26,5 +27,15 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   logout(@Request() req) {
     return this.authService.logout(req);
+  }
+
+  @Patch('confirm')
+  confirmUser(@Body() confirmUserDto: ConfirmUserDto) {
+    return this.userService.confirmUser(confirmUserDto);
+  }
+
+  @Get('code-resend/:id')
+  codeResend(@Param('id') userId: string) {
+    return this.userService.codeResend(+userId);
   }
 }

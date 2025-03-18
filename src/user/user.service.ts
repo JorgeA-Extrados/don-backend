@@ -3,12 +3,13 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDao } from 'src/infrastructure/database/dao/user.dao';
 import { RefreshTokenService } from 'src/auth/refresh-token.service';
+import { ConfirmUserDto } from 'src/auth/dto/confirm-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userDao: UserDao,
-     private readonly refreshTokenService: RefreshTokenService,
+    private readonly refreshTokenService: RefreshTokenService,
   ) { }
 
   async createUser(createUserDto: CreateUserDto) {
@@ -25,9 +26,12 @@ export class UserService {
       });
     }
 
+    const numericalCode = Math.floor(100000 + Math.random() * 900000);
+
     const createUser = {
       usr_email,
       usr_password,
+      usr_verification_code: numericalCode,
     }
 
 
@@ -37,7 +41,8 @@ export class UserService {
       message: 'User',
       statusCode: HttpStatus.OK,
       data: {
-        usr_id: newUser.usr_id
+        usr_id: newUser.usr_id,
+        usr_verification_code: newUser.usr_verification_code
       },
     };
   }
@@ -112,6 +117,88 @@ export class UserService {
       message: 'User delete',
       statusCode: HttpStatus.OK,
     };
+  }
+
+  async updateUser(req, updateUserDto: UpdateUserDto) {
+    try {
+      const { userId } = req.user
+
+      const user = await this.userDao.getUserById(userId)
+
+
+      if (!user) {
+        throw new UnauthorizedException('User not fount')
+      }
+
+
+      await this.userDao.updateUser(userId, updateUserDto)
+
+      const newUser = await this.userDao.getUserById(userId)
+
+      return {
+        message: 'User Update',
+        statusCode: HttpStatus.OK,
+        data: {
+          freelancer: newUser
+        }
+      };
+
+    } catch (error) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Internal Error`,
+      });
+    }
+  }
+
+  async confirmUser(confirmUserDto: ConfirmUserDto) {
+    try {
+      const { code, id } = confirmUserDto
+      const user = await this.userDao.getUserById(id)
+
+      if (!user) {
+        throw new UnauthorizedException('User not fount')
+      }
+
+      if (code === user.usr_verification_code) {
+        return await this.userDao.confirmUser(id)
+      }
+    } catch (error) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Internal Error`,
+      });
+    }
+
+  }
+
+  
+  async codeResend(id: number) {
+    try {
+      const user = await this.userDao.getUserById(id)
+
+      if (!user) {
+        throw new UnauthorizedException('User not fount')
+      }
+
+
+      return {
+        message: 'User code',
+        statusCode: HttpStatus.OK,
+        data: {
+          usr_verification_code: user.usr_verification_code
+        },
+      };
+    } catch (error) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Internal Error`,
+      });
+    }
+
   }
 
 }

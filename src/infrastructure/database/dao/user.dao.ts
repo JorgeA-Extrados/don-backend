@@ -17,7 +17,7 @@ export class UserDao {
 
     async createUser(createUserDto) {
         try {
-            const { usr_email, usr_password } = createUserDto;
+            const { usr_email, usr_password, usr_verification_code } = createUserDto;
             const newEmail = usr_email.toLowerCase()
 
             let user;
@@ -29,12 +29,14 @@ export class UserDao {
                     usr_email: newEmail,
                     usr_password: hashedPassword,
                     usr_create: new Date(),
+                    usr_verification_code
                 })
             } else {
                 // Si la contraseña es nula (usuario de Google), guárdala como nula 
                 user = this.userRepository.create({
                     usr_email: newEmail,
                     usr_create: new Date(),
+                    usr_verification_code
                 });
             }
 
@@ -70,6 +72,7 @@ export class UserDao {
                     usr_phone: true,
                     usr_creditDON: true,
                     usr_active: true,
+                    usr_verification_code: true
                 }
             })
 
@@ -155,6 +158,69 @@ export class UserDao {
                     error: 'Internal Server Error',
                 });
             });
+    }
+
+    async updateUser(usrId: number, updateUserDto) {
+
+        return await this.userRepository
+            .update(
+                { usr_id: usrId },
+                updateUserDto
+            )
+            .then(() => {
+                return {
+                    message: 'User updated successfully',
+                    statusCode: HttpStatus.CREATED,
+                };
+            })
+            .catch((error) => {
+                throw new BadRequestException({
+                    statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                    message: [`${error.message}`],
+                    error: 'Internal Server Error',
+                });
+            });
+    }
+
+    async confirmUser(usrId: number) {
+        return await this.userRepository
+            .update({ usr_id: usrId }, {
+                usr_verified: true
+            })
+            .then(() => {
+                return {
+                    message: 'User confirm successfully',
+                    statusCode: HttpStatus.CREATED,
+                };
+            })
+            .catch((error) => {
+                throw new BadRequestException({
+                    statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                    message: [`${error.message}`],
+                    error: 'Internal Server Error',
+                });
+            });
+    }
+
+    async isConfirmUser(usrId: number) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    usr_id: usrId,
+                    usr_verified: true,
+                    usr_delete: IsNull()
+                }
+            })
+
+            return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `User not found`,
+            });
+        }
     }
 
 }

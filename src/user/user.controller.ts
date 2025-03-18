@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 
 @Controller('user')
@@ -27,6 +28,12 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   deleteUser(@Request() req) {
     return this.userService.deleteUser(req);
+  }
+
+  @Patch('update')
+  @UseGuards(JwtAuthGuard)
+  updateUser(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.updateUser(req, updateUserDto);
   }
 
 }
