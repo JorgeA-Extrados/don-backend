@@ -14,14 +14,24 @@ export class UserService {
 
   async createUser(createUserDto: CreateUserDto) {
 
-    const { usr_email, usr_password } = createUserDto
+    const { usr_email, usr_password, usr_name } = createUserDto
 
     const user = await this.userDao.getUserByEmail(usr_email)
 
     if (user) {
       throw new ConflictException({
         statusCode: HttpStatus.CONFLICT,
-        message: 'User already exists',
+        message: 'User Email already exists',
+        user: true
+      });
+    }
+
+    const userName = await this.userDao.getUserByName(usr_name)
+
+    if (userName) {
+      throw new ConflictException({
+        statusCode: HttpStatus.CONFLICT,
+        message: 'User Name already exists',
         user: true
       });
     }
@@ -31,6 +41,7 @@ export class UserService {
     const createUser = {
       usr_email,
       usr_password,
+      usr_name,
       usr_verification_code: numericalCode,
     }
 
@@ -96,6 +107,19 @@ export class UserService {
     }
   }
 
+  async getUserByName(name: string) {
+    try {
+      return await this.userDao.getUserByName(name);
+
+    } catch (error) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Internal Error`,
+      });
+    }
+  }
+
   async deleteUser(req) {
     const { userId } = req.user
 
@@ -119,11 +143,9 @@ export class UserService {
     };
   }
 
-  async updateUser(req, updateUserDto: UpdateUserDto) {
+  async updateUser(id, updateUserDto: UpdateUserDto) {
     try {
-      const { userId } = req.user
-
-      const user = await this.userDao.getUserById(userId)
+      const user = await this.userDao.getUserById(id)
 
 
       if (!user) {
@@ -131,15 +153,15 @@ export class UserService {
       }
 
 
-      await this.userDao.updateUser(userId, updateUserDto)
+      await this.userDao.updateUser(id, updateUserDto)
 
-      const newUser = await this.userDao.getUserById(userId)
+      const newUser = await this.userDao.getUserById(id)
 
       return {
         message: 'User Update',
         statusCode: HttpStatus.OK,
         data: {
-          freelancer: newUser
+          User: newUser
         }
       };
 
@@ -173,7 +195,6 @@ export class UserService {
     }
 
   }
-
   
   async codeResend(id: number) {
     try {

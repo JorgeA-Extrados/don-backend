@@ -17,7 +17,7 @@ export class UserDao {
 
     async createUser(createUserDto) {
         try {
-            const { usr_email, usr_password, usr_verification_code } = createUserDto;
+            const { usr_email, usr_password, usr_verification_code, usr_name } = createUserDto;
             const newEmail = usr_email.toLowerCase()
 
             let user;
@@ -28,6 +28,7 @@ export class UserDao {
                 user = this.userRepository.create({
                     usr_email: newEmail,
                     usr_password: hashedPassword,
+                    usr_name: usr_name,
                     usr_create: new Date(),
                     usr_verification_code
                 })
@@ -35,6 +36,7 @@ export class UserDao {
                 // Si la contraseña es nula (usuario de Google), guárdala como nula 
                 user = this.userRepository.create({
                     usr_email: newEmail,
+                    usr_name: usr_name,
                     usr_create: new Date(),
                     usr_verification_code
                 });
@@ -125,6 +127,26 @@ export class UserDao {
             const user = await this.userRepository.findOne({
                 where: {
                     usr_email: email,
+                    usr_delete: IsNull()
+                }
+            })
+
+            return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `User not found`,
+            });
+        }
+    }
+
+    async getUserByName(name: string) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    usr_name: name,
                     usr_delete: IsNull()
                 }
             })

@@ -20,15 +20,23 @@ export class AuthService {
   ) { }
 
 
-  async validateUser(email: string, password?: string) {
+  async validateUser(email?: string, password?: string, name?: string) {
     if (!password) {
       throw new NotAcceptableException('Password not found');
     }
 
-    const user = await this.userService.getUserByEmail(email);
+    let user
+
+    if (email) {
+      user = await this.userService.getUserByEmail(email);      
+    }
+
+    if (name) {
+      user = await this.userService.getUserByName(name);      
+    }
 
     if (!user) {
-      throw new NotAcceptableException('Email or Password are wrong.');
+      throw new NotAcceptableException('Email, Name or Password are wrong.');
     }
 
     const passwordValid: boolean = await bcrypt.compare(
@@ -37,7 +45,7 @@ export class AuthService {
     );
 
     if (!passwordValid) {
-      throw new NotAcceptableException('Email or Password are wrong.');
+      throw new NotAcceptableException('Email, Name or Password are wrong.');
     }
 
 
@@ -49,6 +57,7 @@ export class AuthService {
       let user = await this.validateUser(
         loginDto.usr_email,
         loginDto.usr_password,
+        loginDto.usr_name
       );
 
       const { usr_id, usr_email, usr_role } = user

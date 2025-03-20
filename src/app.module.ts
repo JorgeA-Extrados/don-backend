@@ -5,6 +5,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { ExperiencesModule } from './experiences/experiences.module';
+import { CategoriesModule } from './categories/categories.module';
 import jwtConfig from './infrastructure/database/jwt/jwt.config';
 
 @Module({
@@ -26,6 +28,8 @@ import jwtConfig from './infrastructure/database/jwt/jwt.config';
     }),
     AuthModule,
     UserModule,
+    ExperiencesModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
