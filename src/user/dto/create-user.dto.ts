@@ -33,9 +33,9 @@ export class CreateUserDto {
     @IsString()
     usr_address?: string;
 
-    @IsOptional()
+    @IsNotEmpty()
     @IsString()
-    usr_name?: string;
+    usr_name: string;
 
     @IsOptional()
     @IsString()

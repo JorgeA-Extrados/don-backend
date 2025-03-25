@@ -1,6 +1,7 @@
 import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { RefreshToken } from "src/auth/entities/refresh-token.entity";
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Experience } from "src/experiences/entities/experience.entity";
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 
 
@@ -63,11 +64,11 @@ export class User {
 
     @Column({
         name: 'usr_name',
-        nullable: true,
+        nullable: false,
     })
-    @IsOptional()
+    @IsNotEmpty()
     @IsString()
-    usr_name?: string;
+    usr_name: string;
 
     @Column({
         name: 'usr_role',
@@ -148,5 +149,8 @@ export class User {
 
     @OneToOne(() => RefreshToken, refresh => refresh.user)
     refreshToken: RefreshToken;
+
+    @OneToMany(() => Experience, experience => experience.usr_id)
+    userExperience: Experience;
 }
 
