@@ -1,38 +1,31 @@
 import { Injectable, BadRequestException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
+import { Professional } from "src/professional/entities/professional.entity";
 import { User } from "src/user/entities/user.entity";
-import { getHashedPassword } from "src/user/user.utils";
-import { Experience } from "src/experiences/entities/experience.entity";
-import { Category } from "src/categories/entities/category.entity";
 
 
 
 Injectable()
-export class ExperienceDao {
+export class ProfessionalDao {
 
     constructor(
-        @InjectRepository(Experience)
-        private experienceRepository: Repository<Experience>,
+        @InjectRepository(Professional)
+        private professionalRepository: Repository<Professional>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
-        @InjectRepository(Category)
-        private categoryRepository: Repository<Category>,
     ) { }
 
-
-    async createExperience(createExperienceDto) {
+    async createProfessional(createProfessionalDto) {
         try {
-            const { cat_id, usr_id } = createExperienceDto
-
-            const experience = await this.experienceRepository.create({
-                ...createExperienceDto,
-                exp_create: new Date(),
-                cat_id: await this.categoryRepository.create({ cat_id }),
-                usr_id: await this.userRepository.create({ usr_id })
+            const {usr_id} = createProfessionalDto
+            const professional = await this.professionalRepository.create({
+                ...createProfessionalDto,
+                user: await this.userRepository.create({usr_id}),
+                pro_create: new Date(),
             })
 
-            return await this.experienceRepository.save(experience, { reload: true })
+            return await this.professionalRepository.save(professional, { reload: true })
 
         } catch (error) {
 
@@ -44,16 +37,16 @@ export class ExperienceDao {
         }
     }
 
-    async getExperienceById(expId: number) {
+    async getProfessionalById(proID: number) {
         try {
-            const experience = await this.experienceRepository.findOne({
+            const professional = await this.professionalRepository.findOne({
                 where: {
-                    exp_id: expId,
-                    exp_delete: IsNull()
+                    pro_id: proID,
+                    pro_delete: IsNull()
                 }
             })
 
-            return experience
+            return professional
 
         } catch (error) {
             throw new BadRequestException({
@@ -64,15 +57,15 @@ export class ExperienceDao {
         }
     }
 
-    async getAllExperience() {
+    async getAllProfessional() {
         try {
-            const experience = await this.experienceRepository.find({
+            const professional = await this.professionalRepository.find({
                 where: {
-                    exp_delete: IsNull()
+                    pro_delete: IsNull()
                 }
             })
 
-            return experience
+            return professional
 
         } catch (error) {
             throw new BadRequestException({
@@ -83,14 +76,14 @@ export class ExperienceDao {
         }
     }
 
-    async deleteExperience(expId: number) {
-        return await this.experienceRepository
-            .update({ exp_id: expId }, {
-                exp_delete: new Date(),
+    async deleteProfessional(proID: number) {
+        return await this.professionalRepository
+            .update({ pro_id: proID }, {
+                pro_delete: new Date(),
             })
             .then(() => {
                 return {
-                    message: 'Experience delete successfully',
+                    message: 'Professional delete successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -103,16 +96,16 @@ export class ExperienceDao {
             });
     }
 
-    async updateExperience(expId: number, updateExperienceDto) {
+    async updateProfessional(proID: number, updateProfessionalDto) {
 
-        return await this.experienceRepository
+        return await this.professionalRepository
             .update(
-                { exp_id: expId },
-                updateExperienceDto
+                { pro_id: proID },
+                updateProfessionalDto
             )
             .then(() => {
                 return {
-                    message: 'Experience updated successfully',
+                    message: 'Professional updated successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })

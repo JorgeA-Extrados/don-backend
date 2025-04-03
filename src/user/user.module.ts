@@ -7,9 +7,10 @@ import { User } from './entities/user.entity';
 import { RefreshTokenService } from 'src/auth/refresh-token.service';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { JwtService } from '@nestjs/jwt';
+import { ForgotPassword } from 'src/auth/entities/forgot-password.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([User, RefreshToken])],
+  imports:[TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword])],
   controllers: [UserController],
   providers: [UserService, UserDao, RefreshTokenService, JwtService],
 })

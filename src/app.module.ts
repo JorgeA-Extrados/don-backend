@@ -7,6 +7,12 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ExperiencesModule } from './experiences/experiences.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ProfessionalModule } from './professional/professional.module';
+import { SupplierModule } from './supplier/supplier.module';
+import { ServicesSearchModule } from './services-search/services-search.module';
+import { HeadingModule } from './heading/heading.module';
+import { SubHeadingModule } from './sub-heading/sub-heading.module';
+import { UserHeadingModule } from './user-heading/user-heading.module';
 import jwtConfig from './infrastructure/database/jwt/jwt.config';
 
 @Module({
@@ -30,6 +36,12 @@ import jwtConfig from './infrastructure/database/jwt/jwt.config';
     UserModule,
     ExperiencesModule,
     CategoriesModule,
+    ProfessionalModule,
+    SupplierModule,
+    ServicesSearchModule,
+    HeadingModule,
+    SubHeadingModule,
+    UserHeadingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

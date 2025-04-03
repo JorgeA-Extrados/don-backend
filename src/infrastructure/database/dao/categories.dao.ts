@@ -69,7 +69,7 @@ export class CategoryDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `User not found`,
+                error: `Internal Server Error`,
             });
         }
     }

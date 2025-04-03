@@ -2,37 +2,30 @@ import { Injectable, BadRequestException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
 import { User } from "src/user/entities/user.entity";
-import { getHashedPassword } from "src/user/user.utils";
-import { Experience } from "src/experiences/entities/experience.entity";
-import { Category } from "src/categories/entities/category.entity";
+import { Supplier } from "src/supplier/entities/supplier.entity";
 
 
 
 Injectable()
-export class ExperienceDao {
+export class SupplierDao {
 
     constructor(
-        @InjectRepository(Experience)
-        private experienceRepository: Repository<Experience>,
+        @InjectRepository(Supplier)
+        private supplierRepository: Repository<Supplier>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
-        @InjectRepository(Category)
-        private categoryRepository: Repository<Category>,
     ) { }
 
-
-    async createExperience(createExperienceDto) {
+    async createSupplier(createSupplierDto) {
         try {
-            const { cat_id, usr_id } = createExperienceDto
-
-            const experience = await this.experienceRepository.create({
-                ...createExperienceDto,
-                exp_create: new Date(),
-                cat_id: await this.categoryRepository.create({ cat_id }),
-                usr_id: await this.userRepository.create({ usr_id })
+            const {usr_id} = createSupplierDto
+            const supplier = await this.supplierRepository.create({
+                ...createSupplierDto,
+                user: await this.userRepository.create({usr_id}),
+                sup_create: new Date(),
             })
 
-            return await this.experienceRepository.save(experience, { reload: true })
+            return await this.supplierRepository.save(supplier, { reload: true })
 
         } catch (error) {
 
@@ -44,16 +37,16 @@ export class ExperienceDao {
         }
     }
 
-    async getExperienceById(expId: number) {
+    async getSupplierById(supID: number) {
         try {
-            const experience = await this.experienceRepository.findOne({
+            const supplier = await this.supplierRepository.findOne({
                 where: {
-                    exp_id: expId,
-                    exp_delete: IsNull()
+                    sup_id: supID,
+                    sup_delete: IsNull()
                 }
             })
 
-            return experience
+            return supplier
 
         } catch (error) {
             throw new BadRequestException({
@@ -64,15 +57,15 @@ export class ExperienceDao {
         }
     }
 
-    async getAllExperience() {
+    async getAllSupplier() {
         try {
-            const experience = await this.experienceRepository.find({
+            const supplier = await this.supplierRepository.find({
                 where: {
-                    exp_delete: IsNull()
+                    sup_delete: IsNull()
                 }
             })
 
-            return experience
+            return supplier
 
         } catch (error) {
             throw new BadRequestException({
@@ -83,14 +76,14 @@ export class ExperienceDao {
         }
     }
 
-    async deleteExperience(expId: number) {
-        return await this.experienceRepository
-            .update({ exp_id: expId }, {
-                exp_delete: new Date(),
+    async deleteSupplier(supID: number) {
+        return await this.supplierRepository
+            .update({ sup_id: supID }, {
+                sup_delete: new Date(),
             })
             .then(() => {
                 return {
-                    message: 'Experience delete successfully',
+                    message: 'Supplier delete successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -103,16 +96,16 @@ export class ExperienceDao {
             });
     }
 
-    async updateExperience(expId: number, updateExperienceDto) {
+    async updateSupplier(supID: number, updateSupplierDto) {
 
-        return await this.experienceRepository
+        return await this.supplierRepository
             .update(
-                { exp_id: expId },
-                updateExperienceDto
+                { sup_id: supID },
+                updateSupplierDto
             )
             .then(() => {
                 return {
-                    message: 'Experience updated successfully',
+                    message: 'Supplier updated successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })
