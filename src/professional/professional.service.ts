@@ -18,7 +18,7 @@ export class ProfessionalService {
 
     const professional = await this.professionalDao.createProfessional(createProfessionalDto);
 
-    const {usr_name, usr_id} = createProfessionalDto
+    const { usr_name, usr_id } = createProfessionalDto
     if (usr_name) {
       const update = {
         usr_name
@@ -35,28 +35,43 @@ export class ProfessionalService {
 
   async updateProfilePicture(pro_id: number, file: Express.Multer.File) {
 
-    const professional = await this.professionalDao.getProfessionalById(pro_id);
+    try {
+      const professional = await this.professionalDao.getProfessionalById(pro_id);
 
-    if (!professional) throw new Error('Profesional no encontrado');
+      if (!professional) throw new Error('Profesional no encontrado');
 
-    const imageUrl = await this.firebaseService.uploadFile(file, pro_id);
-    professional.pro_profilePicture = imageUrl;
+      const imageUrl = await this.firebaseService.uploadFile(file, pro_id);
 
-    
-    await this.professionalDao.updateProfessional(pro_id, professional)
+      const updateImg = {
+        pro_profilePicture: imageUrl
+      }
 
-    const newProfessional = await this.professionalDao.getProfessionalById(pro_id)
 
-    return {
-      message: 'Professional Image Update',
-      statusCode: HttpStatus.OK,
-      data: newProfessional
-    };
+      await this.professionalDao.updateProfessional(pro_id, updateImg)
+
+      const newProfessional = await this.professionalDao.getProfessionalById(pro_id)
+
+      return {
+        message: 'Professional Image Update',
+        statusCode: HttpStatus.OK,
+        data: newProfessional
+      };
+    } catch (error) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Internal Error`,
+      });
+    }
   }
 
   async getProfessionalById(id: number) {
     try {
       const professional = await this.professionalDao.getProfessionalById(id);
+
+      if (!professional) {
+        throw new UnauthorizedException('Professional not fount')
+      }
 
       return {
         message: 'Professional',
@@ -75,6 +90,10 @@ export class ProfessionalService {
   async getAllProfessional() {
     try {
       const professional = await this.professionalDao.getAllProfessional();
+
+      if (professional.length === 0) {
+        throw new UnauthorizedException('Professionals not fount')
+      }
 
       return {
         message: 'Professional',
@@ -113,7 +132,6 @@ export class ProfessionalService {
       if (!professional) {
         throw new UnauthorizedException('Professional not fount')
       }
-
 
       await this.professionalDao.updateProfessional(id, updateProfessionalDto)
 

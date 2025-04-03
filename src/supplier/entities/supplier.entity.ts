@@ -42,11 +42,14 @@ export class Supplier {
     sup_longitude: string;
 
     @Column({
-        name: 'sup_profilePicture'
+        name: 'sup_profilePicture',
+        nullable: true,
+        type: 'varchar',
+        length: 2083,
     })
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    sup_profilePicture: string;
+    sup_profilePicture?: string;
 
     // @Column({
     //     name: 'sup_creditDON',

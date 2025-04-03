@@ -17,9 +17,9 @@ export class CreateServicesSearchDto {
     @IsString()
     sea_longitude: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    sea_profilePicture: string;
+    sea_profilePicture?: string;
 
     @IsString()
     @IsOptional()

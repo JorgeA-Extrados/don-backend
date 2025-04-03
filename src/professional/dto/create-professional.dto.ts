@@ -20,9 +20,9 @@ export class CreateProfessionalDto {
 
     // file: any; // No se valida con class-validator
 
-    // @IsNotEmpty()
-    // @IsString()
-    // pro_profilePicture: string;
+    @IsOptional()
+    @IsString()
+    pro_profilePicture?: string;
 
     @IsString()
     @IsOptional()
