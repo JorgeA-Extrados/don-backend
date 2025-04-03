@@ -1,38 +1,33 @@
 import { Injectable, BadRequestException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
-import { User } from "src/user/entities/user.entity";
-import { getHashedPassword } from "src/user/user.utils";
 import { Experience } from "src/experiences/entities/experience.entity";
 import { Category } from "src/categories/entities/category.entity";
+import { Heading } from "src/heading/entities/heading.entity";
+import { SubHeading } from "src/sub-heading/entities/sub-heading.entity";
 
 
 
 Injectable()
-export class ExperienceDao {
+export class SubHeadingDao {
 
     constructor(
-        @InjectRepository(Experience)
-        private experienceRepository: Repository<Experience>,
-        @InjectRepository(User)
-        private userRepository: Repository<User>,
-        @InjectRepository(Category)
-        private categoryRepository: Repository<Category>,
+        @InjectRepository(SubHeading)
+        private subHeadingRepository: Repository<SubHeading>,
+        @InjectRepository(Heading)
+        private headingRepository: Repository<Heading>,
     ) { }
 
-
-    async createExperience(createExperienceDto) {
+    async createSubHeading(createSubHeadingDto) {
         try {
-            const { cat_id, usr_id } = createExperienceDto
-
-            const experience = await this.experienceRepository.create({
-                ...createExperienceDto,
-                exp_create: new Date(),
-                cat_id: await this.categoryRepository.create({ cat_id }),
-                usr_id: await this.userRepository.create({ usr_id })
+            const {hea_id} = createSubHeadingDto
+            const subHeading = await this.subHeadingRepository.create({
+                ...createSubHeadingDto,
+                heading: await this.headingRepository.create({hea_id}),
+                sbh_create: new Date(),
             })
 
-            return await this.experienceRepository.save(experience, { reload: true })
+            return await this.subHeadingRepository.save(subHeading, { reload: true })
 
         } catch (error) {
 
@@ -44,16 +39,16 @@ export class ExperienceDao {
         }
     }
 
-    async getExperienceById(expId: number) {
+    async getSubHeadingById(sbhId: number) {
         try {
-            const experience = await this.experienceRepository.findOne({
+            const subHeading = await this.subHeadingRepository.findOne({
                 where: {
-                    exp_id: expId,
-                    exp_delete: IsNull()
+                    sbh_id: sbhId,
+                    sbh_delete: IsNull()
                 }
             })
 
-            return experience
+            return subHeading
 
         } catch (error) {
             throw new BadRequestException({
@@ -64,15 +59,15 @@ export class ExperienceDao {
         }
     }
 
-    async getAllExperience() {
+    async getAllSubHeading() {
         try {
-            const experience = await this.experienceRepository.find({
+            const subHeading = await this.subHeadingRepository.find({
                 where: {
-                    exp_delete: IsNull()
+                    sbh_delete: IsNull()
                 }
             })
 
-            return experience
+            return subHeading
 
         } catch (error) {
             throw new BadRequestException({
@@ -83,14 +78,14 @@ export class ExperienceDao {
         }
     }
 
-    async deleteExperience(expId: number) {
-        return await this.experienceRepository
-            .update({ exp_id: expId }, {
-                exp_delete: new Date(),
+    async deleteSubHeading(sbhId: number) {
+        return await this.subHeadingRepository
+            .update({ sbh_id: sbhId }, {
+                sbh_delete: new Date(),
             })
             .then(() => {
                 return {
-                    message: 'Experience delete successfully',
+                    message: 'SubHeading delete successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -103,16 +98,16 @@ export class ExperienceDao {
             });
     }
 
-    async updateExperience(expId: number, updateExperienceDto) {
+    async updateSubHeading(sbhId: number, updateSubHeadingDto) {
 
-        return await this.experienceRepository
+        return await this.subHeadingRepository
             .update(
-                { exp_id: expId },
-                updateExperienceDto
+                { sbh_id: sbhId },
+                updateSubHeadingDto
             )
             .then(() => {
                 return {
-                    message: 'Experience updated successfully',
+                    message: 'SubHeading updated successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })

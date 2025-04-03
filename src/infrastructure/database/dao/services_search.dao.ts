@@ -2,37 +2,30 @@ import { Injectable, BadRequestException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
 import { User } from "src/user/entities/user.entity";
-import { getHashedPassword } from "src/user/user.utils";
-import { Experience } from "src/experiences/entities/experience.entity";
-import { Category } from "src/categories/entities/category.entity";
+import { ServicesSearch } from "src/services-search/entities/services-search.entity";
 
 
 
 Injectable()
-export class ExperienceDao {
+export class ServicesSearchDao {
 
     constructor(
-        @InjectRepository(Experience)
-        private experienceRepository: Repository<Experience>,
+        @InjectRepository(ServicesSearch)
+        private servicesSearchRepository: Repository<ServicesSearch>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
-        @InjectRepository(Category)
-        private categoryRepository: Repository<Category>,
     ) { }
 
-
-    async createExperience(createExperienceDto) {
+    async createServicesSearch(createServicesSearchDto) {
         try {
-            const { cat_id, usr_id } = createExperienceDto
-
-            const experience = await this.experienceRepository.create({
-                ...createExperienceDto,
-                exp_create: new Date(),
-                cat_id: await this.categoryRepository.create({ cat_id }),
-                usr_id: await this.userRepository.create({ usr_id })
+            const {usr_id} = createServicesSearchDto
+            const servicesSearch = await this.servicesSearchRepository.create({
+                ...createServicesSearchDto,
+                user: await this.userRepository.create({usr_id}),
+                sea_create: new Date(),
             })
 
-            return await this.experienceRepository.save(experience, { reload: true })
+            return await this.servicesSearchRepository.save(servicesSearch, { reload: true })
 
         } catch (error) {
 
@@ -44,16 +37,16 @@ export class ExperienceDao {
         }
     }
 
-    async getExperienceById(expId: number) {
+    async getServicesSearchById(seaID: number) {
         try {
-            const experience = await this.experienceRepository.findOne({
+            const servicesSearch = await this.servicesSearchRepository.findOne({
                 where: {
-                    exp_id: expId,
-                    exp_delete: IsNull()
+                    sea_id: seaID,
+                    sea_delete: IsNull()
                 }
             })
 
-            return experience
+            return servicesSearch
 
         } catch (error) {
             throw new BadRequestException({
@@ -64,15 +57,15 @@ export class ExperienceDao {
         }
     }
 
-    async getAllExperience() {
+    async getAllServicesSearch() {
         try {
-            const experience = await this.experienceRepository.find({
+            const servicesSearch = await this.servicesSearchRepository.find({
                 where: {
-                    exp_delete: IsNull()
+                    sea_delete: IsNull()
                 }
             })
 
-            return experience
+            return servicesSearch
 
         } catch (error) {
             throw new BadRequestException({
@@ -83,14 +76,14 @@ export class ExperienceDao {
         }
     }
 
-    async deleteExperience(expId: number) {
-        return await this.experienceRepository
-            .update({ exp_id: expId }, {
-                exp_delete: new Date(),
+    async deleteServicesSearch(seaID: number) {
+        return await this.servicesSearchRepository
+            .update({ sea_id: seaID }, {
+                sea_delete: new Date(),
             })
             .then(() => {
                 return {
-                    message: 'Experience delete successfully',
+                    message: 'ServicesSearch delete successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -103,16 +96,16 @@ export class ExperienceDao {
             });
     }
 
-    async updateExperience(expId: number, updateExperienceDto) {
+    async updateServicesSearch(seaID: number, updateServicesSearchDto) {
 
-        return await this.experienceRepository
+        return await this.servicesSearchRepository
             .update(
-                { exp_id: expId },
-                updateExperienceDto
+                { sea_id: seaID },
+                updateServicesSearchDto
             )
             .then(() => {
                 return {
-                    message: 'Experience updated successfully',
+                    message: 'ServicesSearch updated successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })

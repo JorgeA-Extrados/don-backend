@@ -4,17 +4,22 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDao } from 'src/infrastructure/database/dao/user.dao';
 import { RefreshTokenService } from 'src/auth/refresh-token.service';
 import { ConfirmUserDto } from 'src/auth/dto/confirm-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userDao: UserDao,
     private readonly refreshTokenService: RefreshTokenService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
   ) { }
 
   async createUser(createUserDto: CreateUserDto) {
 
-    const { usr_email, usr_password, usr_name } = createUserDto
+    const { usr_email, usr_password, usr_phone, usr_passwordConfir, usr_over, usr_terms } = createUserDto
+
 
     const user = await this.userDao.getUserByEmail(usr_email)
 
@@ -22,17 +27,13 @@ export class UserService {
       throw new ConflictException({
         statusCode: HttpStatus.CONFLICT,
         message: 'User Email already exists',
-        user: true
       });
     }
 
-    const userName = await this.userDao.getUserByName(usr_name)
-
-    if (userName) {
+    if (usr_password != usr_passwordConfir) {
       throw new ConflictException({
         statusCode: HttpStatus.CONFLICT,
-        message: 'User Name already exists',
-        user: true
+        message: 'Passwords must match',
       });
     }
 
@@ -41,8 +42,10 @@ export class UserService {
     const createUser = {
       usr_email,
       usr_password,
-      usr_name,
+      usr_phone,
       usr_verification_code: numericalCode,
+      usr_over,
+      usr_terms
     }
 
 
@@ -53,7 +56,8 @@ export class UserService {
       statusCode: HttpStatus.OK,
       data: {
         usr_id: newUser.usr_id,
-        usr_verification_code: newUser.usr_verification_code
+        usr_verification_code: newUser.usr_verification_code,
+        usr_phone: newUser.usr_phone
       },
     };
   }
@@ -184,7 +188,26 @@ export class UserService {
       }
 
       if (code === user.usr_verification_code) {
-        return await this.userDao.confirmUser(id)
+        const payload = { userId: user.usr_id, email: user.usr_email, rol: user.usr_role };
+        const tokens = await this.getTokens(payload)
+        const response = await this.refreshTokenService.createRefreshToken((await tokens).refreshToken, user.usr_id);
+
+        if (!response) {
+          const refresh = await this.refreshTokenService.findRefreshTokenbyUser(user.usr_id)
+          await this.refreshTokenService.deleteRefreshToken(refresh.rft_token)
+          await this.refreshTokenService.createRefreshToken((await tokens).refreshToken, user.usr_id);
+        }
+
+        await this.userDao.confirmUser(id)
+
+        return {
+          message: 'User confirm successfully',
+          access_token: (await tokens).accessToken,
+          refreshToken: (await tokens).refreshToken,
+          expires_in: 180,
+          token_type: "Bearer",
+          usr_id: user.usr_id,
+        };
       }
     } catch (error) {
       throw new BadRequestException({
@@ -195,13 +218,17 @@ export class UserService {
     }
 
   }
-  
+
   async codeResend(id: number) {
     try {
       const user = await this.userDao.getUserById(id)
 
       if (!user) {
         throw new UnauthorizedException('User not fount')
+      }
+
+      if (user.usr_verified === true) {
+        throw new UnauthorizedException('User already verified')
       }
 
 
@@ -220,6 +247,29 @@ export class UserService {
       });
     }
 
+  }
+
+  async getTokens(payloady: {}, payment?) {
+    // Configuración base para el token de acceso
+    const accessToken = await this.jwtService.signAsync(payloady, {
+      secret: this.configService.get('jwt.jwt_secret'),
+      expiresIn: '3m',
+    });
+
+    // Determinación del tiempo de expiración para el refresh token
+    let refreshExpiresIn = '7d'; // Valor predeterminado
+
+
+    // Generación del token de refresco
+    const refreshToken = await this.jwtService.signAsync(payloady, {
+      secret: this.configService.get('jwt.jwt_refresh_secret'),
+      expiresIn: refreshExpiresIn,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
 }

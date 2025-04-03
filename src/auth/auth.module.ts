@@ -12,10 +12,12 @@ import { UserService } from 'src/user/user.service';
 import { UserDao } from 'src/infrastructure/database/dao/user.dao';
 import { RefreshTokenService } from './refresh-token.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { ForgotPassword } from './entities/forgot-password.entity';
+import { ForgotPasswordDao } from 'src/infrastructure/database/dao/forgot_password.dao';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, RefreshToken ]),
+    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword ]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -27,6 +29,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     })
   ],
   controllers: [AuthController, RefreshTokenController],
-  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy ],
+  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao ],
 })
 export class AuthModule {}

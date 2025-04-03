@@ -1,38 +1,26 @@
 import { Injectable, BadRequestException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
-import { User } from "src/user/entities/user.entity";
-import { getHashedPassword } from "src/user/user.utils";
-import { Experience } from "src/experiences/entities/experience.entity";
-import { Category } from "src/categories/entities/category.entity";
+import { Heading } from "src/heading/entities/heading.entity";
 
 
 
 Injectable()
-export class ExperienceDao {
+export class HeadingDao {
 
     constructor(
-        @InjectRepository(Experience)
-        private experienceRepository: Repository<Experience>,
-        @InjectRepository(User)
-        private userRepository: Repository<User>,
-        @InjectRepository(Category)
-        private categoryRepository: Repository<Category>,
+        @InjectRepository(Heading)
+        private headingRepository: Repository<Heading>,
     ) { }
 
-
-    async createExperience(createExperienceDto) {
+    async createHeading(createHeadingDto) {
         try {
-            const { cat_id, usr_id } = createExperienceDto
-
-            const experience = await this.experienceRepository.create({
-                ...createExperienceDto,
-                exp_create: new Date(),
-                cat_id: await this.categoryRepository.create({ cat_id }),
-                usr_id: await this.userRepository.create({ usr_id })
+            const heading = await this.headingRepository.create({
+                ...createHeadingDto,
+                hea_create: new Date(),
             })
 
-            return await this.experienceRepository.save(experience, { reload: true })
+            return await this.headingRepository.save(heading, { reload: true })
 
         } catch (error) {
 
@@ -44,16 +32,19 @@ export class ExperienceDao {
         }
     }
 
-    async getExperienceById(expId: number) {
+    async getHeadingById(heaId: number) {
         try {
-            const experience = await this.experienceRepository.findOne({
+            const heading = await this.headingRepository.findOne({
                 where: {
-                    exp_id: expId,
-                    exp_delete: IsNull()
+                    hea_id: heaId,
+                    hea_delete: IsNull()
+                },
+                relations: {
+                    subHeading: true
                 }
             })
 
-            return experience
+            return heading
 
         } catch (error) {
             throw new BadRequestException({
@@ -64,15 +55,18 @@ export class ExperienceDao {
         }
     }
 
-    async getAllExperience() {
+    async getAllHeading() {
         try {
-            const experience = await this.experienceRepository.find({
+            const heading = await this.headingRepository.find({
                 where: {
-                    exp_delete: IsNull()
+                    hea_delete: IsNull()
+                },
+                relations: {
+                    subHeading: true
                 }
             })
 
-            return experience
+            return heading
 
         } catch (error) {
             throw new BadRequestException({
@@ -83,14 +77,14 @@ export class ExperienceDao {
         }
     }
 
-    async deleteExperience(expId: number) {
-        return await this.experienceRepository
-            .update({ exp_id: expId }, {
-                exp_delete: new Date(),
+    async deleteHeading(heaId: number) {
+        return await this.headingRepository
+            .update({ hea_id: heaId }, {
+                hea_delete: new Date(),
             })
             .then(() => {
                 return {
-                    message: 'Experience delete successfully',
+                    message: 'Heading delete successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -103,16 +97,16 @@ export class ExperienceDao {
             });
     }
 
-    async updateExperience(expId: number, updateExperienceDto) {
+    async updateHeading(heaId: number, updateHeadingDto) {
 
-        return await this.experienceRepository
+        return await this.headingRepository
             .update(
-                { exp_id: expId },
-                updateExperienceDto
+                { hea_id: heaId },
+                updateHeadingDto
             )
             .then(() => {
                 return {
-                    message: 'Experience updated successfully',
+                    message: 'Heading updated successfully',
                     statusCode: HttpStatus.CREATED,
                 };
             })

@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
 import { User } from "src/user/entities/user.entity";
 import { getHashedPassword } from "src/user/user.utils";
+import { ForgotPassword } from "src/auth/entities/forgot-password.entity";
 
 
 
@@ -12,44 +13,51 @@ export class UserDao {
     constructor(
         @InjectRepository(User)
         private userRepository: Repository<User>,
+        @InjectRepository(ForgotPassword)
+        private forgotPasswordRepository: Repository<ForgotPassword>,
     ) { }
 
 
     async createUser(createUserDto) {
         try {
-            const { usr_email, usr_password, usr_verification_code, usr_name } = createUserDto;
+            const { usr_email, usr_password, usr_verification_code, usr_phone, usr_over, usr_terms } = createUserDto;
             const newEmail = usr_email.toLowerCase()
 
             let user;
 
             if (usr_password) {
-
                 const hashedPassword = await getHashedPassword(usr_password);
                 user = this.userRepository.create({
                     usr_email: newEmail,
                     usr_password: hashedPassword,
-                    usr_name: usr_name,
+                    usr_phone,
                     usr_create: new Date(),
-                    usr_verification_code
+                    usr_verification_code,
+                    usr_over,
+                    usr_terms
                 })
             } else {
                 // Si la contraseña es nula (usuario de Google), guárdala como nula 
                 user = this.userRepository.create({
                     usr_email: newEmail,
-                    usr_name: usr_name,
+                    usr_phone,
                     usr_create: new Date(),
-                    usr_verification_code
+                    usr_verification_code,
+                    usr_over,
+                    usr_terms
                 });
             }
 
             return await this.userRepository.save(user, { reload: true })
 
         } catch (error) {
-
+            console.log('===============error=====================');
+            console.log(error);
+            console.log('====================================');
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `User not found`,
+                error: `Internal Server Error`,
             });
         }
     }
@@ -65,16 +73,17 @@ export class UserDao {
                     usr_id: true,
                     usr_email: true,
                     usr_invitationCode: true,
-                    usr_firstName: true,
-                    usr_lastName: true,
-                    usr_address: true,
-                    usr_name: true,
+                    //usr_firstName: true,
+                    //usr_lastName: true,
+                    //usr_address: true,
+                    // usr_name: true,
                     usr_role: true,
-                    usr_profilePicture: true,
+                    //usr_profilePicture: true,
                     usr_phone: true,
-                    usr_creditDON: true,
-                    usr_active: true,
-                    usr_verification_code: true
+                    //usr_creditDON: true,
+                    // usr_active: true,
+                    usr_verification_code: true,
+                    usr_verified: true
                 }
             })
 
@@ -84,7 +93,7 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `User not found`,
+                error: `Internal Server Error`,
             });
         }
     }
@@ -99,15 +108,15 @@ export class UserDao {
                     usr_id: true,
                     usr_email: true,
                     usr_invitationCode: true,
-                    usr_firstName: true,
-                    usr_lastName: true,
-                    usr_address: true,
-                    usr_name: true,
+                    //usr_firstName: true,
+                    //usr_lastName: true,
+                    //usr_address: true,
+                    //usr_name: true,
                     usr_role: true,
-                    usr_profilePicture: true,
+                    //usr_profilePicture: true,
                     usr_phone: true,
-                    usr_creditDON: true,
-                    usr_active: true,
+                    //usr_creditDON: true,
+                    // usr_active: true,
                 }
             })
 
@@ -117,7 +126,7 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `User not found`,
+                error: `Internal Server Error`,
             });
         }
     }
@@ -137,7 +146,7 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `User not found`,
+                error: `Internal Server Error`,
             });
         }
     }
@@ -157,7 +166,7 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `User not found`,
+                error: `Internal Server Error`,
             });
         }
     }
@@ -240,9 +249,34 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `User not found`,
+                error: `Internal Server Error`,
             });
         }
+    }
+
+    async updateUserPassword(updatePassword) {
+        const { userId, hashedPassword, fopId } = updatePassword
+        return await this.userRepository
+            .update(
+                { usr_id: userId },
+                {
+                    usr_password: hashedPassword,
+                },
+            )
+            .then(async () => {
+                await this.forgotPasswordRepository.update({ fop_id: fopId }, { fop_code_used: new Date(), fop_is_active: false })
+                return {
+                    message: 'Successful password change',
+                    statusCode: HttpStatus.OK
+                };
+            })
+            .catch((error) => {
+                throw new BadRequestException({
+                    statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                    message: [`${error.message}`],
+                    error: 'Internal Server Error',
+                });
+            });
     }
 
 }
