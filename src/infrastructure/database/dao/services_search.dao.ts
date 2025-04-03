@@ -43,6 +43,23 @@ export class ServicesSearchDao {
                 where: {
                     sea_id: seaID,
                     sea_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    sea_id: true,
+                    sea_firstName: true,
+                    sea_lastName: true,
+                    sea_latitude: true,
+                    sea_longitude: true,
+                    sea_profilePicture: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
                 }
             })
 
@@ -62,6 +79,23 @@ export class ServicesSearchDao {
             const servicesSearch = await this.servicesSearchRepository.find({
                 where: {
                     sea_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    sea_id: true,
+                    sea_firstName: true,
+                    sea_lastName: true,
+                    sea_latitude: true,
+                    sea_longitude: true,
+                    sea_profilePicture: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
                 }
             })
 

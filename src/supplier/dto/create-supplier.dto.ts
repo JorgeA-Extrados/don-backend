@@ -18,9 +18,9 @@ export class CreateSupplierDto {
     @IsString()
     sup_longitude: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    sup_profilePicture: string;
+    sup_profilePicture?: string;
 
     @IsString()
     @IsOptional()

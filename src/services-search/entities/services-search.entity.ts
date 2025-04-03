@@ -41,11 +41,14 @@ export class ServicesSearch {
     sea_longitude: string;
 
     @Column({
-        name: 'sea_profilePicture'
+        name: 'sea_profilePicture',
+        nullable: true,
+        type: 'varchar',
+        length: 2083,
     })
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    sea_profilePicture: string;
+    sea_profilePicture?: string;
 
     // @Column({
     //     name: 'sea_creditDON',

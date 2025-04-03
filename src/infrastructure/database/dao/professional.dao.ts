@@ -43,6 +43,24 @@ export class ProfessionalDao {
                 where: {
                     pro_id: proID,
                     pro_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    pro_id: true,
+                    pro_firstName: true,
+                    pro_lastName: true,
+                    pro_latitude: true,
+                    pro_longitude: true,
+                    pro_profilePicture: true,
+                    pro_creditDON: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
                 }
             })
 
@@ -62,6 +80,24 @@ export class ProfessionalDao {
             const professional = await this.professionalRepository.find({
                 where: {
                     pro_delete: IsNull()
+                }, 
+                relations: {
+                    user: true
+                },
+                select: {
+                    pro_id: true,
+                    pro_firstName: true,
+                    pro_lastName: true,
+                    pro_latitude: true,
+                    pro_longitude: true,
+                    pro_profilePicture: true,
+                    pro_creditDON: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
                 }
             })
 

@@ -43,6 +43,23 @@ export class SupplierDao {
                 where: {
                     sup_id: supID,
                     sup_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    sup_id: true,
+                    sup_firstName: true,
+                    sup_lastName: true,
+                    sup_latitude: true,
+                    sup_longitude: true,
+                    sup_profilePicture: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
                 }
             })
 
@@ -62,6 +79,23 @@ export class SupplierDao {
             const supplier = await this.supplierRepository.find({
                 where: {
                     sup_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    sup_id: true,
+                    sup_firstName: true,
+                    sup_lastName: true,
+                    sup_latitude: true,
+                    sup_longitude: true,
+                    sup_profilePicture: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
                 }
             })
 

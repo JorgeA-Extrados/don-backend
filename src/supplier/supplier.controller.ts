@@ -1,16 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { SupplierService } from './supplier.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('supplier')
 export class SupplierController {
-  constructor(private readonly supplierService: SupplierService) {}
+  constructor(private readonly supplierService: SupplierService) { }
 
   @Post('create')
   createSupplier(@Body() createSupplierDto: CreateSupplierDto) {
     return this.supplierService.createSupplier(createSupplierDto);
   }
+
+  @Post(':sup_id/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfilePicture(@Param('sup_id') sup_id: number, @UploadedFile() file: Express.Multer.File) {
+    return await this.supplierService.updateProfilePicture(sup_id, file);
+  }
+
 
   @Get('getAll')
   // @UseGuards(JwtAuthGuard)

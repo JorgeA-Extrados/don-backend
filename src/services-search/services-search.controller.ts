@@ -1,15 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ServicesSearchService } from './services-search.service';
 import { CreateServicesSearchDto } from './dto/create-services-search.dto';
 import { UpdateServicesSearchDto } from './dto/update-services-search.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('services-search')
 export class ServicesSearchController {
-  constructor(private readonly servicesSearchService: ServicesSearchService) {}
+  constructor(private readonly servicesSearchService: ServicesSearchService) { }
 
- @Post('create')
- createServicesSearch(@Body() createServicesSearchDto: CreateServicesSearchDto) {
+  @Post('create')
+  createServicesSearch(@Body() createServicesSearchDto: CreateServicesSearchDto) {
     return this.servicesSearchService.createServicesSearch(createServicesSearchDto);
+  }
+
+  @Post(':sea_id/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfilePicture(@Param('sea_id') sea_id: number, @UploadedFile() file: Express.Multer.File) {
+    return await this.servicesSearchService.updateProfilePicture(sea_id, file);
   }
 
   @Get('getAll')

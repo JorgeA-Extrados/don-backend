@@ -51,6 +51,8 @@ export class Professional {
     @Column({
         name: 'pro_profilePicture',
         nullable: true,
+        type: 'varchar',
+        length: 2083,
     })
     @IsOptional()
     @IsString()
