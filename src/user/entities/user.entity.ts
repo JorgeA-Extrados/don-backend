@@ -5,6 +5,7 @@ import { Experience } from "src/experiences/entities/experience.entity";
 import { Professional } from "src/professional/entities/professional.entity";
 import { ServicesSearch } from "src/services-search/entities/services-search.entity";
 import { Supplier } from "src/supplier/entities/supplier.entity";
+import { UserHeading } from "src/user-heading/entities/user-heading.entity";
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 
@@ -135,5 +136,8 @@ export class User {
 
     @OneToMany(() => ForgotPassword, forgotPassword => forgotPassword.usrID)
     fop_id: ForgotPassword;
+
+    @OneToMany(() => UserHeading, userHeading => userHeading.user)
+    userHeading: UserHeading;
 }
 

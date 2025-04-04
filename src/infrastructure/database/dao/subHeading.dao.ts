@@ -45,6 +45,9 @@ export class SubHeadingDao {
                 where: {
                     sbh_id: sbhId,
                     sbh_delete: IsNull()
+                }, 
+                relations: {
+                    heading: true
                 }
             })
 

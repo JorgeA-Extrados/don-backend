@@ -1,5 +1,6 @@
 import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { SubHeading } from "src/sub-heading/entities/sub-heading.entity";
+import { UserHeading } from "src/user-heading/entities/user-heading.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
@@ -52,4 +53,7 @@ export class Heading {
 
     @OneToMany(() => SubHeading, subHeading => subHeading.heading)
     subHeading: SubHeading;
+
+    @OneToMany(() => UserHeading, userHeading => userHeading.heading)
+    userHeading: UserHeading;
 }

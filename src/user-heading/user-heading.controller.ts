@@ -5,30 +5,43 @@ import { UpdateUserHeadingDto } from './dto/update-user-heading.dto';
 
 @Controller('user-heading')
 export class UserHeadingController {
-  constructor(private readonly userHeadingService: UserHeadingService) {}
+  constructor(private readonly userHeadingService: UserHeadingService) { }
 
-  @Post()
-  create(@Body() createUserHeadingDto: CreateUserHeadingDto) {
-    return this.userHeadingService.create(createUserHeadingDto);
+  @Post('create')
+  createUserHeading(@Body() createUserHeadingDto: CreateUserHeadingDto) {
+    return this.userHeadingService.createUserHeading(createUserHeadingDto);
   }
 
-  @Get()
-  findAll() {
-    return this.userHeadingService.findAll();
+  @Get('getAll')
+  // @UseGuards(JwtAuthGuard)
+  getAllUserHeading() {
+    return this.userHeadingService.getAllUserHeading();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userHeadingService.findOne(+id);
+  @Get('byId/:id')
+  // @UseGuards(JwtAuthGuard, RolesGuard) 
+  // @Roles('admin')
+  getUserHeadingById(@Param('id') id: string) {
+    return this.userHeadingService.getUserHeadingById(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserHeadingDto: UpdateUserHeadingDto) {
-    return this.userHeadingService.update(+id, updateUserHeadingDto);
+  @Get('byUserId/:id')
+  // @UseGuards(JwtAuthGuard, RolesGuard) 
+  // @Roles('admin')
+  getUserHeadingByUserId(@Param('id') id: string) {
+    return this.userHeadingService.getUserHeadingByUserId(+id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userHeadingService.remove(+id);
+
+  @Patch('delete/:id')
+  // @UseGuards(JwtAuthGuard)
+  deleteUserHeading(@Param('id') id: string) {
+    return this.userHeadingService.deleteUserHeading(+id);
+  }
+
+  @Patch('update/:id')
+  // @UseGuards(JwtAuthGuard)
+  updateUserHeading(@Param('id') id: string, @Body() updateUserHeadingDto: UpdateUserHeadingDto) {
+    return this.userHeadingService.updateUserHeading(+id, updateUserHeadingDto);
   }
 }

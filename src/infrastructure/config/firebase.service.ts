@@ -12,7 +12,8 @@ export class FirebaseService {
         // Evitar inicializar Firebase múltiples veces
         if (!admin.apps.length) {
             // Ruta absoluta desde la raíz del proyecto (evita problemas con `dist/`)
-            const serviceAccountPath = path.join(process.cwd(), 'src', 'infrastructure', 'config', 'firebase-service-account.json');
+            // const serviceAccountPath = path.join(process.cwd(), 'src', 'infrastructure', 'config', 'firebase-service-account.json');
+            const serviceAccountPath = path.join(process.cwd(), 'firebase-service-account.json');
 
             if (!fs.existsSync(serviceAccountPath)) {
                 throw new Error(`No se encontró el archivo de credenciales en: ${serviceAccountPath}`);

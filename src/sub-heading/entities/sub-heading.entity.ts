@@ -1,6 +1,7 @@
 import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { Heading } from "src/heading/entities/heading.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { UserHeading } from "src/user-heading/entities/user-heading.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('subHeading')
 export class SubHeading {
@@ -32,7 +33,7 @@ export class SubHeading {
     @IsOptional()
     @IsDateString()
     sbh_create?: Date;
-    
+
     @Column({
         name: 'sbh_update',
         nullable: true,
@@ -40,7 +41,7 @@ export class SubHeading {
     @IsOptional()
     @IsDateString()
     sbh_update?: Date;
-    
+
     @Column({
         name: 'sbh_delete',
         nullable: true,
@@ -53,4 +54,7 @@ export class SubHeading {
     @ManyToOne(() => Heading, heading => heading.subHeading)
     @JoinColumn({ name: 'hea_id' })
     heading: Heading;
+
+    @OneToMany(() => UserHeading, userHeading => userHeading.subHeading)
+    userHeading: UserHeading;
 }
