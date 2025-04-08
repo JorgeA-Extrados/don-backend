@@ -26,14 +26,14 @@ export class UserService {
     if (user) {
       throw new ConflictException({
         statusCode: HttpStatus.CONFLICT,
-        message: 'User Email already exists',
+        message: 'El correo electrónico del usuario ya existe',
       });
     }
 
     if (usr_password != usr_passwordConfir) {
       throw new ConflictException({
         statusCode: HttpStatus.CONFLICT,
-        message: 'Passwords must match',
+        message: 'Las contraseñas deben coincidir',
       });
     }
 
@@ -52,7 +52,7 @@ export class UserService {
     const newUser = await this.userDao.createUser(createUser);
 
     return {
-      message: 'User',
+      message: 'Usuario',
       statusCode: HttpStatus.OK,
       data: {
         usr_id: newUser.usr_id,
@@ -67,7 +67,7 @@ export class UserService {
       const user = await this.userDao.getUserById(id);
 
       return {
-        message: 'User',
+        message: 'Usuario',
         statusCode: HttpStatus.OK,
         data: user,
       };
@@ -75,7 +75,7 @@ export class UserService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -85,7 +85,7 @@ export class UserService {
       const user = await this.userDao.getAllUser();
 
       return {
-        message: 'Users',
+        message: 'Usuario',
         statusCode: HttpStatus.OK,
         data: user,
       };
@@ -93,7 +93,7 @@ export class UserService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -106,7 +106,7 @@ export class UserService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -119,7 +119,7 @@ export class UserService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -130,7 +130,7 @@ export class UserService {
     const user = await this.userDao.getUserById(userId)
 
     if (!user) {
-      throw new UnauthorizedException('User not fount')
+      throw new UnauthorizedException('Usuario no encontrado.')
     }
 
     const refresh = await this.refreshTokenService.findRefreshTokenbyUser(userId)
@@ -142,7 +142,7 @@ export class UserService {
     await this.userDao.deleteUser(userId)
 
     return {
-      message: 'User delete',
+      message: 'Usuario eliminado',
       statusCode: HttpStatus.OK,
     };
   }
@@ -153,7 +153,7 @@ export class UserService {
 
 
       if (!user) {
-        throw new UnauthorizedException('User not fount')
+        throw new UnauthorizedException('Usuario no encontrado.')
       }
 
 
@@ -162,7 +162,7 @@ export class UserService {
       const newUser = await this.userDao.getUserById(id)
 
       return {
-        message: 'User Update',
+        message: 'Usuario eliminado',
         statusCode: HttpStatus.OK,
         data: {
           User: newUser
@@ -173,7 +173,7 @@ export class UserService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -184,7 +184,7 @@ export class UserService {
       const user = await this.userDao.getUserById(id)
 
       if (!user) {
-        throw new UnauthorizedException('User not fount')
+        throw new UnauthorizedException('Usuario no encontrado.')
       }
 
       if (code === user.usr_verification_code) {
@@ -201,7 +201,7 @@ export class UserService {
         await this.userDao.confirmUser(id)
 
         return {
-          message: 'User confirm successfully',
+          message: 'El usuario confirmado con éxito.',
           access_token: (await tokens).accessToken,
           refreshToken: (await tokens).refreshToken,
           expires_in: 180,
@@ -213,7 +213,7 @@ export class UserService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
 
@@ -224,11 +224,11 @@ export class UserService {
       const user = await this.userDao.getUserById(id)
 
       if (!user) {
-        throw new UnauthorizedException('User not fount')
+        throw new UnauthorizedException('Usuario no encontrado.')
       }
 
       if (user.usr_verified === true) {
-        throw new UnauthorizedException('User already verified')
+        throw new UnauthorizedException('Usuario ya verificado.')
       }
 
 
@@ -243,7 +243,7 @@ export class UserService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
 

@@ -32,7 +32,7 @@ export class ProfessionalDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -70,7 +70,7 @@ export class ProfessionalDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -107,7 +107,7 @@ export class ProfessionalDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -119,7 +119,7 @@ export class ProfessionalDao {
             })
             .then(() => {
                 return {
-                    message: 'Professional delete successfully',
+                    message: 'Profesional eliminado satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -127,7 +127,7 @@ export class ProfessionalDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }
@@ -141,7 +141,7 @@ export class ProfessionalDao {
             )
             .then(() => {
                 return {
-                    message: 'Professional updated successfully',
+                    message: 'Profesional actualizado satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -149,7 +149,7 @@ export class ProfessionalDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }

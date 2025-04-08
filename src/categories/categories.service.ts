@@ -16,7 +16,7 @@ export class CategoriesService {
     const category = await this.categoryDao.createCategory(createCategoryDto);
 
     return {
-      message: 'Category',
+      message: 'Categoría',
       statusCode: HttpStatus.OK,
       data: category,
     };
@@ -27,7 +27,7 @@ export class CategoriesService {
       const user = await this.categoryDao.getCategoryById(id);
 
       return {
-        message: 'Category',
+        message: 'Categoría',
         statusCode: HttpStatus.OK,
         data: user,
       };
@@ -35,7 +35,7 @@ export class CategoriesService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -45,7 +45,7 @@ export class CategoriesService {
       const category = await this.categoryDao.getAllCategory();
 
       return {
-        message: 'Categories',
+        message: 'Categorías',
         statusCode: HttpStatus.OK,
         data: category,
       };
@@ -53,7 +53,7 @@ export class CategoriesService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -62,13 +62,13 @@ export class CategoriesService {
     const category = await this.categoryDao.getCategoryById(id)
 
     if (!category) {
-      throw new UnauthorizedException('Category not fount')
+      throw new UnauthorizedException('Categoría no encontrada')
     }
 
     await this.categoryDao.deleteCategory(id)
 
     return {
-      message: 'Category delete',
+      message: 'Categoría eliminada',
       statusCode: HttpStatus.OK,
     };
   }
@@ -79,7 +79,7 @@ export class CategoriesService {
 
 
       if (!category) {
-        throw new UnauthorizedException('Category not fount')
+        throw new UnauthorizedException('Categoría no encontrada')
       }
 
 
@@ -88,7 +88,7 @@ export class CategoriesService {
       const newCategory = await this.categoryDao.getCategoryById(id)
 
       return {
-        message: 'Category Update',
+        message: 'Categoría actualizada',
         statusCode: HttpStatus.OK,
         data: newCategory
       };
@@ -97,7 +97,7 @@ export class CategoriesService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }

@@ -32,7 +32,7 @@ export class SupplierDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -69,7 +69,7 @@ export class SupplierDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -105,7 +105,7 @@ export class SupplierDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -117,7 +117,7 @@ export class SupplierDao {
             })
             .then(() => {
                 return {
-                    message: 'Supplier delete successfully',
+                    message: 'Proveedor eliminado satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -125,7 +125,7 @@ export class SupplierDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }
@@ -139,7 +139,7 @@ export class SupplierDao {
             )
             .then(() => {
                 return {
-                    message: 'Supplier updated successfully',
+                    message: 'Proveerdo actualizado satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -147,7 +147,7 @@ export class SupplierDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }

@@ -32,7 +32,7 @@ export async function getHashedPassword(password: string): Promise<string> {
     throw new BadRequestException({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: [`${error.message}`],
-      error: 'Internal Server Error',
+      error: 'Error Interno del Servidor',
     });
   });
 }

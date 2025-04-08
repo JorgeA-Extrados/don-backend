@@ -17,12 +17,13 @@ export class CreateProfessionalDto {
     @IsString()
     pro_longitude: string;
 
-
-    // file: any; // No se valida con class-validator
-
     @IsOptional()
     @IsString()
     pro_profilePicture?: string;
+
+    @IsOptional()
+    @IsString()
+    pro_description?: string;
 
     @IsString()
     @IsOptional()

@@ -22,6 +22,10 @@ export class CreateSupplierDto {
     @IsString()
     sup_profilePicture?: string;
 
+    @IsOptional()
+    @IsString()
+    sup_description?: string;
+
     @IsString()
     @IsOptional()
     usr_name?: string;

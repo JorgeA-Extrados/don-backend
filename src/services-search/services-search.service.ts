@@ -28,7 +28,7 @@ export class ServicesSearchService {
     }
 
     return {
-      message: 'ServicesSearch',
+      message: 'Cliente',
       statusCode: HttpStatus.OK,
       data: servicesSearch,
     };
@@ -39,7 +39,7 @@ export class ServicesSearchService {
     try {
       const servicesSearch = await this.servicesSearchDao.getServicesSearchById(sea_id);
 
-      if (!servicesSearch) throw new Error('Profesional no encontrado');
+      if (!servicesSearch) throw new Error('Cliente no encontrado');
 
       const imageUrl = await this.firebaseService.uploadFile(file, sea_id);
 
@@ -53,7 +53,7 @@ export class ServicesSearchService {
       const newProfessional = await this.servicesSearchDao.getServicesSearchById(sea_id)
 
       return {
-        message: 'Services Search Image Update',
+        message: 'Imagen del cliente actualizada con éxito',
         statusCode: HttpStatus.OK,
         data: newProfessional
       };
@@ -61,7 +61,7 @@ export class ServicesSearchService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -71,7 +71,7 @@ export class ServicesSearchService {
       const servicesSearch = await this.servicesSearchDao.getServicesSearchById(id);
 
       return {
-        message: 'ServicesSearch',
+        message: 'Cliente',
         statusCode: HttpStatus.OK,
         data: servicesSearch,
       };
@@ -79,7 +79,7 @@ export class ServicesSearchService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -89,7 +89,7 @@ export class ServicesSearchService {
       const servicesSearch = await this.servicesSearchDao.getAllServicesSearch();
 
       return {
-        message: 'ServicesSearch',
+        message: 'Cliente',
         statusCode: HttpStatus.OK,
         data: servicesSearch,
       };
@@ -97,7 +97,7 @@ export class ServicesSearchService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -106,13 +106,13 @@ export class ServicesSearchService {
     const servicesSearch = await this.servicesSearchDao.getServicesSearchById(id)
 
     if (!servicesSearch) {
-      throw new UnauthorizedException('ServicesSearch not fount')
+      throw new UnauthorizedException('Cliente no encontrado')
     }
 
     await this.servicesSearchDao.deleteServicesSearch(id)
 
     return {
-      message: 'ServicesSearch delete',
+      message: 'Cliente eliminado',
       statusCode: HttpStatus.OK,
     };
   }
@@ -123,7 +123,7 @@ export class ServicesSearchService {
 
 
       if (!servicesSearch) {
-        throw new UnauthorizedException('ServicesSearch not fount')
+        throw new UnauthorizedException('Cliente no encontrado')
       }
 
 
@@ -132,7 +132,7 @@ export class ServicesSearchService {
       const newServicesSearch = await this.servicesSearchDao.getServicesSearchById(id)
 
       return {
-        message: 'ServicesSearch Update',
+        message: 'Cliente actualizado',
         statusCode: HttpStatus.OK,
         data: newServicesSearch
       };
@@ -141,7 +141,7 @@ export class ServicesSearchService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }

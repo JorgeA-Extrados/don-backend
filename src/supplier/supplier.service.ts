@@ -27,7 +27,7 @@ export class SupplierService {
     }
 
     return {
-      message: 'Supplier',
+      message: 'Proveedor',
       statusCode: HttpStatus.OK,
       data: supplier,
     };
@@ -38,7 +38,7 @@ export class SupplierService {
     try {
       const supplier = await this.supplierDao.getSupplierById(sup_id);
 
-      if (!supplier) throw new Error('Profesional no encontrado');
+      if (!supplier) throw new Error('Proveedor no encontrado');
 
       const imageUrl = await this.firebaseService.uploadFile(file, sup_id);
 
@@ -52,7 +52,7 @@ export class SupplierService {
       const newProfessional = await this.supplierDao.getSupplierById(sup_id)
 
       return {
-        message: 'Supplier Image Update',
+        message: 'Imagen del proveedor actualizada con éxito',
         statusCode: HttpStatus.OK,
         data: newProfessional
       };
@@ -60,7 +60,7 @@ export class SupplierService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -70,11 +70,11 @@ export class SupplierService {
       const supplier = await this.supplierDao.getSupplierById(id);
 
       if (!supplier) {
-        throw new UnauthorizedException('Supplier not fount')
+        throw new UnauthorizedException('Proveedor no encontrado')
       }
 
       return {
-        message: 'Supplier',
+        message: 'Proveedor',
         statusCode: HttpStatus.OK,
         data: supplier,
       };
@@ -82,7 +82,7 @@ export class SupplierService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -92,11 +92,11 @@ export class SupplierService {
       const supplier = await this.supplierDao.getAllSupplier();
 
       if (supplier.length === 0) {
-        throw new UnauthorizedException('Suppliers not fount')
+        throw new UnauthorizedException('Proveedor no encontrado')
       }
 
       return {
-        message: 'Supplier',
+        message: 'Proveedor',
         statusCode: HttpStatus.OK,
         data: supplier,
       };
@@ -104,7 +104,7 @@ export class SupplierService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -113,13 +113,13 @@ export class SupplierService {
     const supplier = await this.supplierDao.getSupplierById(id)
 
     if (!supplier) {
-      throw new UnauthorizedException('Supplier not fount')
+      throw new UnauthorizedException('Proveedor no encontrado')
     }
 
     await this.supplierDao.deleteSupplier(id)
 
     return {
-      message: 'Supplier delete',
+      message: 'Proveedor eliminado',
       statusCode: HttpStatus.OK,
     };
   }
@@ -130,7 +130,7 @@ export class SupplierService {
 
 
       if (!supplier) {
-        throw new UnauthorizedException('Supplier not fount')
+        throw new UnauthorizedException('Proveedor no encontrado')
       }
 
 
@@ -139,7 +139,7 @@ export class SupplierService {
       const newSupplier = await this.supplierDao.getSupplierById(id)
 
       return {
-        message: 'Supplier Update',
+        message: 'Proveedor actualizado',
         statusCode: HttpStatus.OK,
         data: newSupplier
       };
@@ -148,7 +148,7 @@ export class SupplierService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }

@@ -36,7 +36,7 @@ export class RefreshTokenController {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }

@@ -16,7 +16,7 @@ export class SubHeadingService {
       const SubHeading = await this.subHeadingDao.createSubHeading(createSubHeadingDto);
   
       return {
-        message: 'Sub-Heading',
+        message: 'Sub-rubro',
         statusCode: HttpStatus.OK,
         data: SubHeading,
       };
@@ -27,7 +27,7 @@ export class SubHeadingService {
         const subHeading = await this.subHeadingDao.getSubHeadingById(id);
   
         return {
-          message: 'Sub Heading',
+          message: 'Sub-rubro',
           statusCode: HttpStatus.OK,
           data: subHeading,
         };
@@ -35,7 +35,7 @@ export class SubHeadingService {
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           message: `${error.code} ${error.detail} ${error.message}`,
-          error: `Internal Error`,
+          error: `Error interno`,
         });
       }
     }
@@ -45,7 +45,7 @@ export class SubHeadingService {
         const subHeading = await this.subHeadingDao.getAllSubHeading();
   
         return {
-          message: 'Sub-Heading',
+          message: 'Sub-rubro',
           statusCode: HttpStatus.OK,
           data: subHeading,
         };
@@ -53,7 +53,7 @@ export class SubHeadingService {
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           message: `${error.code} ${error.detail} ${error.message}`,
-          error: `Internal Error`,
+          error: `Error interno`,
         });
       }
     }
@@ -62,13 +62,13 @@ export class SubHeadingService {
       const subHeading = await this.subHeadingDao.getSubHeadingById(id)
   
       if (!subHeading) {
-        throw new UnauthorizedException('Sub-Heading not fount')
+        throw new UnauthorizedException('Sub-rubro no encontrado')
       }
   
       await this.subHeadingDao.deleteSubHeading(id)
   
       return {
-        message: 'Sub-Heading delete',
+        message: 'Sub-rubro eliminado',
         statusCode: HttpStatus.OK,
       };
     }
@@ -79,7 +79,7 @@ export class SubHeadingService {
   
   
         if (!subHeading) {
-          throw new UnauthorizedException('Sub-Heading not fount')
+          throw new UnauthorizedException('Sub-rubro no encontrado')
         }
   
   
@@ -88,7 +88,7 @@ export class SubHeadingService {
         const newSubHeading = await this.subHeadingDao.getSubHeadingById(id)
   
         return {
-          message: 'Sub-Heading Update',
+          message: 'Sub-rubro actualizado',
           statusCode: HttpStatus.OK,
           data: newSubHeading
         };
@@ -97,7 +97,7 @@ export class SubHeadingService {
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           message: `${error.code} ${error.detail} ${error.message}`,
-          error: `Internal Error`,
+          error: `Error interno`,
         });
       }
     }

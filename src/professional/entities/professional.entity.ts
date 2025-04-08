@@ -59,6 +59,16 @@ export class Professional {
     pro_profilePicture?: string;
 
     @Column({
+        name: 'pro_description',
+        nullable: true,
+        type: 'varchar',
+        length: 300,
+    })
+    @IsOptional()
+    @IsString()
+    pro_description?: string;
+
+    @Column({
         name: 'pro_creditDON',
         nullable: true,
     })

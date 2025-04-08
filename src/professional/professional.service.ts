@@ -27,7 +27,7 @@ export class ProfessionalService {
     }
 
     return {
-      message: 'Professional',
+      message: 'Profesional',
       statusCode: HttpStatus.OK,
       data: professional,
     };
@@ -52,7 +52,7 @@ export class ProfessionalService {
       const newProfessional = await this.professionalDao.getProfessionalById(pro_id)
 
       return {
-        message: 'Professional Image Update',
+        message: 'Imagen del profesional actualizada con éxito',
         statusCode: HttpStatus.OK,
         data: newProfessional
       };
@@ -60,7 +60,7 @@ export class ProfessionalService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -70,11 +70,11 @@ export class ProfessionalService {
       const professional = await this.professionalDao.getProfessionalById(id);
 
       if (!professional) {
-        throw new UnauthorizedException('Professional not fount')
+        throw new UnauthorizedException('Profesional no encontrado')
       }
 
       return {
-        message: 'Professional',
+        message: 'Profesional',
         statusCode: HttpStatus.OK,
         data: professional,
       };
@@ -82,7 +82,7 @@ export class ProfessionalService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -92,11 +92,11 @@ export class ProfessionalService {
       const professional = await this.professionalDao.getAllProfessional();
 
       if (professional.length === 0) {
-        throw new UnauthorizedException('Professionals not fount')
+        throw new UnauthorizedException('Profesional no encontrado')
       }
 
       return {
-        message: 'Professional',
+        message: 'Profesional',
         statusCode: HttpStatus.OK,
         data: professional,
       };
@@ -104,7 +104,7 @@ export class ProfessionalService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -113,13 +113,13 @@ export class ProfessionalService {
     const professional = await this.professionalDao.getProfessionalById(id)
 
     if (!professional) {
-      throw new UnauthorizedException('Professional not fount')
+      throw new UnauthorizedException('Profesional no encontrado')
     }
 
     await this.professionalDao.deleteProfessional(id)
 
     return {
-      message: 'Professional delete',
+      message: 'Profesional eliminado',
       statusCode: HttpStatus.OK,
     };
   }
@@ -130,7 +130,7 @@ export class ProfessionalService {
 
 
       if (!professional) {
-        throw new UnauthorizedException('Professional not fount')
+        throw new UnauthorizedException('Profesional no encontrado')
       }
 
       await this.professionalDao.updateProfessional(id, updateProfessionalDto)
@@ -138,7 +138,7 @@ export class ProfessionalService {
       const newProfessional = await this.professionalDao.getProfessionalById(id)
 
       return {
-        message: 'Professional Update',
+        message: 'Profesional actualizado',
         statusCode: HttpStatus.OK,
         data: newProfessional
       };
@@ -147,7 +147,7 @@ export class ProfessionalService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }

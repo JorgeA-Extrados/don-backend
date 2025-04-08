@@ -28,7 +28,7 @@ export class AuthService {
 
   async validateUser(email?: string, password?: string, name?: string) {
     if (!password) {
-      throw new NotAcceptableException('Password not found');
+      throw new NotAcceptableException('Contraseña no encontrada');
     }
 
     let user
@@ -42,7 +42,7 @@ export class AuthService {
     }
 
     if (!user) {
-      throw new NotAcceptableException('Email, Name or Password are wrong.');
+      throw new NotAcceptableException('El correo electrónico, el nombre o la contraseña son incorrectos.');
     }
 
     const passwordValid: boolean = await bcrypt.compare(
@@ -51,7 +51,7 @@ export class AuthService {
     );
 
     if (!passwordValid) {
-      throw new NotAcceptableException('Email, Name or Password are wrong.');
+      throw new NotAcceptableException('El correo electrónico, el nombre o la contraseña son incorrectos.');
     }
 
 
@@ -69,7 +69,7 @@ export class AuthService {
             authUser?.usr_password,
           );
           if (!passwordValid) {
-            throw new NotAcceptableException('You already have an account created with that email.');
+            throw new NotAcceptableException('Ya tienes una cuenta creada con ese correo electrónico.');
           }
           // if (authUser) {
           //   throw new NotAcceptableException('You already have an account created with that email.');
@@ -89,7 +89,7 @@ export class AuthService {
 
       if (!validateAccount) {
         throw new UnauthorizedException(
-          'Your account is not valid, you must validate your account with the code.',
+          'Su cuenta no es válida, debe validar su cuenta con el código.',
         );
       }
 
@@ -115,7 +115,7 @@ export class AuthService {
       throw new BadRequestException({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: [`${error.message}`],
-        error: 'Internal Error',
+        error: 'Error interno',
       });
     }
   }
@@ -156,7 +156,7 @@ export class AuthService {
     await this.refreshTokenService.deleteRefreshToken(refresh.rft_token)
 
     return {
-      message: 'User logout',
+      message: 'Cierre de sesión de usuario',
       statusCode: HttpStatus.OK,
     };
 
@@ -167,7 +167,7 @@ export class AuthService {
     let user = await this.userDao.getUserByEmail(sendingCodeDto.email)
 
     if (!user) {
-      throw new NotAcceptableException('The email entered is incorrect.');
+      throw new NotAcceptableException('El correo electrónico ingresado es incorrecto');
     }
 
     try {
@@ -185,7 +185,7 @@ export class AuthService {
       const emailVeri = await this.forgotPasswordDao.createForgotPassword(createForgotPassword)
 
       return {
-        message: 'Code to change password',
+        message: 'Código para cambiar contraseña.',
         statusCode: HttpStatus.OK,
         data: {
           code: emailVeri.fop_code,
@@ -196,7 +196,7 @@ export class AuthService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -215,7 +215,7 @@ export class AuthService {
 
     if (!code) {
       return {
-        message: 'incorrect code or its usage time expired',
+        message: 'Código incorrecto o su tiempo de uso expiró.',
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
@@ -238,7 +238,7 @@ export class AuthService {
 
     //Retornamos el mensaje de que el codigo utilizado es correcto
     return {
-      message: 'Code validated correctly',
+      message: 'Código validado correctamente.',
       statusCode: HttpStatus.OK
     }
   }
@@ -253,7 +253,7 @@ export class AuthService {
 
     if (!code) {
       return {
-        message: 'You must validate your code to make the change. The code can be used only once.',
+        message: 'Debes validar tu código para realizar el cambio. El código solo se puede usar una vez.',
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
@@ -262,11 +262,11 @@ export class AuthService {
     const user = await this.userDao.getUserById(userId)
 
     if (!user) {
-      throw new NotAcceptableException('User not found.');
+      throw new NotAcceptableException('Usuario no encontrado.');
     }
 
     if (newPassword != newPasswordRepeat) {
-      throw new NotAcceptableException('Your passwords must match.');
+      throw new NotAcceptableException('Sus contraseñas deben coincidir.');
     }
 
     const hashedPassword = await getHashedPassword(newPassword);

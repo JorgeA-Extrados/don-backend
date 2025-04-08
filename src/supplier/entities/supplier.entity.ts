@@ -51,6 +51,16 @@ export class Supplier {
     @IsString()
     sup_profilePicture?: string;
 
+    @Column({
+        name: 'sup_description',
+        nullable: true,
+        type: 'varchar',
+        length: 300,
+    })
+    @IsOptional()
+    @IsString()
+    sup_description?: string;
+
     // @Column({
     //     name: 'sup_creditDON',
     //     nullable: true,

@@ -21,6 +21,10 @@ export class CreateServicesSearchDto {
     @IsString()
     sea_profilePicture?: string;
 
+    @IsOptional()
+    @IsString()
+    sea_description?: string;
+
     @IsString()
     @IsOptional()
     usr_name?: string;

@@ -2,7 +2,6 @@ import { Injectable, BadRequestException, HttpStatus } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
 import { User } from "src/user/entities/user.entity";
-import { getHashedPassword } from "src/user/user.utils";
 import { Experience } from "src/experiences/entities/experience.entity";
 import { Category } from "src/categories/entities/category.entity";
 
@@ -39,7 +38,7 @@ export class ExperienceDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -59,7 +58,7 @@ export class ExperienceDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -78,7 +77,7 @@ export class ExperienceDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -90,7 +89,7 @@ export class ExperienceDao {
             })
             .then(() => {
                 return {
-                    message: 'Experience delete successfully',
+                    message: 'Experiencia eliminada satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -98,7 +97,7 @@ export class ExperienceDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }
@@ -112,7 +111,7 @@ export class ExperienceDao {
             )
             .then(() => {
                 return {
-                    message: 'Experience updated successfully',
+                    message: 'Experiencia actualizada satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -120,7 +119,7 @@ export class ExperienceDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }

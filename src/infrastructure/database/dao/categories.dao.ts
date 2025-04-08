@@ -30,7 +30,7 @@ export class CategoryDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -50,7 +50,7 @@ export class CategoryDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -69,7 +69,7 @@ export class CategoryDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -81,7 +81,7 @@ export class CategoryDao {
             })
             .then(() => {
                 return {
-                    message: 'Category delete successfully',
+                    message: 'Categoria eliminada satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -89,7 +89,7 @@ export class CategoryDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }
@@ -103,7 +103,7 @@ export class CategoryDao {
             )
             .then(() => {
                 return {
-                    message: 'Category updated successfully',
+                    message: 'Categoria actualizada satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -111,7 +111,7 @@ export class CategoryDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }

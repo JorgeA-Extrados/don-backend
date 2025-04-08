@@ -13,36 +13,128 @@ export class UserHeadingService {
   ) { }
 
 
-  async createUserHeading(createUserHeadingDto: CreateUserHeadingDto) {
+  // async createUserHeading(createUserHeadingDto: CreateUserHeadingDto) {
 
+  //   try {
+  //     const { sbh_id, hea_id } = createUserHeadingDto
+  
+  //     if (sbh_id) {
+  //       const subHeading = await this.subHeadingDao.getSubHeadingById(sbh_id)
+  
+  //       if (subHeading?.heading.hea_id !== hea_id) {
+  //         throw new UnauthorizedException('El sub-rubro no pertenece al rubro seleccionado')
+  //       }
+  
+  //     }
+  
+  
+  //     const userHeading = await this.userHeadingDao.createUserHeading(createUserHeadingDto);
+  
+  //     return {
+  //       message: 'User Heading',
+  //       statusCode: HttpStatus.OK,
+  //       data: userHeading,
+  //     };
+  //   } catch (error) {
+  //     throw new BadRequestException({
+  //       statusCode: HttpStatus.BAD_REQUEST,
+  //       message: `${error.code} ${error.detail} ${error.message}`,
+  //       error: `Error interno`,
+  //     });
+  //   }
+  // }
+
+  async createUserHeading(createUserHeadingDto: CreateUserHeadingDto) {
     try {
-      const { sbh_id, hea_id } = createUserHeadingDto
+      const { usr_id, hea_id, sbh_id = [] } = createUserHeadingDto;
   
-      if (sbh_id) {
-        const subHeading = await this.subHeadingDao.getSubHeadingById(sbh_id)
-  
-        if (subHeading?.heading.hea_id !== hea_id) {
-          throw new UnauthorizedException('El sub-rubro no pertenece al rubro seleccionado')
-        }
-  
+      if (!hea_id || hea_id.length === 0) {
+        throw new BadRequestException('Debe incluir al menos un rubro');
       }
   
+      const existingAll = await this.userHeadingDao.getUserHeadingByUserId(usr_id);
+      const existingHeaIds = new Set(existingAll.map(e => e.heading.hea_id));
   
-      const userHeading = await this.userHeadingDao.createUserHeading(createUserHeadingDto);
+      const nuevosHeaIds = hea_id.filter(id => !existingHeaIds.has(id));
+      const totalHeaIds = new Set([...existingHeaIds, ...nuevosHeaIds]);
+  
+      if (totalHeaIds.size > 3) {
+        throw new BadRequestException('Solo se pueden asignar hasta 3 rubros por usuario');
+      }
+  
+      const createdUserHeadings: any[] = [];
+      const usedSubIds: number[] = [];
+  
+      for (const currentHeaId of hea_id) {
+        const existing = existingAll.filter(e => e.heading.hea_id === currentHeaId);
+  
+        let subrubrosAsociados = false;
+  
+        for (const subId of sbh_id) {
+          if (usedSubIds.includes(subId)) continue;
+  
+          const subHeading = await this.subHeadingDao.getSubHeadingById(subId);
+          if (!subHeading || subHeading.heading.hea_id !== currentHeaId) continue;
+  
+          usedSubIds.push(subId);
+          subrubrosAsociados = true;
+  
+          const yaExisteExacto = existing.find(
+            e => e.subHeading?.sbh_id === subId
+          );
+          if (yaExisteExacto) continue; // ya está asignado igual
+  
+          // Actualizamos si hay uno sin subHeading
+          const existenteConOtro = existing.find(e => !e.subHeading);
+          if (existenteConOtro) {
+            await this.userHeadingDao.updateUserHeadingCreate(existenteConOtro.ush_id, { sbh_id: subId });
+            createdUserHeadings.push({ ...existenteConOtro, sbh_id: subId });
+          } else {
+            const nuevo = await this.userHeadingDao.createUserHeading({
+              usr_id,
+              hea_id: currentHeaId,
+              sbh_id: subId,
+            });
+            createdUserHeadings.push(nuevo);
+          }
+        }
+  
+        // Si no se asociaron subrubros, creamos solo si NO existe ya esa combinación con sbh_id: null
+        if (!subrubrosAsociados) {
+          const yaExisteSinSub = existing.find(e => !e.subHeading);
+          if (!yaExisteSinSub) {
+            const nuevo = await this.userHeadingDao.createUserHeading({
+              usr_id,
+              hea_id: currentHeaId,
+              sbh_id: null,
+            });
+            createdUserHeadings.push(nuevo);
+          }
+        }
+      }
+  
+      const unusedSubIds = sbh_id.filter((id) => !usedSubIds.includes(id));
+      if (unusedSubIds.length > 0) {
+        throw new BadRequestException(
+          `Los sub-rubros ${unusedSubIds.join(', ')} no pudieron asignarse de forma única a un rubro`
+        );
+      }
   
       return {
-        message: 'User Heading',
+        message: 'Usuario-rubro creados/actualizados correctamente',
         statusCode: HttpStatus.OK,
-        data: userHeading,
+        data: createdUserHeadings,
       };
     } catch (error) {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
-        message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        message: `${error.message}`,
+        error: 'Error interno',
       });
     }
   }
+  
+  
 
   async getUserHeadingById(id: number) {
     try {
@@ -53,7 +145,7 @@ export class UserHeadingService {
       }
 
       return {
-        message: 'User Heading',
+        message: 'Usuario-rubro',
         statusCode: HttpStatus.OK,
         data: userHeading,
       };
@@ -61,7 +153,7 @@ export class UserHeadingService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -75,7 +167,7 @@ export class UserHeadingService {
       }
 
       return {
-        message: 'User Heading',
+        message: 'Usuario-rubro',
         statusCode: HttpStatus.OK,
         data: userHeading,
       };
@@ -83,7 +175,7 @@ export class UserHeadingService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -97,7 +189,7 @@ export class UserHeadingService {
       }
 
       return {
-        message: 'User Heading',
+        message: 'Usuario-rubro',
         statusCode: HttpStatus.OK,
         data: userHeading,
       };
@@ -105,7 +197,7 @@ export class UserHeadingService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -114,13 +206,13 @@ export class UserHeadingService {
     const userHeading = await this.userHeadingDao.getUserHeadingById(id)
 
     if (!userHeading) {
-      throw new UnauthorizedException('User Heading not fount')
+      throw new UnauthorizedException('Usuario-rubro no encontrado')
     }
 
     await this.userHeadingDao.deleteUserHeading(id)
 
     return {
-      message: 'User Heading delete',
+      message: 'Usuario-rubro eliminado',
       statusCode: HttpStatus.OK,
     };
   }
@@ -131,7 +223,7 @@ export class UserHeadingService {
 
 
       if (!userHeading) {
-        throw new UnauthorizedException('User Heading not fount')
+        throw new UnauthorizedException('Usuario-rubro no encontrado')
       }
 
 
@@ -140,7 +232,7 @@ export class UserHeadingService {
       const newUserHeading = await this.userHeadingDao.getUserHeadingById(id)
 
       return {
-        message: 'User Heading Update',
+        message: 'Usuario-rubro actualizado',
         statusCode: HttpStatus.OK,
         data: newUserHeading
       };
@@ -149,7 +241,7 @@ export class UserHeadingService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }

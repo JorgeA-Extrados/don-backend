@@ -51,13 +51,10 @@ export class UserDao {
             return await this.userRepository.save(user, { reload: true })
 
         } catch (error) {
-            console.log('===============error=====================');
-            console.log(error);
-            console.log('====================================');
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -93,7 +90,7 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -126,7 +123,7 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -146,7 +143,7 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -166,7 +163,7 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -178,7 +175,7 @@ export class UserDao {
             })
             .then(() => {
                 return {
-                    message: 'User delete successfully',
+                    message: 'Usuario eliminado satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -186,7 +183,7 @@ export class UserDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }
@@ -200,7 +197,7 @@ export class UserDao {
             )
             .then(() => {
                 return {
-                    message: 'User updated successfully',
+                    message: 'Usuario actualizado satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -208,7 +205,7 @@ export class UserDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }
@@ -220,7 +217,7 @@ export class UserDao {
             })
             .then(() => {
                 return {
-                    message: 'User confirm successfully',
+                    message: 'Usuario confirmado satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -228,7 +225,7 @@ export class UserDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }
@@ -249,7 +246,7 @@ export class UserDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -266,7 +263,7 @@ export class UserDao {
             .then(async () => {
                 await this.forgotPasswordRepository.update({ fop_id: fopId }, { fop_code_used: new Date(), fop_is_active: false })
                 return {
-                    message: 'Successful password change',
+                    message: 'Cambio de contraseña correcto',
                     statusCode: HttpStatus.OK
                 };
             })
@@ -274,7 +271,7 @@ export class UserDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }

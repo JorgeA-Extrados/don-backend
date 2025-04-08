@@ -16,7 +16,7 @@ export class ExperiencesService {
     const experience = await this.experienceDao.createExperience(createExperienceDto);
 
     return {
-      message: 'Experience',
+      message: 'Experiencia',
       statusCode: HttpStatus.OK,
       data: experience,
     };
@@ -27,7 +27,7 @@ export class ExperiencesService {
       const experience = await this.experienceDao.getExperienceById(id);
 
       return {
-        message: 'Exprience',
+        message: 'Experiencia',
         statusCode: HttpStatus.OK,
         data: experience,
       };
@@ -35,7 +35,7 @@ export class ExperiencesService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -45,7 +45,7 @@ export class ExperiencesService {
       const experience = await this.experienceDao.getAllExperience();
 
       return {
-        message: 'Experience',
+        message: 'Experiencias',
         statusCode: HttpStatus.OK,
         data: experience,
       };
@@ -53,7 +53,7 @@ export class ExperiencesService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }
@@ -62,13 +62,13 @@ export class ExperiencesService {
     const experience = await this.experienceDao.deleteExperience(id)
 
     if (!experience) {
-      throw new UnauthorizedException('Experience not fount')
+      throw new UnauthorizedException('Experiencia no encontrada')
     }
 
     await this.experienceDao.deleteExperience(id)
 
     return {
-      message: 'Experience delete',
+      message: 'Experiencia eliminada',
       statusCode: HttpStatus.OK,
     };
   }
@@ -79,7 +79,7 @@ export class ExperiencesService {
 
 
       if (!experience) {
-        throw new UnauthorizedException('Experience not fount')
+        throw new UnauthorizedException('Experiencia no encontrada')
       }
 
 
@@ -88,7 +88,7 @@ export class ExperiencesService {
       const newExperience = await this.experienceDao.getExperienceById(id)
 
       return {
-        message: 'Experience Update',
+        message: 'Experiencia actualizada',
         statusCode: HttpStatus.OK,
         data: newExperience
       };
@@ -97,7 +97,7 @@ export class ExperiencesService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
-        error: `Internal Error`,
+        error: `Error interno`,
       });
     }
   }

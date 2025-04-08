@@ -16,7 +16,7 @@ export class HeadingService {
       const heading = await this.headingDao.createHeading(createHeadingDto);
   
       return {
-        message: 'Heading',
+        message: 'Rubro',
         statusCode: HttpStatus.OK,
         data: heading,
       };
@@ -27,7 +27,7 @@ export class HeadingService {
         const heading = await this.headingDao.getHeadingById(id);
   
         return {
-          message: 'Heading',
+          message: 'Rubro',
           statusCode: HttpStatus.OK,
           data: heading,
         };
@@ -35,7 +35,7 @@ export class HeadingService {
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           message: `${error.code} ${error.detail} ${error.message}`,
-          error: `Internal Error`,
+          error: `Error interno`,
         });
       }
     }
@@ -45,7 +45,7 @@ export class HeadingService {
         const heading = await this.headingDao.getAllHeading();
   
         return {
-          message: 'Heading',
+          message: 'Rubro',
           statusCode: HttpStatus.OK,
           data: heading,
         };
@@ -53,7 +53,7 @@ export class HeadingService {
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           message: `${error.code} ${error.detail} ${error.message}`,
-          error: `Internal Error`,
+          error: `Error interno`,
         });
       }
     }
@@ -62,13 +62,13 @@ export class HeadingService {
       const heading = await this.headingDao.getHeadingById(id)
   
       if (!heading) {
-        throw new UnauthorizedException('Heading not fount')
+        throw new UnauthorizedException('Rubro no encontrado')
       }
   
       await this.headingDao.deleteHeading(id)
   
       return {
-        message: 'Heading delete',
+        message: 'Rubro eliminado',
         statusCode: HttpStatus.OK,
       };
     }
@@ -79,7 +79,7 @@ export class HeadingService {
   
   
         if (!heading) {
-          throw new UnauthorizedException('Heading not fount')
+          throw new UnauthorizedException('Rubro no encontrado')
         }
   
   
@@ -88,7 +88,7 @@ export class HeadingService {
         const newHeading = await this.headingDao.getHeadingById(id)
   
         return {
-          message: 'Heading Update',
+          message: 'Rubro actualizado',
           statusCode: HttpStatus.OK,
           data: newHeading
         };
@@ -97,7 +97,7 @@ export class HeadingService {
         throw new BadRequestException({
           statusCode: HttpStatus.BAD_REQUEST,
           message: `${error.code} ${error.detail} ${error.message}`,
-          error: `Internal Error`,
+          error: `Error interno`,
         });
       }
     }

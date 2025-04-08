@@ -50,6 +50,16 @@ export class ServicesSearch {
     @IsString()
     sea_profilePicture?: string;
 
+    @Column({
+        name: 'sea_description',
+        nullable: true,
+        type: 'varchar',
+        length: 300,
+    })
+    @IsOptional()
+    @IsString()
+    sea_description?: string;
+
     // @Column({
     //     name: 'sea_creditDON',
     //     nullable: true,

@@ -33,7 +33,7 @@ export class ForgotPasswordDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Error`,
+                error: `Error Interno del Servidor`,
               });
         }
     }
@@ -60,7 +60,7 @@ export class ForgotPasswordDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: [`${error.message}`],
-                error: 'Internal Server Error',
+                error: 'Error Interno del Servidor',
             });
         }
     }
@@ -72,7 +72,7 @@ export class ForgotPasswordDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: [`${error.message}`],
-                error: 'Internal Server Error',
+                error: 'Error Interno del Servidor',
             });
         }
     }
@@ -90,7 +90,7 @@ export class ForgotPasswordDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: [`${error.message}`],
-                error: 'Internal Server Error',
+                error: 'Error Interno del Servidor',
             });
         }
     }
@@ -109,7 +109,7 @@ export class ForgotPasswordDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: [`${error.message}`],
-                error: 'Internal Server Error',
+                error: 'Error Interno del Servidor',
             });
         }
     }
@@ -135,7 +135,7 @@ export class ForgotPasswordDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: [`${error.message}`],
-                error: 'Internal Server Error',
+                error: 'Error Interno del Servidor',
             });
         }
     }

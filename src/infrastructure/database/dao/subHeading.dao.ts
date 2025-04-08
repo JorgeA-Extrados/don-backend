@@ -34,7 +34,7 @@ export class SubHeadingDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -57,7 +57,7 @@ export class SubHeadingDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -76,7 +76,7 @@ export class SubHeadingDao {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
-                error: `Internal Server Error`,
+                error: `Error Interno del Servidor`,
             });
         }
     }
@@ -88,7 +88,7 @@ export class SubHeadingDao {
             })
             .then(() => {
                 return {
-                    message: 'SubHeading delete successfully',
+                    message: 'Sub-rubro eliminado satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -96,7 +96,7 @@ export class SubHeadingDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }
@@ -110,7 +110,7 @@ export class SubHeadingDao {
             )
             .then(() => {
                 return {
-                    message: 'SubHeading updated successfully',
+                    message: 'Sub-rubro actualizado satisfactoriamente',
                     statusCode: HttpStatus.CREATED,
                 };
             })
@@ -118,7 +118,7 @@ export class SubHeadingDao {
                 throw new BadRequestException({
                     statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                     message: [`${error.message}`],
-                    error: 'Internal Server Error',
+                    error: 'Error Interno del Servidor',
                 });
             });
     }

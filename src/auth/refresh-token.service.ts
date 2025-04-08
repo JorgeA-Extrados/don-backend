@@ -95,7 +95,7 @@ export class RefreshTokenService {
             
             await this.refreshTokenRepository.delete({ id: refresh?.id });
         } catch (error) {
-            throw new BadRequestException('Failed to delete refresh token');
+            throw new BadRequestException('No se pudo eliminar el refresh token');
         }
     }
 }
