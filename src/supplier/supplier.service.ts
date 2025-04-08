@@ -26,6 +26,11 @@ export class SupplierService {
       await this.userDao.updateUser(usr_id, update)
     }
 
+    const updateRole = {
+      usr_role: "supplier"
+    }
+    await this.userDao.updateUser(usr_id, updateRole)
+
     return {
       message: 'Proveedor',
       statusCode: HttpStatus.OK,

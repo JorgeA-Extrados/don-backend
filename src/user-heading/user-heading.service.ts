@@ -116,7 +116,7 @@ export class UserHeadingService {
       const unusedSubIds = sbh_id.filter((id) => !usedSubIds.includes(id));
       if (unusedSubIds.length > 0) {
         throw new BadRequestException(
-          `Los sub-rubros ${unusedSubIds.join(', ')} no pudieron asignarse de forma única a un rubro`
+          `Los sub-rubros ${unusedSubIds.join(', ')} no pudieron asignarse a un rubro, verifique que sean correctos`
         );
       }
   

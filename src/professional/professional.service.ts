@@ -26,6 +26,11 @@ export class ProfessionalService {
       await this.userDao.updateUser(usr_id, update)
     }
 
+    const updateRole = {
+      usr_role: "professional"
+    }
+    await this.userDao.updateUser(usr_id, updateRole)
+
     return {
       message: 'Profesional',
       statusCode: HttpStatus.OK,

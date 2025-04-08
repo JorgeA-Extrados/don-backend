@@ -63,7 +63,10 @@ export class HeadingDao {
                 },
                 relations: {
                     subHeading: true
-                }
+                },
+                order: {
+                    hea_name: 'ASC',
+                },
             })
 
             return heading

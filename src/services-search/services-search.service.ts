@@ -27,6 +27,11 @@ export class ServicesSearchService {
       await this.userDao.updateUser(usr_id, update)
     }
 
+    const updateRole = {
+      usr_role: "serviceSearch"
+    }
+    await this.userDao.updateUser(usr_id, updateRole)
+
     return {
       message: 'Cliente',
       statusCode: HttpStatus.OK,
