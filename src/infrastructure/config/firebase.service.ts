@@ -3,6 +3,7 @@ import * as admin from 'firebase-admin';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Express } from 'express';
+import { validateFile } from '../utils/file-validator';
 
 @Injectable()
 export class FirebaseService {
@@ -35,6 +36,14 @@ export class FirebaseService {
         if (!file) {
             throw new Error('No se ha subido ningún archivo');
         }
+
+        // Validar según el tipo
+        const isImage = file.mimetype.startsWith('image/');
+        const isVideo = file.mimetype.startsWith('video/');
+
+        if (isImage) validateFile(file, 'image');
+        else if (isVideo) validateFile(file, 'video');
+        else throw new Error('Tipo de archivo no soportado');
 
         // CORRECCIÓN: Ahora obtenemos el bucket correctamente ✅
         const bucket = this.bucket.bucket('gs://don-oficios-da6b1.firebasestorage.app');

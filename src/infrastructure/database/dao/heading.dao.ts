@@ -55,11 +55,38 @@ export class HeadingDao {
         }
     }
 
-    async getAllHeading() {
+    async getAllHeadingProfessional() {
         try {
             const heading = await this.headingRepository.find({
                 where: {
-                    hea_delete: IsNull()
+                    hea_delete: IsNull(),
+                    hea_type: "professional"
+                },
+                relations: {
+                    subHeading: true
+                },
+                order: {
+                    hea_name: 'ASC',
+                },
+            })
+
+            return heading
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
+    async getAllHeadingSupplier() {
+        try {
+            const heading = await this.headingRepository.find({
+                where: {
+                    hea_delete: IsNull(),
+                    hea_type: "supplier"
                 },
                 relations: {
                     subHeading: true

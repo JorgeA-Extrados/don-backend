@@ -8,10 +8,11 @@ import { RefreshTokenService } from 'src/auth/refresh-token.service';
 import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { JwtService } from '@nestjs/jwt';
 import { ForgotPassword } from 'src/auth/entities/forgot-password.entity';
+import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
 
 @Module({
   imports:[TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword])],
   controllers: [UserController],
-  providers: [UserService, UserDao, RefreshTokenService, JwtService],
+  providers: [UserService, UserDao, RefreshTokenService, JwtService, EmailRepository],
 })
 export class UserModule {}

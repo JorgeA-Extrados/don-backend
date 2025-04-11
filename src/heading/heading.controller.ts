@@ -12,10 +12,16 @@ export class HeadingController {
     return this.headingService.createHeading(createHeadingDto);
   }
 
-  @Get('getAll')
+  @Get('getAllProfessional')
   // @UseGuards(JwtAuthGuard)
-  getAllHeading() {
-    return this.headingService.getAllHeading();
+  getAllHeadingProfessional() {
+    return this.headingService.getAllHeadingProfessional();
+  }
+
+  @Get('getAllSupplier')
+  // @UseGuards(JwtAuthGuard)
+  getAllHeadingSupplier() {
+    return this.headingService.getAllHeadingSupplier();
   }
 
   @Get('byId/:id')

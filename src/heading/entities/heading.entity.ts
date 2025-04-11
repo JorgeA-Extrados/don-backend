@@ -28,6 +28,14 @@ export class Heading {
     hea_icon: string;
 
     @Column({
+        name: 'hea_type',
+        nullable: true,
+    })
+    @IsOptional()
+    @IsString()
+    hea_type?: string;
+
+    @Column({
         name: 'hea_create',
         nullable: true,
     })

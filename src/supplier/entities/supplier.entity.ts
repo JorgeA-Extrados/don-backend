@@ -55,7 +55,7 @@ export class Supplier {
         name: 'sup_description',
         nullable: true,
         type: 'varchar',
-        length: 300,
+        length: 140,
     })
     @IsOptional()
     @IsString()

@@ -14,9 +14,25 @@ import { HeadingModule } from './heading/heading.module';
 import { SubHeadingModule } from './sub-heading/sub-heading.module';
 import { UserHeadingModule } from './user-heading/user-heading.module';
 import jwtConfig from './infrastructure/database/jwt/jwt.config';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
+    MailerModule.forRootAsync({
+      useFactory: () => {        
+        return {
+          transport: {
+            host: process.env.MAILER_HOST,
+            port: Number(process.env.MAILER_PORT),
+            secure: process.env.MAILER_SECURE,
+            auth: {
+              user: process.env.MAILER_EMAIL,
+              pass: process.env.MAILER_PASSWORD,
+            },
+          },
+        };
+      },
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [jwtConfig],
