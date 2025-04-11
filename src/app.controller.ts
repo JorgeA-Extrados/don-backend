@@ -1,10 +1,13 @@
 import { Controller, Get } from '@nestjs/common';
 import { DataSource } from 'typeorm';
+import { AppService } from './app.service';
 
 
 @Controller()
 export class AppController {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource
+    ,private readonly appService: AppService
+  ) {}
 
   @Get('app-health')
   async checkDatabaseHealth(): Promise<string> {

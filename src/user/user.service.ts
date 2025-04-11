@@ -6,15 +6,26 @@ import { RefreshTokenService } from 'src/auth/refresh-token.service';
 import { ConfirmUserDto } from 'src/auth/dto/confirm-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import * as Twilio from 'twilio';
+import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
 
 @Injectable()
 export class UserService {
+
+  private client: Twilio.Twilio;
+
   constructor(
     private readonly userDao: UserDao,
     private readonly refreshTokenService: RefreshTokenService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+    private readonly emailRepository: EmailRepository,
+  ) {
+    // this.client = Twilio(
+    //   process.env.TWILIO_ACCOUNT_SID,
+    //   process.env.TWILIO_AUTH_TOKEN,
+    // );
+  }
 
   async createUser(createUserDto: CreateUserDto) {
 
@@ -51,13 +62,23 @@ export class UserService {
 
     const newUser = await this.userDao.createUser(createUser);
 
+    // try {
+    //   await this.sendMessage(newUser.usr_verification_code, newUser.usr_phone)
+    // } catch (error) {
+    //   throw new UnauthorizedException('Error al enviar el código de verificación.')
+    // }
+
+    try {
+      await this.emailRepository.sendVerificationEmail(newUser.usr_email, newUser.usr_verification_code);
+    } catch (error) {
+      throw new UnauthorizedException('Error al enviar el código de verificación.')
+    }
+
     return {
       message: 'Usuario',
       statusCode: HttpStatus.OK,
       data: {
-        usr_id: newUser.usr_id,
-        usr_verification_code: newUser.usr_verification_code,
-        usr_phone: newUser.usr_phone
+        usr_id: newUser.usr_id
       },
     };
   }
@@ -270,6 +291,15 @@ export class UserService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async sendMessage(code: number, phone: string) {
+    const message = `Su código DON es ${code}`;
+    await this.client.messages.create({
+      body: message,
+      from: "+13802273184", // Número de Twilio
+      to: "+543513610642", // Número destino, ej: +56912345678
+    })
   }
 
 }

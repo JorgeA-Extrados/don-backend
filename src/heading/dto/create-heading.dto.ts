@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 
 export class CreateHeadingDto {
@@ -7,8 +7,11 @@ export class CreateHeadingDto {
     @IsString()
     hea_name: string;
 
-
     @IsNotEmpty()
     @IsString()
     hea_icon: string;
+
+    @IsOptional()
+    @IsString()
+    hea_type?: string;
 }

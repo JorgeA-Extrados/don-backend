@@ -14,6 +14,7 @@ import { RefreshTokenService } from './refresh-token.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ForgotPassword } from './entities/forgot-password.entity';
 import { ForgotPasswordDao } from 'src/infrastructure/database/dao/forgot_password.dao';
+import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
 
 @Module({
   imports: [
@@ -29,6 +30,6 @@ import { ForgotPasswordDao } from 'src/infrastructure/database/dao/forgot_passwo
     })
   ],
   controllers: [AuthController, RefreshTokenController],
-  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao ],
+  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository ],
 })
 export class AuthModule {}

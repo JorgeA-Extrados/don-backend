@@ -40,9 +40,27 @@ export class HeadingService {
       }
     }
   
-    async getAllHeading() {
+    async getAllHeadingProfessional() {
       try {
-        const heading = await this.headingDao.getAllHeading();
+        const heading = await this.headingDao.getAllHeadingProfessional();
+  
+        return {
+          message: 'Rubro',
+          statusCode: HttpStatus.OK,
+          data: heading,
+        };
+      } catch (error) {
+        throw new BadRequestException({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: `${error.code} ${error.detail} ${error.message}`,
+          error: `Error interno`,
+        });
+      }
+    }
+  
+    async getAllHeadingSupplier() {
+      try {
+        const heading = await this.headingDao.getAllHeadingSupplier();
   
         return {
           message: 'Rubro',

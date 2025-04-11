@@ -16,15 +16,21 @@ export class ProfessionalService {
 
   async createProfessional(createProfessionalDto: CreateProfessionalDto) {
 
-    const professional = await this.professionalDao.createProfessional(createProfessionalDto);
-
     const { usr_name, usr_id } = createProfessionalDto
     if (usr_name) {
+      const name = await this.userDao.getUserByName(usr_name)
+
+      if (name) {
+        throw new UnauthorizedException('El nombre de usuario ya se encuentra en uso')
+      }
+
       const update = {
         usr_name
       }
       await this.userDao.updateUser(usr_id, update)
     }
+
+    const professional = await this.professionalDao.createProfessional(createProfessionalDto);
 
     const updateRole = {
       usr_role: "professional"
@@ -43,7 +49,9 @@ export class ProfessionalService {
     try {
       const professional = await this.professionalDao.getProfessionalById(pro_id);
 
-      if (!professional) throw new Error('Profesional no encontrado');
+      if (!professional) {
+        throw new UnauthorizedException('Profesional no encontrado')
+      }
 
       const imageUrl = await this.firebaseService.uploadFile(file, pro_id);
 
