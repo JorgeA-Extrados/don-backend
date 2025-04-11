@@ -6,13 +6,10 @@ import { RefreshTokenService } from 'src/auth/refresh-token.service';
 import { ConfirmUserDto } from 'src/auth/dto/confirm-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as Twilio from 'twilio';
 import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
 
 @Injectable()
 export class UserService {
-
-  private client: Twilio.Twilio;
 
   constructor(
     private readonly userDao: UserDao,
@@ -252,13 +249,15 @@ export class UserService {
         throw new UnauthorizedException('Usuario ya verificado.')
       }
 
+      try {
+        await this.emailRepository.sendVerificationEmail(user.usr_email, user.usr_verification_code);
+      } catch (error) {
+        throw new UnauthorizedException('Error al enviar el código de verificación.')
+      }
 
       return {
-        message: 'User code',
+        message: 'Código enviado correctamente',
         statusCode: HttpStatus.OK,
-        data: {
-          usr_verification_code: user.usr_verification_code
-        },
       };
     } catch (error) {
       throw new BadRequestException({
@@ -292,15 +291,5 @@ export class UserService {
       refreshToken,
     };
   }
-
-  async sendMessage(code: number, phone: string) {
-    const message = `Su código DON es ${code}`;
-    await this.client.messages.create({
-      body: message,
-      from: "+13802273184", // Número de Twilio
-      to: "+543513610642", // Número destino, ej: +56912345678
-    })
-  }
-
 }
 
