@@ -15,6 +15,7 @@ import { SubHeadingModule } from './sub-heading/sub-heading.module';
 import { UserHeadingModule } from './user-heading/user-heading.module';
 import jwtConfig from './infrastructure/database/jwt/jwt.config';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { PublicationModule } from './publication/publication.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     HeadingModule,
     SubHeadingModule,
     UserHeadingModule,
+    PublicationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

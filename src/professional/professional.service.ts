@@ -7,6 +7,7 @@ import { UserDao } from 'src/infrastructure/database/dao/user.dao';
 
 @Injectable()
 export class ProfessionalService {
+  
   constructor(
     private readonly professionalDao: ProfessionalDao,
     private readonly userDao: UserDao,
