@@ -4,6 +4,7 @@ import { RefreshToken } from "src/auth/entities/refresh-token.entity";
 import { Experience } from "src/experiences/entities/experience.entity";
 import { Professional } from "src/professional/entities/professional.entity";
 import { Publication } from "src/publication/entities/publication.entity";
+import { ReportPublication } from "src/report-publication/entities/report-publication.entity";
 import { ServicesSearch } from "src/services-search/entities/services-search.entity";
 import { Supplier } from "src/supplier/entities/supplier.entity";
 import { UserHeading } from "src/user-heading/entities/user-heading.entity";
@@ -143,6 +144,9 @@ export class User {
 
     @OneToMany(() => Publication, publication => publication.user)
     publication: Publication;
+
+    @OneToMany(() => ReportPublication, reportPublication => reportPublication.whoReported)
+    reportPublication: ReportPublication;
 
 }
 

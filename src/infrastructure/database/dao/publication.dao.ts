@@ -45,7 +45,30 @@ export class PublicationDao {
                     pub_delete: IsNull()
                 },
                 relations: {
-                    user: true
+                    user: {
+                        professional: true,
+                        supplier: true
+                    }
+                },
+                select: {
+                    pub_id: true,
+                    pub_image: true,
+                    pub_description: true,
+                    pub_create: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_invitationCode: true,
+                        usr_name: true,
+                        usr_role: true,
+                        usr_phone: true,
+                        professional: {
+                            pro_profilePicture: true,
+                        },
+                        supplier: {
+                            sup_profilePicture: true
+                        }
+                    }
                 }
             })
 
@@ -67,7 +90,30 @@ export class PublicationDao {
                     pub_delete: IsNull()
                 }, 
                 relations: {
-                    user: true
+                    user: {
+                        professional: true,
+                        supplier: true
+                    }
+                },
+                select: {
+                    pub_id: true,
+                    pub_image: true,
+                    pub_description: true,
+                    pub_create: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_invitationCode: true,
+                        usr_name: true,
+                        usr_role: true,
+                        usr_phone: true,
+                        professional: {
+                            pro_profilePicture: true,
+                        },
+                        supplier: {
+                            sup_profilePicture: true
+                        }
+                    }
                 }
             })
 

@@ -1,6 +1,7 @@
 import { IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
+import { ReportPublication } from "src/report-publication/entities/report-publication.entity";
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('publication')
 export class Publication {
@@ -64,4 +65,7 @@ export class Publication {
     @ManyToOne(() => User, user => user.publication)
     @JoinColumn({ name: 'usr_id' })
     user: User;
+
+    @OneToMany(() => ReportPublication, reportPublication => reportPublication.publication)
+    reportPublication: ReportPublication;
 }
