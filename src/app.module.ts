@@ -15,6 +15,10 @@ import { SubHeadingModule } from './sub-heading/sub-heading.module';
 import { UserHeadingModule } from './user-heading/user-heading.module';
 import jwtConfig from './infrastructure/database/jwt/jwt.config';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { PublicationModule } from './publication/publication.module';
+import { ReportPublicationModule } from './report-publication/report-publication.module';
+import { ReportReasonModule } from './report-reason/report-reason.module';
+import { CreditsDonModule } from './credits-don/credits-don.module';
 
 @Module({
   imports: [
@@ -58,6 +62,10 @@ import { MailerModule } from '@nestjs-modules/mailer';
     HeadingModule,
     SubHeadingModule,
     UserHeadingModule,
+    PublicationModule,
+    ReportPublicationModule,
+    ReportReasonModule,
+    CreditsDonModule,
   ],
   controllers: [AppController],
   providers: [AppService],
