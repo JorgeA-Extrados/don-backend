@@ -44,7 +44,10 @@ export class ServicesSearchService {
     try {
       const servicesSearch = await this.servicesSearchDao.getServicesSearchById(sea_id);
 
-      if (!servicesSearch) throw new Error('Cliente no encontrado');
+
+      if (!servicesSearch) {
+        throw new UnauthorizedException('Cliente no encontrado')
+      }
 
       const imageUrl = await this.firebaseService.uploadFile(file, sea_id);
 
@@ -63,6 +66,11 @@ export class ServicesSearchService {
         data: newProfessional
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -75,12 +83,21 @@ export class ServicesSearchService {
     try {
       const servicesSearch = await this.servicesSearchDao.getServicesSearchById(id);
 
+      if (!servicesSearch) {
+        throw new UnauthorizedException('Cliente no encontrado')
+      }
+
       return {
         message: 'Cliente',
         statusCode: HttpStatus.OK,
         data: servicesSearch,
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -93,12 +110,22 @@ export class ServicesSearchService {
     try {
       const servicesSearch = await this.servicesSearchDao.getAllServicesSearch();
 
+      if (servicesSearch.length === 0) {
+        throw new UnauthorizedException('Clientes no encontrados')
+      }
+
+
       return {
         message: 'Cliente',
         statusCode: HttpStatus.OK,
         data: servicesSearch,
       };
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -108,18 +135,31 @@ export class ServicesSearchService {
   }
 
   async deleteServicesSearch(id) {
-    const servicesSearch = await this.servicesSearchDao.getServicesSearchById(id)
+    try {
+      const servicesSearch = await this.servicesSearchDao.getServicesSearchById(id)
 
-    if (!servicesSearch) {
-      throw new UnauthorizedException('Cliente no encontrado')
+      if (!servicesSearch) {
+        throw new UnauthorizedException('Cliente no encontrado')
+      }
+
+      await this.servicesSearchDao.deleteServicesSearch(id)
+
+      return {
+        message: 'Cliente eliminado',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
     }
-
-    await this.servicesSearchDao.deleteServicesSearch(id)
-
-    return {
-      message: 'Cliente eliminado',
-      statusCode: HttpStatus.OK,
-    };
   }
 
   async updateServicesSearch(id, updateServicesSearchDto: UpdateServicesSearchDto) {
@@ -143,6 +183,11 @@ export class ServicesSearchService {
       };
 
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

@@ -19,6 +19,7 @@ import { PublicationModule } from './publication/publication.module';
 import { ReportPublicationModule } from './report-publication/report-publication.module';
 import { ReportReasonModule } from './report-reason/report-reason.module';
 import { CreditsDonModule } from './credits-don/credits-don.module';
+import { CreditsReasonModule } from './credits-reason/credits-reason.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { CreditsDonModule } from './credits-don/credits-don.module';
     ReportPublicationModule,
     ReportReasonModule,
     CreditsDonModule,
+    CreditsReasonModule,
   ],
   controllers: [AppController],
   providers: [AppService],

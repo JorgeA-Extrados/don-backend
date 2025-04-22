@@ -7,28 +7,48 @@ import { UpdateCreditsDonDto } from './dto/update-credits-don.dto';
 export class CreditsDonController {
   constructor(private readonly creditsDonService: CreditsDonService) {}
 
-  @Post()
-  create(@Body() createCreditsDonDto: CreateCreditsDonDto) {
-    return this.creditsDonService.create(createCreditsDonDto);
+ @Post('create')
+ createCreditsDON(@Body() createCreditsDonDto: CreateCreditsDonDto) {
+    return this.creditsDonService.createCreditsDON(createCreditsDonDto);
   }
 
-  @Get()
-  findAll() {
-    return this.creditsDonService.findAll();
+  @Get('getAll')
+  // @UseGuards(JwtAuthGuard)
+  getAllCreditsDon() {
+    return this.creditsDonService.getAllCreditsDon();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.creditsDonService.findOne(+id);
+  @Get('byId/:id')
+  // @UseGuards(JwtAuthGuard, RolesGuard) 
+  // @Roles('admin')
+  getCreditsDonById(@Param('id') id: string) {
+    return this.creditsDonService.getCreditsDonById(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCreditsDonDto: UpdateCreditsDonDto) {
-    return this.creditsDonService.update(+id, updateCreditsDonDto);
+  @Get('byUsrId/:id')
+  // @UseGuards(JwtAuthGuard, RolesGuard) 
+  // @Roles('admin')
+  getCreditsDonByUsrId(@Param('id') id: string) {
+    return this.creditsDonService.getCreditsDonByUsrId(+id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.creditsDonService.remove(+id);
+  @Get('byUsrId-total/:id')
+  // @UseGuards(JwtAuthGuard, RolesGuard) 
+  // @Roles('admin')
+  getCreditsDonTotalByUsrId(@Param('id') id: string) {
+    return this.creditsDonService.getCreditsDonTotalByUsrId(+id);
+  }
+
+
+  @Patch('delete/:id')
+  // @UseGuards(JwtAuthGuard)
+  deleteCreditsDon(@Param('id') id: string) {
+    return this.creditsDonService.deleteCreditsDon(+id);
+  }
+
+  @Patch('update/:id')
+  // @UseGuards(JwtAuthGuard)
+  updateCreditsDon(@Param('id') id: string, @Body() updateCreditsDonDto: UpdateCreditsDonDto) {
+    return this.creditsDonService.updateCreditsDon(+id, updateCreditsDonDto);
   }
 }

@@ -114,6 +114,9 @@ export class PublicationDao {
                             sup_profilePicture: true
                         }
                     }
+                },
+                order: {
+                    pub_create: 'DESC' // opcional: historial ordenado
                 }
             })
 

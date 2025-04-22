@@ -17,7 +17,7 @@ export class ReportPublicationService {
     const reportPublication = await this.reportPublicationDao.createReportPublication(createReportPublicationDto);
 
     return {
-      message: 'Reporte Publicación',
+      message: 'Reporte realizado con éxito.',
       statusCode: HttpStatus.OK,
       data: reportPublication,
     };
@@ -37,6 +37,11 @@ export class ReportPublicationService {
         data: reportPublication,
       };
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -59,6 +64,11 @@ export class ReportPublicationService {
         data: reportPublication,
       };
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -68,18 +78,31 @@ export class ReportPublicationService {
   }
 
   async deleteReportPublication(id) {
-    const reportPublication = await this.reportPublicationDao.getReportPublicationById(id)
+    try {
+      const reportPublication = await this.reportPublicationDao.getReportPublicationById(id)
 
-    if (!reportPublication) {
-      throw new UnauthorizedException('Reporte Publicación no encontrado')
+      if (!reportPublication) {
+        throw new UnauthorizedException('Reporte Publicación no encontrado')
+      }
+
+      await this.reportPublicationDao.deleteReportPublication(id)
+
+      return {
+        message: 'Reporte de Publicación eliminada',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
     }
-
-    await this.reportPublicationDao.deleteReportPublication(id)
-
-    return {
-      message: 'Reporte de Publicación eliminada',
-      statusCode: HttpStatus.OK,
-    };
   }
 
   async updateReportPublication(id, updateReportPublicationDto: UpdateReportPublicationDto) {
@@ -102,6 +125,12 @@ export class ReportPublicationService {
       };
 
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -212,6 +241,7 @@ export class ReportPublicationService {
   async getAllPendingReportedPublications() {
     try {
       const reports = await this.reportPublicationDao.getAllPendingReportedPublications();
+
       return {
         message: 'Todas las publicaciones reportadas',
         statusCode: HttpStatus.OK,
@@ -225,6 +255,6 @@ export class ReportPublicationService {
       });
     }
   }
-  
+
 
 }

@@ -17,19 +17,19 @@ export class UserHeadingService {
 
   //   try {
   //     const { sbh_id, hea_id } = createUserHeadingDto
-  
+
   //     if (sbh_id) {
   //       const subHeading = await this.subHeadingDao.getSubHeadingById(sbh_id)
-  
+
   //       if (subHeading?.heading.hea_id !== hea_id) {
   //         throw new UnauthorizedException('El sub-rubro no pertenece al rubro seleccionado')
   //       }
-  
+
   //     }
-  
-  
+
+
   //     const userHeading = await this.userHeadingDao.createUserHeading(createUserHeadingDto);
-  
+
   //     return {
   //       message: 'User Heading',
   //       statusCode: HttpStatus.OK,
@@ -47,43 +47,43 @@ export class UserHeadingService {
   async createUserHeading(createUserHeadingDto: CreateUserHeadingDto) {
     try {
       const { usr_id, hea_id, sbh_id = [] } = createUserHeadingDto;
-  
+
       if (!hea_id || hea_id.length === 0) {
         throw new BadRequestException('Debe incluir al menos un rubro');
       }
-  
+
       const existingAll = await this.userHeadingDao.getUserHeadingByUserId(usr_id);
       const existingHeaIds = new Set(existingAll.map(e => e.heading.hea_id));
-  
+
       const nuevosHeaIds = hea_id.filter(id => !existingHeaIds.has(id));
       const totalHeaIds = new Set([...existingHeaIds, ...nuevosHeaIds]);
-  
+
       if (totalHeaIds.size > 3) {
         throw new BadRequestException('Solo se pueden asignar hasta 3 rubros por usuario');
       }
-  
+
       const createdUserHeadings: any[] = [];
       const usedSubIds: number[] = [];
-  
+
       for (const currentHeaId of hea_id) {
         const existing = existingAll.filter(e => e.heading.hea_id === currentHeaId);
-  
+
         let subrubrosAsociados = false;
-  
+
         for (const subId of sbh_id) {
           if (usedSubIds.includes(subId)) continue;
-  
+
           const subHeading = await this.subHeadingDao.getSubHeadingById(subId);
           if (!subHeading || subHeading.heading.hea_id !== currentHeaId) continue;
-  
+
           usedSubIds.push(subId);
           subrubrosAsociados = true;
-  
+
           const yaExisteExacto = existing.find(
             e => e.subHeading?.sbh_id === subId
           );
           if (yaExisteExacto) continue; // ya está asignado igual
-  
+
           // Actualizamos si hay uno sin subHeading
           const existenteConOtro = existing.find(e => !e.subHeading);
           if (existenteConOtro) {
@@ -98,7 +98,7 @@ export class UserHeadingService {
             createdUserHeadings.push(nuevo);
           }
         }
-  
+
         // Si no se asociaron subrubros, creamos solo si NO existe ya esa combinación con sbh_id: null
         if (!subrubrosAsociados) {
           const yaExisteSinSub = existing.find(e => !e.subHeading);
@@ -112,14 +112,14 @@ export class UserHeadingService {
           }
         }
       }
-  
+
       const unusedSubIds = sbh_id.filter((id) => !usedSubIds.includes(id));
       if (unusedSubIds.length > 0) {
         throw new BadRequestException(
           `Los sub-rubros ${unusedSubIds.join(', ')} no pudieron asignarse a un rubro, verifique que sean correctos`
         );
       }
-  
+
       return {
         message: 'Usuario-rubro creados/actualizados correctamente',
         statusCode: HttpStatus.OK,
@@ -133,8 +133,8 @@ export class UserHeadingService {
       });
     }
   }
-  
-  
+
+
 
   async getUserHeadingById(id: number) {
     try {
@@ -150,6 +150,11 @@ export class UserHeadingService {
         data: userHeading,
       };
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -172,6 +177,11 @@ export class UserHeadingService {
         data: userHeading,
       };
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -194,6 +204,11 @@ export class UserHeadingService {
         data: userHeading,
       };
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -203,18 +218,31 @@ export class UserHeadingService {
   }
 
   async deleteUserHeading(id) {
-    const userHeading = await this.userHeadingDao.getUserHeadingById(id)
+    try {
+      const userHeading = await this.userHeadingDao.getUserHeadingById(id)
 
-    if (!userHeading) {
-      throw new UnauthorizedException('Usuario-rubro no encontrado')
+      if (!userHeading) {
+        throw new UnauthorizedException('Usuario-rubro no encontrado')
+      }
+
+      await this.userHeadingDao.deleteUserHeading(id)
+
+      return {
+        message: 'Usuario-rubro eliminado',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
     }
-
-    await this.userHeadingDao.deleteUserHeading(id)
-
-    return {
-      message: 'Usuario-rubro eliminado',
-      statusCode: HttpStatus.OK,
-    };
   }
 
   async updateUserHeading(id, updateUserHeadingDto: UpdateUserHeadingDto) {
@@ -238,6 +266,11 @@ export class UserHeadingService {
       };
 
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

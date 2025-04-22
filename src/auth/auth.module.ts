@@ -15,10 +15,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { ForgotPassword } from './entities/forgot-password.entity';
 import { ForgotPasswordDao } from 'src/infrastructure/database/dao/forgot_password.dao';
 import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
+import { CreditsDonDao } from 'src/infrastructure/database/dao/credits_don.dao';
+import { CreditsDon } from 'src/credits-don/entities/credits-don.entity';
+import { CreditsReason } from 'src/credits-reason/entities/credits-reason.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword ]),
+    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason ]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -30,6 +33,6 @@ import { EmailRepository } from 'src/infrastructure/utils/email/email.repository
     })
   ],
   controllers: [AuthController, RefreshTokenController],
-  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository ],
+  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository, CreditsDonDao ],
 })
 export class AuthModule {}

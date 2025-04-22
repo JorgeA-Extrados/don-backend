@@ -4,10 +4,11 @@ import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { ProfessionalDao } from 'src/infrastructure/database/dao/professional.dao';
 import { FirebaseService } from 'src/infrastructure/config/firebase.service';
 import { UserDao } from 'src/infrastructure/database/dao/user.dao';
+import { SearchProfessionalDto } from './dto/search-professional.dto';
 
 @Injectable()
 export class ProfessionalService {
-  
+
   constructor(
     private readonly professionalDao: ProfessionalDao,
     private readonly userDao: UserDao,
@@ -71,6 +72,12 @@ export class ProfessionalService {
         data: newProfessional
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -93,6 +100,12 @@ export class ProfessionalService {
         data: professional,
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -115,6 +128,12 @@ export class ProfessionalService {
         data: professional,
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -124,18 +143,31 @@ export class ProfessionalService {
   }
 
   async deleteProfessional(id) {
-    const professional = await this.professionalDao.getProfessionalById(id)
+    try {
+      const professional = await this.professionalDao.getProfessionalById(id)
 
-    if (!professional) {
-      throw new UnauthorizedException('Profesional no encontrado')
+      if (!professional) {
+        throw new UnauthorizedException('Profesional no encontrado')
+      }
+
+      await this.professionalDao.deleteProfessional(id)
+
+      return {
+        message: 'Profesional eliminado',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
     }
-
-    await this.professionalDao.deleteProfessional(id)
-
-    return {
-      message: 'Profesional eliminado',
-      statusCode: HttpStatus.OK,
-    };
   }
 
   async updateProfessional(id, updateProfessionalDto: UpdateProfessionalDto) {
@@ -158,6 +190,39 @@ export class ProfessionalService {
       };
 
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
+    }
+  }
+
+  async searchProfessionals(searchProfessionalDto: SearchProfessionalDto) {
+    try {
+      const searchProfessional = await this.professionalDao.searchProfessionals(searchProfessionalDto);
+
+      if (searchProfessional.length === 0) {
+        throw new UnauthorizedException('Profesional no encontrado')
+      }
+
+      return {
+        message: 'Profesionales',
+        statusCode: HttpStatus.OK,
+        data: searchProfessional,
+      };
+    } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
