@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { IsNull, Repository } from "typeorm";
 import { Professional } from "src/professional/entities/professional.entity";
 import { User } from "src/user/entities/user.entity";
+import { SearchProfessionalDto } from "src/professional/dto/search-professional.dto";
 
 
 
@@ -18,10 +19,10 @@ export class ProfessionalDao {
 
     async createProfessional(createProfessionalDto) {
         try {
-            const {usr_id} = createProfessionalDto
+            const { usr_id } = createProfessionalDto
             const professional = await this.professionalRepository.create({
                 ...createProfessionalDto,
-                user: await this.userRepository.create({usr_id}),
+                user: await this.userRepository.create({ usr_id }),
                 pro_create: new Date(),
             })
 
@@ -80,7 +81,7 @@ export class ProfessionalDao {
             const professional = await this.professionalRepository.find({
                 where: {
                     pro_delete: IsNull()
-                }, 
+                },
                 relations: {
                     user: true
                 },
@@ -153,5 +154,70 @@ export class ProfessionalDao {
                 });
             });
     }
+
+    async searchProfessionals(searchProfessionalDto: SearchProfessionalDto): Promise<Professional[]> {
+        const { hea_id, lat, lng, radius = 10 } = searchProfessionalDto;
+
+        const professionals = await this.professionalRepository
+            .createQueryBuilder('professional')
+            .leftJoinAndSelect('professional.user', 'user')
+            .leftJoinAndSelect('user.userHeading', 'userHeading')
+            .leftJoinAndSelect('userHeading.heading', 'heading')
+            .leftJoinAndSelect('heading.subHeading', 'subHeading')
+            .where(qb => {
+                const wheres: string[] = [];
+
+                if (hea_id) {
+                    wheres.push('heading.hea_id = :hea_id');
+                    qb.setParameter('hea_id', hea_id);
+                }
+
+                if (lat && lng) {
+                    wheres.push(`
+                (
+                  6371 * acos(
+                    cos(radians(:lat)) * cos(radians(CAST(professional.pro_latitude AS float))) *
+                    cos(radians(CAST(professional.pro_longitude AS float)) - radians(:lng)) +
+                    sin(radians(:lat)) * sin(radians(CAST(professional.pro_latitude AS float)))
+                  )
+                ) <= :radius
+              `);
+                    qb.setParameter('lat', lat);
+                    qb.setParameter('lng', lng);
+                    qb.setParameter('radius', radius);
+                }
+
+                return wheres.length ? wheres.join(' AND ') : '1=1';
+            })
+            .select([
+                'professional.pro_id',
+                'professional.pro_firstName',
+                'professional.pro_lastName',
+                'professional.pro_latitude',
+                'professional.pro_longitude',
+                'professional.pro_profilePicture',
+                'professional.pro_description',
+            ])
+            .addSelect([
+                'user.usr_id',
+                'user.usr_email',
+                'user.usr_phone',
+            ])
+            .addSelect([
+                'userHeading.ush_id',
+            ])
+            .addSelect([
+                'heading.hea_id',
+                'heading.hea_name',
+            ])
+            .addSelect([
+                'subHeading.sbh_id',
+                'subHeading.sbh_name',
+            ])
+            .getMany();
+
+        return professionals;
+    }
+
 
 }

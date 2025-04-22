@@ -11,7 +11,9 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true, // <== convierte automáticamente los query params
+  }));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

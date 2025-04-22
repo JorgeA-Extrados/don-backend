@@ -34,11 +34,11 @@ export class AuthService {
     let user
 
     if (email) {
-      user = await this.userService.getUserByEmail(email);      
+      user = await this.userService.getUserByEmail(email);
     }
 
     if (name) {
-      user = await this.userService.getUserByName(name);      
+      user = await this.userService.getUserByName(name);
     }
 
     if (!user) {
@@ -63,7 +63,7 @@ export class AuthService {
 
       if (loginDto.isSocialAuth === true) {
         if (loginDto.usr_email) {
-          const authUser = await this.userService.getUserByEmail(loginDto.usr_email); 
+          const authUser = await this.userService.getUserByEmail(loginDto.usr_email);
           const passwordValid: boolean = await bcrypt.compare(
             loginDto.usr_password,
             authUser?.usr_password,
@@ -112,6 +112,11 @@ export class AuthService {
         usr_id: user.usr_id,
       };
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: [`${error.message}`],
@@ -146,7 +151,7 @@ export class AuthService {
   async logout(req) {
 
     const { userId } = req.user
-    
+
     const refresh = await this.refreshTokenService.findRefreshTokenbyUser(userId)
 
     if (!refresh) {

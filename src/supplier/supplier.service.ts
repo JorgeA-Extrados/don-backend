@@ -43,7 +43,9 @@ export class SupplierService {
     try {
       const supplier = await this.supplierDao.getSupplierById(sup_id);
 
-      if (!supplier) throw new Error('Proveedor no encontrado');
+      if (!supplier) {
+        throw new UnauthorizedException('Proveedor no encontrado')
+      }
 
       const imageUrl = await this.firebaseService.uploadFile(file, sup_id);
 
@@ -62,6 +64,12 @@ export class SupplierService {
         data: newProfessional
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -84,6 +92,12 @@ export class SupplierService {
         data: supplier,
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -106,6 +120,11 @@ export class SupplierService {
         data: supplier,
       };
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -115,18 +134,31 @@ export class SupplierService {
   }
 
   async deleteSupplier(id) {
-    const supplier = await this.supplierDao.getSupplierById(id)
+    try {
+      const supplier = await this.supplierDao.getSupplierById(id)
 
-    if (!supplier) {
-      throw new UnauthorizedException('Proveedor no encontrado')
+      if (!supplier) {
+        throw new UnauthorizedException('Proveedor no encontrado')
+      }
+
+      await this.supplierDao.deleteSupplier(id)
+
+      return {
+        message: 'Proveedor eliminado',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
     }
-
-    await this.supplierDao.deleteSupplier(id)
-
-    return {
-      message: 'Proveedor eliminado',
-      statusCode: HttpStatus.OK,
-    };
   }
 
   async updateSupplier(id, updateSupplierDto: UpdateSupplierDto) {
@@ -150,6 +182,12 @@ export class SupplierService {
       };
 
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

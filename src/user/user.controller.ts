@@ -22,7 +22,6 @@ export class UserController {
   getUserById(@Param('id') id: string) {
     return this.userService.getUserById(+id);
   }
-
   
   @Patch('delete')
   @UseGuards(JwtAuthGuard)

@@ -20,7 +20,7 @@ export class UserDao {
 
     async createUser(createUserDto) {
         try {
-            const { usr_email, usr_password, usr_verification_code, usr_phone, usr_over, usr_terms } = createUserDto;
+            const { usr_email, usr_password, usr_verification_code, usr_phone, usr_over, usr_terms, usr_invitationCode } = createUserDto;
             const newEmail = usr_email.toLowerCase()
 
             let user;
@@ -34,7 +34,8 @@ export class UserDao {
                     usr_create: new Date(),
                     usr_verification_code,
                     usr_over,
-                    usr_terms
+                    usr_terms,
+                    usr_invitationCode
                 })
             } else {
                 // Si la contraseña es nula (usuario de Google), guárdala como nula 
@@ -44,7 +45,8 @@ export class UserDao {
                     usr_create: new Date(),
                     usr_verification_code,
                     usr_over,
-                    usr_terms
+                    usr_terms,
+                    usr_invitationCode
                 });
             }
 
@@ -274,6 +276,27 @@ export class UserDao {
                     error: 'Error Interno del Servidor',
                 });
             });
+    }
+
+    
+    async getUserByInvitationCode(code: string) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    usr_invitationCode: code,
+                    usr_delete: IsNull()
+                }
+            })
+
+            return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
     }
 
 }

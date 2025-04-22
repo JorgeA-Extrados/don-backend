@@ -34,6 +34,10 @@ export class CreateUserDto {
 
     @IsOptional()
     @IsString()
+    usr_user_code?: string;
+
+    @IsOptional()
+    @IsString()
     usr_name?: string;
 
     @IsOptional()

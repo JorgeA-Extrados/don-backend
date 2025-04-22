@@ -1,6 +1,7 @@
 import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ForgotPassword } from "src/auth/entities/forgot-password.entity";
 import { RefreshToken } from "src/auth/entities/refresh-token.entity";
+import { CreditsDon } from "src/credits-don/entities/credits-don.entity";
 import { Experience } from "src/experiences/entities/experience.entity";
 import { Professional } from "src/professional/entities/professional.entity";
 import { Publication } from "src/publication/entities/publication.entity";
@@ -147,6 +148,9 @@ export class User {
 
     @OneToMany(() => ReportPublication, reportPublication => reportPublication.whoReported)
     reportPublication: ReportPublication;
+
+    @OneToMany(() => CreditsDon, creditsDon => creditsDon.assigningUser)
+    creditsDon: CreditsDon;
 
 }
 

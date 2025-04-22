@@ -7,6 +7,7 @@ import { ConfirmUserDto } from 'src/auth/dto/confirm-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
+import { CreditsDonDao } from 'src/infrastructure/database/dao/credits_don.dao';
 
 @Injectable()
 export class UserService {
@@ -17,6 +18,7 @@ export class UserService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private readonly emailRepository: EmailRepository,
+    private readonly creditsDonDao: CreditsDonDao,
   ) {
     // this.client = Twilio(
     //   process.env.TWILIO_ACCOUNT_SID,
@@ -26,7 +28,7 @@ export class UserService {
 
   async createUser(createUserDto: CreateUserDto) {
 
-    const { usr_email, usr_password, usr_phone, usr_passwordConfir, usr_over, usr_terms } = createUserDto
+    const { usr_email, usr_password, usr_phone, usr_passwordConfir, usr_over, usr_terms, usr_user_code } = createUserDto
 
 
     const user = await this.userDao.getUserByEmail(usr_email)
@@ -45,7 +47,21 @@ export class UserService {
       });
     }
 
+    if (usr_user_code) {
+      const userCredits = await this.userDao.getUserByInvitationCode(usr_user_code)
+      if (userCredits) {
+        const credits = {
+          cre_amount: 1,
+          cre_isCredits: false,
+          usr_id: userCredits.usr_id,
+          crs_id: 1
+        }
+        const newCredits = await this.creditsDonDao.createCreditsDON(credits)
+      }
+    }
+
     const numericalCode = Math.floor(100000 + Math.random() * 900000);
+    const uniqueCode = await this.generateUniqueInvitationCode();
 
     const createUser = {
       usr_email,
@@ -53,7 +69,8 @@ export class UserService {
       usr_phone,
       usr_verification_code: numericalCode,
       usr_over,
-      usr_terms
+      usr_terms,
+      usr_invitationCode: uniqueCode
     }
 
 
@@ -84,12 +101,22 @@ export class UserService {
     try {
       const user = await this.userDao.getUserById(id);
 
+      if (!user) {
+        throw new UnauthorizedException('Usuario no encontrado.')
+      }
+
       return {
         message: 'Usuario',
         statusCode: HttpStatus.OK,
         data: user,
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -102,12 +129,22 @@ export class UserService {
     try {
       const user = await this.userDao.getAllUser();
 
+      if (user.length === 0) {
+        throw new UnauthorizedException('Usuarios no encontrado.')
+      }
+
       return {
         message: 'Usuario',
         statusCode: HttpStatus.OK,
         data: user,
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -118,9 +155,20 @@ export class UserService {
 
   async getUserByEmail(email: string) {
     try {
-      return await this.userDao.getUserByEmail(email);
+      const user = await this.userDao.getUserByEmail(email);
+
+      if (!user) {
+        throw new UnauthorizedException('Usuario no encontrado.')
+      }
+
+      return user
 
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -131,9 +179,22 @@ export class UserService {
 
   async getUserByName(name: string) {
     try {
-      return await this.userDao.getUserByName(name);
+      const user = await this.userDao.getUserByName(name);
+
+      if (!user) {
+        throw new UnauthorizedException('Usuario no encontrado.')
+      }
+
+      return user
 
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -143,26 +204,39 @@ export class UserService {
   }
 
   async deleteUser(req) {
-    const { userId } = req.user
+    try {
+      const { userId } = req.user
 
-    const user = await this.userDao.getUserById(userId)
+      const user = await this.userDao.getUserById(userId)
 
-    if (!user) {
-      throw new UnauthorizedException('Usuario no encontrado.')
+      if (!user) {
+        throw new UnauthorizedException('Usuario no encontrado.')
+      }
+
+      const refresh = await this.refreshTokenService.findRefreshTokenbyUser(userId)
+
+      if (refresh) {
+        await this.refreshTokenService.deleteRefreshToken(refresh.rft_token)
+      }
+
+      await this.userDao.deleteUser(userId)
+
+      return {
+        message: 'Usuario eliminado',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
     }
-
-    const refresh = await this.refreshTokenService.findRefreshTokenbyUser(userId)
-
-    if (refresh) {
-      await this.refreshTokenService.deleteRefreshToken(refresh.rft_token)
-    }
-
-    await this.userDao.deleteUser(userId)
-
-    return {
-      message: 'Usuario eliminado',
-      statusCode: HttpStatus.OK,
-    };
   }
 
   async updateUser(id, updateUserDto: UpdateUserDto) {
@@ -188,6 +262,11 @@ export class UserService {
       };
 
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -228,6 +307,11 @@ export class UserService {
         };
       }
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -260,6 +344,12 @@ export class UserService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -291,5 +381,30 @@ export class UserService {
       refreshToken,
     };
   }
+
+  async generateUniqueInvitationCode() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const length = 6;
+  
+    let code: string = '';
+    let exists = true;
+  
+    while (exists) {
+      code = '';
+      for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        code += characters[randomIndex];
+      }
+  
+      // Verificamos si el código ya existe
+      const existingUser = await this.userDao.getUserByInvitationCode(code);
+      if (!existingUser) {
+        exists = false;
+      }
+    }
+  
+    return code;
+  }
+
 }
 

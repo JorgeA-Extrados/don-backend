@@ -9,10 +9,13 @@ import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
 import { JwtService } from '@nestjs/jwt';
 import { ForgotPassword } from 'src/auth/entities/forgot-password.entity';
 import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
+import { CreditsDonDao } from 'src/infrastructure/database/dao/credits_don.dao';
+import { CreditsDon } from 'src/credits-don/entities/credits-don.entity';
+import { CreditsReason } from 'src/credits-reason/entities/credits-reason.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword])],
+  imports:[TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason])],
   controllers: [UserController],
-  providers: [UserService, UserDao, RefreshTokenService, JwtService, EmailRepository],
+  providers: [UserService, UserDao, RefreshTokenService, JwtService, EmailRepository, CreditsDonDao],
 })
 export class UserModule {}

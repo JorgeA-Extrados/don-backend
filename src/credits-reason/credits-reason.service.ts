@@ -1,39 +1,38 @@
 import { BadRequestException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
-import { CreateExperienceDto } from './dto/create-experience.dto';
-import { UpdateExperienceDto } from './dto/update-experience.dto';
-import { ExperienceDao } from 'src/infrastructure/database/dao/experiences.dao';
+import { CreateCreditsReasonDto } from './dto/create-credits-reason.dto';
+import { UpdateCreditsReasonDto } from './dto/update-credits-reason.dto';
+import { CreditsReasonDao } from 'src/infrastructure/database/dao/credits_reason.dao';
 
 @Injectable()
-export class ExperiencesService {
-
+export class CreditsReasonService {
   constructor(
-    private readonly experienceDao: ExperienceDao,
+    private readonly creditsReasonDao: CreditsReasonDao,
   ) { }
 
+  async createCreditsReason(createCreditsReasonDto: CreateCreditsReasonDto) {
 
-  async createExperience(createExperienceDto: CreateExperienceDto) {
-
-    const experience = await this.experienceDao.createExperience(createExperienceDto);
+    const creditsReason = await this.creditsReasonDao.createCreditsReason(createCreditsReasonDto);
 
     return {
-      message: 'Experiencia',
+      message: 'Razón de credito',
       statusCode: HttpStatus.OK,
-      data: experience,
+      data: creditsReason,
     };
   }
 
-  async getExperienceById(id: number) {
-    try {
-      const experience = await this.experienceDao.getExperienceById(id);
 
-      if (!experience) {
-        throw new UnauthorizedException('Experiencia no encontrada')
+  async getCreditsReasonById(id: number) {
+    try {
+      const creditsReason = await this.creditsReasonDao.getCreditsReasonById(id);
+
+      if (!creditsReason) {
+        throw new UnauthorizedException('Razón de credito no encontrado')
       }
 
       return {
-        message: 'Experiencia',
+        message: 'Razón de credito',
         statusCode: HttpStatus.OK,
-        data: experience,
+        data: creditsReason,
       };
     } catch (error) {
       // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
@@ -49,19 +48,18 @@ export class ExperiencesService {
     }
   }
 
-  async getAllExperience() {
+  async getAllCreditsReason() {
     try {
-      const experience = await this.experienceDao.getAllExperience();
+      const creditsReason = await this.creditsReasonDao.getAllCreditsReason();
 
-
-      if (experience.length === 0) {
-        throw new UnauthorizedException('Experiencia no encontrada')
+      if (creditsReason.length === 0) {
+        throw new UnauthorizedException('Razón de credito no encontrados')
       }
 
       return {
-        message: 'Experiencias',
+        message: 'Razones de creditos',
         statusCode: HttpStatus.OK,
-        data: experience,
+        data: creditsReason,
       };
     } catch (error) {
       // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
@@ -77,18 +75,18 @@ export class ExperiencesService {
     }
   }
 
-  async deleteExperience(id) {
+  async deleteCreditsReason(id) {
     try {
-      const experience = await this.experienceDao.deleteExperience(id)
+      const creditsReason = await this.creditsReasonDao.getCreditsReasonById(id)
 
-      if (!experience) {
-        throw new UnauthorizedException('Experiencia no encontrada')
+      if (!creditsReason) {
+        throw new UnauthorizedException('Razón de credito no encontrado')
       }
 
-      await this.experienceDao.deleteExperience(id)
+      await this.creditsReasonDao.deleteCreditsReason(id)
 
       return {
-        message: 'Experiencia eliminada',
+        message: 'Razón de credito eliminado',
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
@@ -96,6 +94,7 @@ export class ExperiencesService {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -104,32 +103,31 @@ export class ExperiencesService {
     }
   }
 
-  async updateExperience(id, updateExperienceDto: UpdateExperienceDto) {
+  async updateCreditsReason(id, updateCreditsReasonDto: UpdateCreditsReasonDto) {
     try {
-      const experience = await this.experienceDao.getExperienceById(id)
+      const creditsReason = await this.creditsReasonDao.getCreditsReasonById(id)
 
 
-      if (!experience) {
-        throw new UnauthorizedException('Experiencia no encontrada')
+      if (!creditsReason) {
+        throw new UnauthorizedException('Razón de credito no encontrada')
       }
 
+      await this.creditsReasonDao.updateCreditsReason(id, updateCreditsReasonDto)
 
-      await this.experienceDao.updateExperience(id, updateExperienceDto)
-
-      const newExperience = await this.experienceDao.getExperienceById(id)
+      const newCreditsReason = await this.creditsReasonDao.getCreditsReasonById(id)
 
       return {
-        message: 'Experiencia actualizada',
+        message: 'Razón de credito actualizado',
         statusCode: HttpStatus.OK,
-        data: newExperience
+        data: newCreditsReason
       };
 
     } catch (error) {
-
       // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
       if (error instanceof UnauthorizedException) {
         throw error;
       }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

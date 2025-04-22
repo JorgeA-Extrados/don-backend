@@ -49,6 +49,12 @@ export class PublicationService {
         data: newPublication
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -65,12 +71,38 @@ export class PublicationService {
         throw new UnauthorizedException('Publicación no encontrada')
       }
 
+      const { user } = publication;
+
+      const usr_profilePicture =
+        user?.professional?.pro_profilePicture ??
+        user?.supplier?.sup_profilePicture ??
+        null;
+
+      const transformed = {
+        ...publication,
+        user: {
+          usr_id: user.usr_id,
+          usr_email: user.usr_email,
+          usr_invitationCode: user.usr_invitationCode,
+          usr_name: user.usr_name,
+          usr_role: user.usr_role,
+          usr_phone: user.usr_phone,
+          usr_profilePicture
+        }
+      };
+
       return {
         message: 'Publicación',
         statusCode: HttpStatus.OK,
-        data: publication,
+        data: transformed,
       };
     } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -87,12 +119,34 @@ export class PublicationService {
         throw new UnauthorizedException('Publicaciones no encontradas')
       }
 
+      const transformed = publication.map((pub) => {
+        const { professional, supplier, ...userBase } = pub.user;
+
+        const usr_profilePicture = professional?.pro_profilePicture || supplier?.sup_profilePicture || null;
+
+        return {
+          pub_id: pub.pub_id,
+          pub_image: pub.pub_image,
+          pub_description: pub.pub_description,
+          pub_create: pub.pub_create,
+          user: {
+            ...userBase,
+            usr_profilePicture
+          }
+        };
+      });
+
       return {
         message: 'Publicaciones',
         statusCode: HttpStatus.OK,
-        data: publication,
+        data: transformed,
       };
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -102,18 +156,31 @@ export class PublicationService {
   }
 
   async deletePublication(id) {
-    const publication = await this.publicationDao.getPublicationById(id)
+    try {
+      const publication = await this.publicationDao.getPublicationById(id)
 
-    if (!publication) {
-      throw new UnauthorizedException('Publicación no encontrado')
+      if (!publication) {
+        throw new UnauthorizedException('Publicación no encontrado')
+      }
+
+      await this.publicationDao.deletePublication(id)
+
+      return {
+        message: 'Publicación eliminada',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
     }
-
-    await this.publicationDao.deletePublication(id)
-
-    return {
-      message: 'Publicación eliminada',
-      statusCode: HttpStatus.OK,
-    };
   }
 
   async updatePublication(id, updatePublicationDto: UpdatePublicationDto) {
@@ -136,6 +203,11 @@ export class PublicationService {
       };
 
     } catch (error) {
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
