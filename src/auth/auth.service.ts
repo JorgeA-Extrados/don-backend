@@ -11,6 +11,8 @@ import { ForgotPasswordDao } from 'src/infrastructure/database/dao/forgot_passwo
 import { CodeActivationDto } from './dto/code-activation.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { getHashedPassword } from 'src/user/user.utils';
+import { ForgotPasswordAttemptsDao } from 'src/infrastructure/database/dao/forgot_password_attempts.dao';
+import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
 
 
 @Injectable()
@@ -23,6 +25,8 @@ export class AuthService {
     private configService: ConfigService,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly forgotPasswordDao: ForgotPasswordDao,
+    private readonly forgotPasswordAttemptsDao: ForgotPasswordAttemptsDao,
+        private readonly emailRepository: EmailRepository,
   ) { }
 
 
@@ -175,6 +179,25 @@ export class AuthService {
       throw new NotAcceptableException('El correo electrónico ingresado es incorrecto');
     }
 
+    const existingRequest = await this.forgotPasswordAttemptsDao.getActiveRequest(user.usr_id);
+
+    if (!existingRequest) {
+      // Si no hay intento activo, se crea uno nuevo
+      await this.forgotPasswordAttemptsDao.createForgotPasswordAttempts(user.usr_id);
+    } else {
+      // Si ya hay un intento y ya envió 2 códigos, no se permite enviar más
+      if (existingRequest.fpa_attempts >= 2) {
+        throw new BadRequestException({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: `Ya has solicitado el código el máximo de veces permitidas. Por favor, comuniquese al servicio técnico +5400000000000.`,
+          error: 'Demasiados intentos',
+        });
+      }
+  
+      // Si está dentro del límite, se incrementan los intentos
+      await this.forgotPasswordAttemptsDao.incrementAttempts(existingRequest.fpa_id);
+    }
+
     try {
       const numericalCode = Math.floor(100000 + Math.random() * 900000);
 
@@ -189,13 +212,15 @@ export class AuthService {
 
       const emailVeri = await this.forgotPasswordDao.createForgotPassword(createForgotPassword)
 
+      try {
+        await this.emailRepository.sendChangePasswordEmail(user.usr_email, emailVeri.fop_code);
+      } catch (error) {
+        throw new UnauthorizedException('Error al enviar el código de verificación.')
+      }
+
       return {
         message: 'Código para cambiar contraseña.',
         statusCode: HttpStatus.OK,
-        data: {
-          code: emailVeri.fop_code,
-          usr_phone: user.usr_phone
-        }
       };
     } catch (error) {
       throw new BadRequestException({
@@ -241,6 +266,11 @@ export class AuthService {
       await this.forgotPasswordDao.updateForgotPassword(userCode.fop_id, { fop_is_active: false })
     })
 
+    const request = await this.forgotPasswordAttemptsDao.getActiveRequest(userId);
+    if (request) {
+      await this.forgotPasswordAttemptsDao.completeRequest(request.fpa_id);
+    }
+
     //Retornamos el mensaje de que el codigo utilizado es correcto
     return {
       message: 'Código validado correctamente.',
@@ -262,6 +292,15 @@ export class AuthService {
         statusCode: HttpStatus.BAD_REQUEST,
       };
     }
+
+    const request = await this.forgotPasswordAttemptsDao.getActiveRequest(userId);
+    if (request?.fpa_completed === true) {
+      return {
+        message: 'Solicitud no validada. Debes completar la validación del código primero.',
+        statusCode: HttpStatus.FORBIDDEN,
+      };
+    }
+    
     const { newPassword, newPasswordRepeat } = changePasswordDto
 
     const user = await this.userDao.getUserById(userId)

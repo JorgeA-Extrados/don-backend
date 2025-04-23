@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
 import { CreditsDonDao } from 'src/infrastructure/database/dao/credits_don.dao';
+import { UserVerificationAttemptsDao } from 'src/infrastructure/database/dao/user_verification_attempts.dao';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,7 @@ export class UserService {
     private configService: ConfigService,
     private readonly emailRepository: EmailRepository,
     private readonly creditsDonDao: CreditsDonDao,
+    private readonly userVerificationAttemptsDao: UserVerificationAttemptsDao,
   ) {
     // this.client = Twilio(
     //   process.env.TWILIO_ACCOUNT_SID,
@@ -45,6 +47,18 @@ export class UserService {
         statusCode: HttpStatus.CONFLICT,
         message: 'Las contraseñas deben coincidir',
       });
+    }
+
+    if (usr_password) {
+      // Validación de contraseña segura
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+      if (!passwordRegex.test(usr_password)) {
+        throw new ConflictException({
+          statusCode: HttpStatus.CONFLICT,
+          message:
+            'La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial',
+        });
+      }
     }
 
     if (usr_user_code) {
@@ -75,6 +89,10 @@ export class UserService {
 
 
     const newUser = await this.userDao.createUser(createUser);
+
+
+    // Registrar el intento de verificación
+    await this.userVerificationAttemptsDao.createForgotPasswordAttempts(newUser.usr_id);
 
     // try {
     //   await this.sendMessage(newUser.usr_verification_code, newUser.usr_phone)
@@ -297,6 +315,11 @@ export class UserService {
 
         await this.userDao.confirmUser(id)
 
+
+        // Registrar el intento de verificación
+        await this.userVerificationAttemptsDao.completeVerificationAttempt(user.usr_id);
+
+
         return {
           message: 'El usuario confirmado con éxito.',
           access_token: (await tokens).accessToken,
@@ -332,6 +355,17 @@ export class UserService {
       if (user.usr_verified === true) {
         throw new UnauthorizedException('Usuario ya verificado.')
       }
+
+      // Verificar cuántos intentos de verificación tiene el usuario
+      const attempts = await this.userVerificationAttemptsDao.getActiveAttempts(user.usr_id);
+
+      if (attempts >= 2) {
+        throw new UnauthorizedException('Ya has alcanzado el máximo número de intentos de verificación.');
+      }
+
+
+      // Registrar el intento de verificación
+      await this.userVerificationAttemptsDao.createForgotPasswordAttempts(user.usr_id);
 
       try {
         await this.emailRepository.sendVerificationEmail(user.usr_email, user.usr_verification_code);
@@ -385,24 +419,24 @@ export class UserService {
   async generateUniqueInvitationCode() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const length = 6;
-  
+
     let code: string = '';
     let exists = true;
-  
+
     while (exists) {
       code = '';
       for (let i = 0; i < length; i++) {
         const randomIndex = Math.floor(Math.random() * characters.length);
         code += characters[randomIndex];
       }
-  
+
       // Verificamos si el código ya existe
       const existingUser = await this.userDao.getUserByInvitationCode(code);
       if (!existingUser) {
         exists = false;
       }
     }
-  
+
     return code;
   }
 

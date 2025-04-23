@@ -1,6 +1,8 @@
 import { IsBoolean, IsDateString, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ForgotPassword } from "src/auth/entities/forgot-password.entity";
+import { ForgotPasswordAttempts } from "src/auth/entities/forgot_password_attempts.entity";
 import { RefreshToken } from "src/auth/entities/refresh-token.entity";
+import { UserVerificationAttempts } from "src/auth/entities/user_verification_attempts.entity";
 import { CreditsDon } from "src/credits-don/entities/credits-don.entity";
 import { Experience } from "src/experiences/entities/experience.entity";
 import { Professional } from "src/professional/entities/professional.entity";
@@ -70,14 +72,14 @@ export class User {
     @IsString()
     usr_phone?: string;
 
-    
+
     @Column({
         name: 'usr_verified',
         default: false,
     })
     @IsBoolean()
     usr_verified: boolean;
-    
+
     @Column({
         name: 'usr_verification_code'
     })
@@ -97,7 +99,7 @@ export class User {
     })
     @IsBoolean()
     usr_over: boolean;
-    
+
     @Column({
         name: 'usr_create',
         nullable: true,
@@ -105,7 +107,7 @@ export class User {
     @IsOptional()
     @IsDateString()
     usr_create?: Date;
-    
+
     @Column({
         name: 'usr_update',
         nullable: true,
@@ -113,7 +115,7 @@ export class User {
     @IsOptional()
     @IsDateString()
     usr_update?: Date;
-    
+
     @Column({
         name: 'usr_delete',
         nullable: true,
@@ -121,7 +123,7 @@ export class User {
     @IsOptional()
     @IsDateString()
     usr_delete?: Date;
-    
+
     @OneToOne(() => RefreshToken, refresh => refresh.user)
     refreshToken: RefreshToken;
 
@@ -151,6 +153,12 @@ export class User {
 
     @OneToMany(() => CreditsDon, creditsDon => creditsDon.assigningUser)
     creditsDon: CreditsDon;
+
+    @OneToMany(() => UserVerificationAttempts, userVerificationAttempts => userVerificationAttempts.user)
+    verificationAttempts: UserVerificationAttempts;
+
+    @OneToMany(() => ForgotPasswordAttempts, forgotPasswordAttempts => forgotPasswordAttempts.user)
+    forgotPasswordAttempts: ForgotPasswordAttempts;
 
 }
 

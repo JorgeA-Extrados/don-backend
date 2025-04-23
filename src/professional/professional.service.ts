@@ -208,7 +208,10 @@ export class ProfessionalService {
       const searchProfessional = await this.professionalDao.searchProfessionals(searchProfessionalDto);
 
       if (searchProfessional.length === 0) {
-        throw new UnauthorizedException('Profesional no encontrado')
+        return {
+          message: 'Profesional no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {

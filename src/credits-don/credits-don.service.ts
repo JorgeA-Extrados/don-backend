@@ -85,7 +85,10 @@ export class CreditsDonService {
       const creditsDon = await this.creditsDonDao.getCreditsDonTotalByUsrId(id);
 
       if (creditsDon.total === 0) {
-        throw new UnauthorizedException('El usuario no existe o no posee créditos DON');
+        return {
+          message: 'El usuario no existe o no posee créditos DON',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {

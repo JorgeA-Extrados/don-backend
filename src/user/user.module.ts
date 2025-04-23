@@ -12,10 +12,12 @@ import { EmailRepository } from 'src/infrastructure/utils/email/email.repository
 import { CreditsDonDao } from 'src/infrastructure/database/dao/credits_don.dao';
 import { CreditsDon } from 'src/credits-don/entities/credits-don.entity';
 import { CreditsReason } from 'src/credits-reason/entities/credits-reason.entity';
+import { UserVerificationAttemptsDao } from 'src/infrastructure/database/dao/user_verification_attempts.dao';
+import { UserVerificationAttempts } from 'src/auth/entities/user_verification_attempts.entity';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason])],
+  imports:[TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, UserVerificationAttempts])],
   controllers: [UserController],
-  providers: [UserService, UserDao, RefreshTokenService, JwtService, EmailRepository, CreditsDonDao],
+  providers: [UserService, UserDao, RefreshTokenService, JwtService, EmailRepository, CreditsDonDao, UserVerificationAttemptsDao],
 })
 export class UserModule {}

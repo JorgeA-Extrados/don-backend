@@ -18,10 +18,14 @@ import { EmailRepository } from 'src/infrastructure/utils/email/email.repository
 import { CreditsDonDao } from 'src/infrastructure/database/dao/credits_don.dao';
 import { CreditsDon } from 'src/credits-don/entities/credits-don.entity';
 import { CreditsReason } from 'src/credits-reason/entities/credits-reason.entity';
+import { ForgotPasswordAttempts } from './entities/forgot_password_attempts.entity';
+import { UserVerificationAttempts } from './entities/user_verification_attempts.entity';
+import { ForgotPasswordAttemptsDao } from 'src/infrastructure/database/dao/forgot_password_attempts.dao';
+import { UserVerificationAttemptsDao } from 'src/infrastructure/database/dao/user_verification_attempts.dao';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason ]),
+    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, ForgotPasswordAttempts, UserVerificationAttempts ]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -33,6 +37,6 @@ import { CreditsReason } from 'src/credits-reason/entities/credits-reason.entity
     })
   ],
   controllers: [AuthController, RefreshTokenController],
-  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository, CreditsDonDao ],
+  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository, CreditsDonDao, ForgotPasswordAttemptsDao, UserVerificationAttemptsDao ],
 })
 export class AuthModule {}
