@@ -1,34 +1,59 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { UserService } from 'src/user/user.service';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { LoginDto } from './dto/login.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ConfirmUserDto } from './dto/confirm-user.dto';
+import { SendingCodeDto } from './dto/sendingCode.dto';
+import { CodeActivationDto } from './dto/code-activation.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
-
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) { }
+  
+  @Post('signup')
+  createUser(@Body() createUserDto: CreateUserDto) {
+    return this.userService.createUser(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('login')
+  login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  logout(@Request() req) {
+    return this.authService.logout(req);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+  @Patch('confirm')
+  confirmUser(@Body() confirmUserDto: ConfirmUserDto) {
+    return this.userService.confirmUser(confirmUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Get('code-resend/:id')
+  codeResend(@Param('id') userId: string) {
+    return this.userService.codeResend(+userId);
+  }
+
+  @Post('forgot-password/sending-code')
+  sendingCode(@Body() sendingCodeDto: SendingCodeDto) {
+    return this.authService.sendingCode(sendingCodeDto);
+  }
+
+  @Patch('forgot-password/codeActivation/:id')
+  codeActivation(@Param('id') userId: string, @Body() codeActivationDto: CodeActivationDto) {
+    return this.authService.codeActivation(+userId, codeActivationDto);
+  }
+
+  @Patch('forgot-password/changePassword/:id')
+  changePassword(@Param('id') userId: string, @Body() changePasswordDto: ChangePasswordDto) {
+    return this.authService.changePassword(+userId, changePasswordDto);
   }
 }
