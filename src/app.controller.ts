@@ -15,7 +15,7 @@ export class AppController {
       await this.dataSource.query('SELECT 1');
       const version = process.env.BACKEND_VERSION
       if (version) {
-        return `Database connection is healthy!. Version: ${version}`;        
+        return `Database connection is healthy!. Version: ${version}. Test AWS`;        
       } else {
         return 'Database connection failed!. Version not found ';
       }
