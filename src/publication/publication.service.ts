@@ -215,4 +215,55 @@ export class PublicationService {
       });
     }
   }
+
+  
+  async getPublicationByUserId(id: number) {
+    try {
+      const publications = await this.publicationDao.getPublicationByUserId(id);
+
+      if (publications.length === 0) {
+        throw new UnauthorizedException('El usuario no tiene ninguna publicación')
+      }
+
+      const transformed = publications.map((publication) => {
+        const { user } = publication;
+  
+        const usr_profilePicture =
+          user?.professional?.pro_profilePicture ??
+          user?.supplier?.sup_profilePicture ??
+          null;
+  
+        return {
+          ...publication,
+          user: {
+            usr_id: user.usr_id,
+            usr_email: user.usr_email,
+            usr_invitationCode: user.usr_invitationCode,
+            usr_name: user.usr_name,
+            usr_role: user.usr_role,
+            usr_phone: user.usr_phone,
+            usr_profilePicture,
+          },
+        };
+      });
+
+      return {
+        message: 'Todas las publicaciones del usuario',
+        statusCode: HttpStatus.OK,
+        data: transformed,
+      };
+    } catch (error) {
+
+      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
+    }
+  }
 }

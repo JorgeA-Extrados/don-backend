@@ -43,5 +43,13 @@ export class PublicationController {
    // @UseGuards(JwtAuthGuard)
    updatePublication(@Param('id') id: string, @Body() updatePublicationDto: UpdatePublicationDto) {
      return this.publicationService.updatePublication(+id, updatePublicationDto);
-   }
+  }
+  
+   
+  @Get('byUserId/:id')
+  // @UseGuards(JwtAuthGuard, RolesGuard) 
+  // @Roles('admin')
+  getPublicationByUserId(@Param('id') id: string) {
+    return this.publicationService.getPublicationByUserId(+id);
+  }
 }
