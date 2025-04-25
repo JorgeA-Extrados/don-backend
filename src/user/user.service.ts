@@ -138,9 +138,9 @@ export class UserService {
         null;
 
       const usr_lastName =
-        professional?.pro_firstName ??
-        supplier?.sup_firstName ??
-        servicesSearch?.sea_firstName ??
+        professional?.pro_lastName ??
+        supplier?.sup_lastName ??
+        servicesSearch?.sea_lastName ??
         null;
 
       const usr_address =
