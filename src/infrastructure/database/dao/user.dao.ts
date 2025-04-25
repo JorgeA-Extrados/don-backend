@@ -72,17 +72,35 @@ export class UserDao {
                     usr_id: true,
                     usr_email: true,
                     usr_invitationCode: true,
-                    //usr_firstName: true,
-                    //usr_lastName: true,
-                    //usr_address: true,
-                    // usr_name: true,
                     usr_role: true,
-                    //usr_profilePicture: true,
                     usr_phone: true,
-                    //usr_creditDON: true,
-                    // usr_active: true,
                     usr_verification_code: true,
                     usr_verified: true
+                }
+            })
+
+            return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
+    async getUserProfileById(usrId: number) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    usr_id: usrId,
+                    usr_delete: IsNull()
+                },
+                relations: {
+                    professional: true,
+                    servicesSearch: true,
+                    supplier: true
                 }
             })
 

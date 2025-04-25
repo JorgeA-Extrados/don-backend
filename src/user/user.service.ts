@@ -117,16 +117,63 @@ export class UserService {
 
   async getUserById(id: number) {
     try {
-      const user = await this.userDao.getUserById(id);
+      const user = await this.userDao.getUserProfileById(id);
 
       if (!user) {
         throw new UnauthorizedException('Usuario no encontrado.')
       }
 
+      const { professional, servicesSearch, supplier } = user
+
+      const usr_profilePicture =
+        professional?.pro_profilePicture ??
+        supplier?.sup_profilePicture ??
+        servicesSearch?.sea_profilePicture ??
+        null;
+
+      const usr_firstName =
+        professional?.pro_firstName ??
+        supplier?.sup_firstName ??
+        servicesSearch?.sea_firstName ??
+        null;
+
+      const usr_lastName =
+        professional?.pro_firstName ??
+        supplier?.sup_firstName ??
+        servicesSearch?.sea_firstName ??
+        null;
+
+      const usr_address =
+        professional?.pro_address ??
+        supplier?.sup_address ??
+        servicesSearch?.sea_address ??
+        null;
+
+      const usr_description =
+        professional?.pro_description ??
+        supplier?.sup_description ??
+        servicesSearch?.sea_description ??
+        null;
+      
+      const newUser = {
+        usr_id: user.usr_id,
+        usr_email: user.usr_email,
+        usr_invitationCode: user.usr_invitationCode,
+        usr_name: user.usr_name,
+        usr_role: user.usr_role,
+        usr_phone: user.usr_phone,
+        usr_profilePicture,
+        usr_firstName,
+        usr_lastName,
+        usr_address,
+        usr_description
+      }
+
+
       return {
         message: 'Usuario',
         statusCode: HttpStatus.OK,
-        data: user,
+        data: newUser,
       };
     } catch (error) {
 
