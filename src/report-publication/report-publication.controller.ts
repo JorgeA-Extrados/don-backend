@@ -1,25 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ReportPublicationService } from './report-publication.service';
 import { CreateReportPublicationDto } from './dto/create-report-publication.dto';
 import { UpdateReportPublicationDto } from './dto/update-report-publication.dto';
 import { CreateChangeOfStateDto } from './dto/change-of-state.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('report-publication')
 export class ReportPublicationController {
   constructor(private readonly reportPublicationService: ReportPublicationService) { }
 
   @Post('create')
+    @UseGuards(JwtAuthGuard)
   createReportPublication(@Body() createReportPublicationDto: CreateReportPublicationDto) {
     return this.reportPublicationService.createReportPublication(createReportPublicationDto);
   }
 
   @Get('getAll')
+  @UseGuards(JwtAuthGuard)
   // @UseGuards(JwtAuthGuard)
   getAllReportPublication() {
     return this.reportPublicationService.getAllReportPublication();
   }
 
   @Get('byId/:id')
+  @UseGuards(JwtAuthGuard)
   // @UseGuards(JwtAuthGuard, RolesGuard) 
   // @Roles('admin')
   getReportPublicationById(@Param('id') id: string) {
@@ -28,18 +32,21 @@ export class ReportPublicationController {
 
 
   @Patch('delete/:id')
+  @UseGuards(JwtAuthGuard)
   // @UseGuards(JwtAuthGuard)
   deleteReportPublication(@Param('id') id: string) {
     return this.reportPublicationService.deleteReportPublication(+id);
   }
 
   @Patch('update/:id')
+  @UseGuards(JwtAuthGuard)
   // @UseGuards(JwtAuthGuard)
   updateReportPublication(@Param('id') id: string, @Body() updateReportPublicationDto: UpdateReportPublicationDto) {
     return this.reportPublicationService.updateReportPublication(+id, updateReportPublicationDto);
   }
 
   @Get('publication/byId/:id')
+  @UseGuards(JwtAuthGuard)
   // @UseGuards(JwtAuthGuard, RolesGuard) 
   // @Roles('admin')
   getReportPublicationByPUBID(@Param('id') id: string) {
@@ -47,11 +54,13 @@ export class ReportPublicationController {
   }
 
   @Patch('update-state')
+  @UseGuards(JwtAuthGuard)
   async updateReportsByState(@Body() createChangeOfStateDto: CreateChangeOfStateDto) {
     return this.reportPublicationService.updateReportsByAction(createChangeOfStateDto);
   }
 
   @Get('pending-reported-publications')
+  @UseGuards(JwtAuthGuard)
   async getAllPendingReportedPublications() {
     return this.reportPublicationService.getAllPendingReportedPublications();
   }

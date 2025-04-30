@@ -28,7 +28,10 @@ export class ReportReasonService {
       const reportReason = await this.reportReasonDao.getReportReasonById(id);
 
       if (!reportReason) {
-        throw new UnauthorizedException('Razón de reporte no encontrado')
+        return {
+          message: 'Razón de reporte no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -37,12 +40,6 @@ export class ReportReasonService {
         data: reportReason,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -56,7 +53,10 @@ export class ReportReasonService {
       const reportReason = await this.reportReasonDao.getAllReportReason();
 
       if (reportReason.length === 0) {
-        throw new UnauthorizedException('Razón de reporte no encontrados')
+        return {
+          message: 'Razón de reporte no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -65,11 +65,6 @@ export class ReportReasonService {
         data: reportReason,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -83,7 +78,10 @@ export class ReportReasonService {
       const reportReason = await this.reportReasonDao.getReportReasonById(id)
 
       if (!reportReason) {
-        throw new UnauthorizedException('Razón de reporte no encontrado')
+        return {
+          message: 'Razón de reporte no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.reportReasonDao.deleteReportReason(id)
@@ -93,10 +91,6 @@ export class ReportReasonService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -111,7 +105,10 @@ export class ReportReasonService {
 
 
       if (!reportReason) {
-        throw new UnauthorizedException('Razón de reporte no encontrada')
+        return {
+          message: 'Razón de reporte no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.reportReasonDao.updateReportReason(id, updateReportReasonDto)
@@ -125,11 +122,6 @@ export class ReportReasonService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

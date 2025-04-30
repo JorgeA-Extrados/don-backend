@@ -45,7 +45,10 @@ export class SubHeadingService {
       const subHeading = await this.subHeadingDao.getAllSubHeading();
 
       if (subHeading.length === 0) {
-        throw new UnauthorizedException('Sub-rubro no encontrado')
+        return {
+          message: 'Sub-rubro no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -54,12 +57,6 @@ export class SubHeadingService {
         data: subHeading,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -73,7 +70,10 @@ export class SubHeadingService {
       const subHeading = await this.subHeadingDao.getSubHeadingById(id)
 
       if (!subHeading) {
-        throw new UnauthorizedException('Sub-rubro no encontrado')
+        return {
+          message: 'Sub-rubro no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.subHeadingDao.deleteSubHeading(id)
@@ -83,11 +83,6 @@ export class SubHeadingService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -100,11 +95,12 @@ export class SubHeadingService {
     try {
       const subHeading = await this.subHeadingDao.getSubHeadingById(id)
 
-
       if (!subHeading) {
-        throw new UnauthorizedException('Sub-rubro no encontrado')
+        return {
+          message: 'Sub-rubro no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
-
 
       await this.subHeadingDao.updateSubHeading(id, updateSubHeadingDto)
 
@@ -117,11 +113,6 @@ export class SubHeadingService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

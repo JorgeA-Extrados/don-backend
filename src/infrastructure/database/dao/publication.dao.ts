@@ -88,7 +88,7 @@ export class PublicationDao {
             const publication = await this.publicationRepository.find({
                 where: {
                     user: {usr_id: usrID},
-                    pub_delete: IsNull()
+                    // pub_delete: IsNull()
                 },
                 relations: {
                     user: {
@@ -101,6 +101,8 @@ export class PublicationDao {
                     pub_image: true,
                     pub_description: true,
                     pub_create: true,
+                    pub_delete: true,
+                    pub_reason_for_deletion: true,
                     user: {
                         usr_id: true,
                         usr_email: true,
@@ -115,6 +117,9 @@ export class PublicationDao {
                             sup_profilePicture: true
                         }
                     }
+                },
+                order: {
+                    pub_create: 'DESC' // opcional: historial ordenado
                 }
             })
 

@@ -26,7 +26,10 @@ export class CreditsReasonService {
       const creditsReason = await this.creditsReasonDao.getCreditsReasonById(id);
 
       if (!creditsReason) {
-        throw new UnauthorizedException('Razón de credito no encontrado')
+        return {
+          message: 'Razón de credito no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -35,11 +38,6 @@ export class CreditsReasonService {
         data: creditsReason,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -53,7 +51,10 @@ export class CreditsReasonService {
       const creditsReason = await this.creditsReasonDao.getAllCreditsReason();
 
       if (creditsReason.length === 0) {
-        throw new UnauthorizedException('Razón de credito no encontrados')
+        return {
+          message: 'Razón de credito no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -62,11 +63,6 @@ export class CreditsReasonService {
         data: creditsReason,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -80,7 +76,10 @@ export class CreditsReasonService {
       const creditsReason = await this.creditsReasonDao.getCreditsReasonById(id)
 
       if (!creditsReason) {
-        throw new UnauthorizedException('Razón de credito no encontrado')
+        return {
+          message: 'Razón de credito no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.creditsReasonDao.deleteCreditsReason(id)
@@ -90,11 +89,6 @@ export class CreditsReasonService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -109,7 +103,10 @@ export class CreditsReasonService {
 
 
       if (!creditsReason) {
-        throw new UnauthorizedException('Razón de credito no encontrada')
+        return {
+          message: 'Razón de credito no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.creditsReasonDao.updateCreditsReason(id, updateCreditsReasonDto)
@@ -123,11 +120,6 @@ export class CreditsReasonService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

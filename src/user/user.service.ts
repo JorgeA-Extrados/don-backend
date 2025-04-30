@@ -68,7 +68,8 @@ export class UserService {
           cre_amount: 1,
           cre_isCredits: false,
           usr_id: userCredits.usr_id,
-          crs_id: 1
+          crs_id: 1,
+          cre_isAdmin: false
         }
         const newCredits = await this.creditsDonDao.createCreditsDON(credits)
       }
@@ -103,7 +104,10 @@ export class UserService {
     try {
       await this.emailRepository.sendVerificationEmail(newUser.usr_email, newUser.usr_verification_code);
     } catch (error) {
-      throw new UnauthorizedException('Error al enviar el código de verificación.')
+      return {
+        message: 'Error al enviar el código de verificación.',
+        statusCode: HttpStatus.NOT_FOUND,
+      };
     }
 
     return {
@@ -120,7 +124,10 @@ export class UserService {
       const user = await this.userDao.getUserProfileById(id);
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       const { professional, servicesSearch, supplier } = user
@@ -176,12 +183,6 @@ export class UserService {
         data: newUser,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -195,7 +196,10 @@ export class UserService {
       const user = await this.userDao.getAllUser();
 
       if (user.length === 0) {
-        throw new UnauthorizedException('Usuarios no encontrado.')
+        return {
+          message: 'Usuarios no encontrados.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -204,12 +208,6 @@ export class UserService {
         data: user,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -223,17 +221,17 @@ export class UserService {
       const user = await this.userDao.getUserByEmail(email);
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return user
 
-    } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
 
+
+    } catch (error) {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -247,19 +245,15 @@ export class UserService {
       const user = await this.userDao.getUserByName(name);
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return user
 
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -275,7 +269,10 @@ export class UserService {
       const user = await this.userDao.getUserById(userId)
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       const refresh = await this.refreshTokenService.findRefreshTokenbyUser(userId)
@@ -291,11 +288,6 @@ export class UserService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -308,11 +300,12 @@ export class UserService {
     try {
       const user = await this.userDao.getUserById(id)
 
-
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
-
 
       await this.userDao.updateUser(id, updateUserDto)
 
@@ -327,11 +320,6 @@ export class UserService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -346,7 +334,10 @@ export class UserService {
       const user = await this.userDao.getUserById(id)
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       if (code === user.usr_verification_code) {
@@ -377,11 +368,6 @@ export class UserService {
         };
       }
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -396,18 +382,27 @@ export class UserService {
       const user = await this.userDao.getUserById(id)
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       if (user.usr_verified === true) {
-        throw new UnauthorizedException('Usuario ya verificado.')
+        return {
+          message: 'Usuario ya verificado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       // Verificar cuántos intentos de verificación tiene el usuario
       const attempts = await this.userVerificationAttemptsDao.getActiveAttempts(user.usr_id);
 
       if (attempts >= 2) {
-        throw new UnauthorizedException('Ya has alcanzado el máximo número de intentos de verificación.');
+        return {
+          message: 'Ya has alcanzado el máximo número de intentos de verificación.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
 
@@ -417,7 +412,10 @@ export class UserService {
       try {
         await this.emailRepository.sendVerificationEmail(user.usr_email, user.usr_verification_code);
       } catch (error) {
-        throw new UnauthorizedException('Error al enviar el código de verificación.')
+        return {
+          message: 'Error al enviar el código de verificación.',
+          statusCode: HttpStatus.NOT_FOUND,
+        };
       }
 
       return {
@@ -425,12 +423,6 @@ export class UserService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

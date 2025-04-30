@@ -10,6 +10,10 @@ export class CreateCreditsDonDto {
     @IsBoolean()
     cre_isCredits?: boolean;
 
+    @IsOptional()
+    @IsBoolean()
+    cre_isAdmin?: boolean;
+
     @IsNotEmpty()
     @IsInt()
     usr_id: number;

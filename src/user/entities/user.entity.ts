@@ -36,9 +36,9 @@ export class User {
         name: 'usr_password',
         nullable: true,
     })
-    @IsOptional()
+    @IsNotEmpty()
     @IsString()
-    usr_password?: string;
+    usr_password: string;
 
     @Column({
         name: 'usr_invitationCode',

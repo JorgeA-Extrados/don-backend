@@ -44,7 +44,10 @@ export class SupplierService {
       const supplier = await this.supplierDao.getSupplierById(sup_id);
 
       if (!supplier) {
-        throw new UnauthorizedException('Proveedor no encontrado')
+        return {
+          message: 'Proveedor no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       const imageUrl = await this.firebaseService.uploadFile(file, sup_id);
@@ -64,12 +67,6 @@ export class SupplierService {
         data: newProfessional
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -83,7 +80,10 @@ export class SupplierService {
       const supplier = await this.supplierDao.getSupplierById(id);
 
       if (!supplier) {
-        throw new UnauthorizedException('Proveedor no encontrado')
+        return {
+          message: 'Proveedor no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -92,12 +92,6 @@ export class SupplierService {
         data: supplier,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -111,7 +105,10 @@ export class SupplierService {
       const supplier = await this.supplierDao.getAllSupplier();
 
       if (supplier.length === 0) {
-        throw new UnauthorizedException('Proveedor no encontrado')
+        return {
+          message: 'Proveedor no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -120,11 +117,6 @@ export class SupplierService {
         data: supplier,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -138,7 +130,10 @@ export class SupplierService {
       const supplier = await this.supplierDao.getSupplierById(id)
 
       if (!supplier) {
-        throw new UnauthorizedException('Proveedor no encontrado')
+        return {
+          message: 'Proveedor no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.supplierDao.deleteSupplier(id)
@@ -148,11 +143,6 @@ export class SupplierService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -167,7 +157,10 @@ export class SupplierService {
 
 
       if (!supplier) {
-        throw new UnauthorizedException('Proveedor no encontrado')
+        return {
+          message: 'Proveedor no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
 
@@ -182,12 +175,6 @@ export class SupplierService {
       };
 
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
