@@ -32,21 +32,21 @@ export class AuthService {
 
   async validateUser(email?: string, password?: string, name?: string) {
     if (!password) {
-      throw new NotAcceptableException('Contraseña no encontrada');
+      throw new UnauthorizedException('Contraseña no encontrada');
     }
 
     let user
 
     if (email) {
-      user = await this.userService.getUserByEmail(email);
+      user = await this.userDao.getUserByEmail(email);
     }
 
     if (name) {
-      user = await this.userService.getUserByName(name);
+      user = await this.userDao.getUserByName(name);
     }
 
     if (!user) {
-      throw new NotAcceptableException('El correo electrónico, el nombre o la contraseña son incorrectos.');
+      throw new UnauthorizedException('El correo electrónico, el nombre o la contraseña son incorrectos.');
     }
 
     const passwordValid: boolean = await bcrypt.compare(
@@ -55,7 +55,7 @@ export class AuthService {
     );
 
     if (!passwordValid) {
-      throw new NotAcceptableException('El correo electrónico, el nombre o la contraseña son incorrectos.');
+      throw new UnauthorizedException('El correo electrónico, el nombre o la contraseña son incorrectos.');
     }
 
 
@@ -67,13 +67,13 @@ export class AuthService {
 
       if (loginDto.isSocialAuth === true) {
         if (loginDto.usr_email) {
-          const authUser = await this.userService.getUserByEmail(loginDto.usr_email);
+          const authUser = await this.userDao.getUserByEmail(loginDto.usr_email);
           const passwordValid: boolean = await bcrypt.compare(
             loginDto.usr_password,
             authUser?.usr_password,
           );
           if (!passwordValid) {
-            throw new NotAcceptableException('Ya tienes una cuenta creada con ese correo electrónico.');
+            throw new UnauthorizedException('Ya tienes una cuenta creada con ese correo electrónico.');
           }
           // if (authUser) {
           //   throw new NotAcceptableException('You already have an account created with that email.');
@@ -116,8 +116,10 @@ export class AuthService {
         usr_id: user.usr_id,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
 

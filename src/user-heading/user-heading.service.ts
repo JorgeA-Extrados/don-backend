@@ -12,38 +12,6 @@ export class UserHeadingService {
     private readonly subHeadingDao: SubHeadingDao,
   ) { }
 
-
-  // async createUserHeading(createUserHeadingDto: CreateUserHeadingDto) {
-
-  //   try {
-  //     const { sbh_id, hea_id } = createUserHeadingDto
-
-  //     if (sbh_id) {
-  //       const subHeading = await this.subHeadingDao.getSubHeadingById(sbh_id)
-
-  //       if (subHeading?.heading.hea_id !== hea_id) {
-  //         throw new UnauthorizedException('El sub-rubro no pertenece al rubro seleccionado')
-  //       }
-
-  //     }
-
-
-  //     const userHeading = await this.userHeadingDao.createUserHeading(createUserHeadingDto);
-
-  //     return {
-  //       message: 'User Heading',
-  //       statusCode: HttpStatus.OK,
-  //       data: userHeading,
-  //     };
-  //   } catch (error) {
-  //     throw new BadRequestException({
-  //       statusCode: HttpStatus.BAD_REQUEST,
-  //       message: `${error.code} ${error.detail} ${error.message}`,
-  //       error: `Error interno`,
-  //     });
-  //   }
-  // }
-
   async createUserHeading(createUserHeadingDto: CreateUserHeadingDto) {
     try {
       const { usr_id, hea_id, sbh_id = [] } = createUserHeadingDto;
@@ -134,14 +102,15 @@ export class UserHeadingService {
     }
   }
 
-
-
   async getUserHeadingById(id: number) {
     try {
       const userHeading = await this.userHeadingDao.getUserHeadingById(id);
 
       if (!userHeading) {
-        throw new UnauthorizedException('Usuario-rubro no encontrado')
+        return {
+          message: 'Usuario-rubro no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -150,11 +119,6 @@ export class UserHeadingService {
         data: userHeading,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -168,7 +132,10 @@ export class UserHeadingService {
       const userHeading = await this.userHeadingDao.getUserHeadingByUserId(id);
 
       if (userHeading.length === 0) {
-        throw new UnauthorizedException('Usuario-rubro no encontrado')
+        return {
+          message: 'Usuario-rubro no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -177,11 +144,6 @@ export class UserHeadingService {
         data: userHeading,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -195,7 +157,10 @@ export class UserHeadingService {
       const userHeading = await this.userHeadingDao.getAllUserHeading();
 
       if (userHeading.length === 0) {
-        throw new UnauthorizedException('Usuario-rubro no encontrado')
+        return {
+          message: 'Usuario-rubro no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -204,11 +169,6 @@ export class UserHeadingService {
         data: userHeading,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -222,7 +182,10 @@ export class UserHeadingService {
       const userHeading = await this.userHeadingDao.getUserHeadingById(id)
 
       if (!userHeading) {
-        throw new UnauthorizedException('Usuario-rubro no encontrado')
+        return {
+          message: 'Usuario-rubro no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.userHeadingDao.deleteUserHeading(id)
@@ -232,11 +195,6 @@ export class UserHeadingService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -251,7 +209,10 @@ export class UserHeadingService {
 
 
       if (!userHeading) {
-        throw new UnauthorizedException('Usuario-rubro no encontrado')
+        return {
+          message: 'Usuario-rubro no encontrado',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
 
@@ -266,11 +227,6 @@ export class UserHeadingService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

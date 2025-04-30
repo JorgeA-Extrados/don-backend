@@ -30,6 +30,14 @@ export class CreditsDon {
     cre_isCredits?: boolean;
 
     @Column({
+        name: 'cre_isAdmin',
+        default: false
+    })
+    @IsOptional()
+    @IsBoolean()
+    cre_isAdmin?: boolean;
+
+    @Column({
         name: 'cre_create',
         nullable: true,
     })

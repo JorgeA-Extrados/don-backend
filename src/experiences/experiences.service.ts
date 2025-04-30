@@ -27,7 +27,10 @@ export class ExperiencesService {
       const experience = await this.experienceDao.getExperienceById(id);
 
       if (!experience) {
-        throw new UnauthorizedException('Experiencia no encontrada')
+        return {
+          message: 'Experiencia no encontrada.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -36,11 +39,6 @@ export class ExperiencesService {
         data: experience,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -55,7 +53,10 @@ export class ExperiencesService {
 
 
       if (experience.length === 0) {
-        throw new UnauthorizedException('Experiencia no encontrada')
+        return {
+          message: 'Experiencia no encontrada.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -64,11 +65,6 @@ export class ExperiencesService {
         data: experience,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -82,7 +78,10 @@ export class ExperiencesService {
       const experience = await this.experienceDao.deleteExperience(id)
 
       if (!experience) {
-        throw new UnauthorizedException('Experiencia no encontrada')
+        return {
+          message: 'Experiencia no encontrada.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.experienceDao.deleteExperience(id)
@@ -92,10 +91,6 @@ export class ExperiencesService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -108,11 +103,12 @@ export class ExperiencesService {
     try {
       const experience = await this.experienceDao.getExperienceById(id)
 
-
       if (!experience) {
-        throw new UnauthorizedException('Experiencia no encontrada')
+        return {
+          message: 'Experiencia no encontrada.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
-
 
       await this.experienceDao.updateExperience(id, updateExperienceDto)
 
@@ -125,11 +121,6 @@ export class ExperiencesService {
       };
 
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

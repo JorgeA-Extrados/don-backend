@@ -28,7 +28,10 @@ export class CategoriesService {
 
 
       if (!category) {
-        throw new UnauthorizedException('Categoría no encontrada')
+        return {
+          message: 'Categoría no encontrada.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -37,11 +40,6 @@ export class CategoriesService {
         data: category,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -56,7 +54,10 @@ export class CategoriesService {
 
 
       if (category.length === 0) {
-        throw new UnauthorizedException('Categoría no encontrada')
+        return {
+          message: 'Categorías no encontradas.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -65,10 +66,6 @@ export class CategoriesService {
         data: category,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -82,7 +79,10 @@ export class CategoriesService {
       const category = await this.categoryDao.getCategoryById(id)
 
       if (!category) {
-        throw new UnauthorizedException('Categoría no encontrada')
+        return {
+          message: 'Categoría no encontrada.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.categoryDao.deleteCategory(id)
@@ -92,11 +92,6 @@ export class CategoriesService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -109,11 +104,12 @@ export class CategoriesService {
     try {
       const category = await this.categoryDao.getCategoryById(id)
 
-
       if (!category) {
-        throw new UnauthorizedException('Categoría no encontrada')
+        return {
+          message: 'Categoría no encontrada.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
-
 
       await this.categoryDao.updateCategory(id, updateCategoryDto)
 
@@ -126,11 +122,6 @@ export class CategoriesService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

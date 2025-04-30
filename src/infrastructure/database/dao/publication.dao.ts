@@ -83,6 +83,57 @@ export class PublicationDao {
         }
     }
 
+    async getPublicationByUserId(usrID: number) {
+        try {
+            const publication = await this.publicationRepository.find({
+                where: {
+                    user: {usr_id: usrID},
+                    // pub_delete: IsNull()
+                },
+                relations: {
+                    user: {
+                        professional: true,
+                        supplier: true
+                    }
+                },
+                select: {
+                    pub_id: true,
+                    pub_image: true,
+                    pub_description: true,
+                    pub_create: true,
+                    pub_delete: true,
+                    pub_reason_for_deletion: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_invitationCode: true,
+                        usr_name: true,
+                        usr_role: true,
+                        usr_phone: true,
+                        professional: {
+                            pro_profilePicture: true,
+                        },
+                        supplier: {
+                            sup_profilePicture: true
+                        }
+                    }
+                },
+                order: {
+                    pub_create: 'DESC' // opcional: historial ordenado
+                }
+            })
+
+            return publication
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     async getAllPublication() {
         try {
             const publication = await this.publicationRepository.find({
