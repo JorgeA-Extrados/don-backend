@@ -22,10 +22,16 @@ import { ForgotPasswordAttempts } from './entities/forgot_password_attempts.enti
 import { UserVerificationAttempts } from './entities/user_verification_attempts.entity';
 import { ForgotPasswordAttemptsDao } from 'src/infrastructure/database/dao/forgot_password_attempts.dao';
 import { UserVerificationAttemptsDao } from 'src/infrastructure/database/dao/user_verification_attempts.dao';
+import { SupplierDao } from 'src/infrastructure/database/dao/supplier.dao';
+import { ServicesSearchDao } from 'src/infrastructure/database/dao/services_search.dao';
+import { ProfessionalDao } from 'src/infrastructure/database/dao/professional.dao';
+import { Professional } from 'src/professional/entities/professional.entity';
+import { ServicesSearch } from 'src/services-search/entities/services-search.entity';
+import { Supplier } from 'src/supplier/entities/supplier.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, ForgotPasswordAttempts, UserVerificationAttempts ]),
+    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, ForgotPasswordAttempts, UserVerificationAttempts, Professional, ServicesSearch, Supplier ]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -37,6 +43,6 @@ import { UserVerificationAttemptsDao } from 'src/infrastructure/database/dao/use
     })
   ],
   controllers: [AuthController, RefreshTokenController],
-  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository, CreditsDonDao, ForgotPasswordAttemptsDao, UserVerificationAttemptsDao ],
+  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository, CreditsDonDao, ForgotPasswordAttemptsDao, UserVerificationAttemptsDao, ProfessionalDao, ServicesSearchDao, SupplierDao ],
 })
 export class AuthModule {}

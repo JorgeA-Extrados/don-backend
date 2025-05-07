@@ -75,7 +75,40 @@ export class UserDao {
                     usr_role: true,
                     usr_phone: true,
                     usr_verification_code: true,
-                    usr_verified: true
+                    usr_verified: true,
+                    usr_name: true,
+                    professional: {
+                        pro_id: true,
+                        pro_firstName: true,
+                        pro_lastName: true,
+                        pro_latitude: true,
+                        pro_longitude: true,
+                        pro_address: true,
+                        pro_description: true,
+                    },
+                    supplier: {
+                        sup_id: true,
+                        sup_firstName: true,
+                        sup_lastName: true,
+                        sup_latitude: true,
+                        sup_longitude: true,
+                        sup_address: true,
+                        sup_description: true,
+                    },
+                    servicesSearch: {
+                        sea_id: true,
+                        sea_firstName: true,
+                        sea_lastName: true,
+                        sea_latitude: true,
+                        sea_longitude: true,
+                        sea_address: true,
+                        sea_description: true,
+                    }
+                }, 
+                relations: {
+                    professional: true,
+                    supplier: true,
+                    servicesSearch: true
                 }
             })
 

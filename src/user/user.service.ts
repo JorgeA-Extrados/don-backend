@@ -9,6 +9,10 @@ import { ConfigService } from '@nestjs/config';
 import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
 import { CreditsDonDao } from 'src/infrastructure/database/dao/credits_don.dao';
 import { UserVerificationAttemptsDao } from 'src/infrastructure/database/dao/user_verification_attempts.dao';
+import { ProfessionalDao } from 'src/infrastructure/database/dao/professional.dao';
+import { ServicesSearchDao } from 'src/infrastructure/database/dao/services_search.dao';
+import { SupplierDao } from 'src/infrastructure/database/dao/supplier.dao';
+import { CreateAllUserDto } from './dto/all-user.dto';
 
 @Injectable()
 export class UserService {
@@ -21,6 +25,9 @@ export class UserService {
     private readonly emailRepository: EmailRepository,
     private readonly creditsDonDao: CreditsDonDao,
     private readonly userVerificationAttemptsDao: UserVerificationAttemptsDao,
+    private readonly professionalDao: ProfessionalDao,
+    private readonly servicesSearchDao: ServicesSearchDao,
+    private readonly supplierDao: SupplierDao,
   ) {
     // this.client = Twilio(
     //   process.env.TWILIO_ACCOUNT_SID,
@@ -161,7 +168,7 @@ export class UserService {
         supplier?.sup_description ??
         servicesSearch?.sea_description ??
         null;
-      
+
       const newUser = {
         usr_id: user.usr_id,
         usr_email: user.usr_email,
@@ -296,7 +303,7 @@ export class UserService {
     }
   }
 
-  async updateUser(id, updateUserDto: UpdateUserDto) {
+  async updateUser(id, createAllUserDto: CreateAllUserDto) {
     try {
       const user = await this.userDao.getUserById(id)
 
@@ -306,8 +313,21 @@ export class UserService {
           statusCode: HttpStatus.NO_CONTENT,
         };
       }
+      // Actualizamos el usuario base (campos que pertenezcan a la entidad User)
+      const userFields = this.extractUserFields(createAllUserDto);
+      await this.userDao.updateUser(id, userFields);
 
-      await this.userDao.updateUser(id, updateUserDto)
+      // Dependiendo del rol o subperfil relacionado, actualizamos el subperfil correspondiente
+      if (user.professional) {
+        const proFields = this.mapToProfessionalFields(createAllUserDto);
+        await this.professionalDao.updateProfessional(user.professional.pro_id, proFields);
+      } else if (user.servicesSearch) {
+        const seaFields = this.mapToServicesSearchFields(createAllUserDto);
+        await this.servicesSearchDao.updateServicesSearch(user.servicesSearch.sea_id, seaFields);
+      } else if (user.supplier) {
+        const supFields = this.mapToSupplierFields(createAllUserDto);
+        await this.supplierDao.updateSupplier(user.supplier.sup_id, supFields);
+      }
 
       const newUser = await this.userDao.getUserById(id)
 
@@ -320,6 +340,9 @@ export class UserService {
       };
 
     } catch (error) {
+      console.log('===============error=====================');
+      console.log(error);
+      console.log('====================================');
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -477,6 +500,58 @@ export class UserService {
     }
 
     return code;
+  }
+
+
+  private extractUserFields(dto: any) {
+    const fields: any = {};
+    
+    if (dto.usr_name != null) fields.usr_name = dto.usr_name;
+    if (dto.usr_phone != null) fields.usr_phone = dto.usr_phone;
+  
+    return fields;
+  }
+
+  private mapToProfessionalFields(dto: any) {
+    const fields: any = {};
+
+    if (dto.usr_firstName != null) fields.pro_firstName = dto.usr_firstName;
+    if (dto.usr_lastName != null) fields.pro_lastName = dto.usr_lastName;
+    if (dto.usr_latitude != null) fields.pro_latitude = dto.usr_latitude;
+    if (dto.usr_longitude != null) fields.pro_longitude = dto.usr_longitude;
+    if (dto.usr_address != null) fields.pro_address = dto.usr_address;
+    if (dto.usr_profilePicture != null) fields.pro_profilePicture = dto.usr_profilePicture;
+    if (dto.usr_description != null) fields.pro_description = dto.usr_description;
+  
+    return fields;
+  }
+
+  private mapToServicesSearchFields(dto: any) {
+    const fields: any = {};
+
+    if (dto.usr_firstName != null) fields.sea_firstName = dto.usr_firstName;
+    if (dto.usr_lastName != null) fields.sea_lastName = dto.usr_lastName;
+    if (dto.usr_latitude != null) fields.sea_latitude = dto.usr_latitude;
+    if (dto.usr_longitude != null) fields.sea_longitude = dto.usr_longitude;
+    if (dto.usr_address != null) fields.sea_address = dto.usr_address;
+    if (dto.usr_profilePicture != null) fields.sea_profilePicture = dto.usr_profilePicture;
+    if (dto.usr_description != null) fields.sea_description = dto.usr_description;
+  
+    return fields;
+  }
+
+  private mapToSupplierFields(dto: any) {
+    const fields: any = {};
+
+    if (dto.usr_firstName != null) fields.sup_firstName = dto.usr_firstName;
+    if (dto.usr_lastName != null) fields.sup_lastName = dto.usr_lastName;
+    if (dto.usr_latitude != null) fields.sup_latitude = dto.usr_latitude;
+    if (dto.usr_longitude != null) fields.sup_longitude = dto.usr_longitude;
+    if (dto.usr_address != null) fields.sup_address = dto.usr_address;
+    if (dto.usr_profilePicture != null) fields.sup_profilePicture = dto.usr_profilePicture;
+    if (dto.usr_description != null) fields.sup_description = dto.usr_description;
+  
+    return fields;
   }
 
 }
