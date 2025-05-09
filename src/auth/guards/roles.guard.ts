@@ -22,7 +22,7 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedException('User not authenticated');
     }
 
-    const hasRole = roles.some((role) => user.usr_role === role); // Verificar si el usuario tiene uno de los roles requeridos
+    const hasRole = roles.some((role) => user.rol === role); // Verificar si el usuario tiene uno de los roles requeridos
 
     if (!hasRole) {
       throw new ForbiddenException('You do not have permission to access this resource');

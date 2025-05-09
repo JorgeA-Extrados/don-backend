@@ -4,28 +4,29 @@ import { CreateReportPublicationDto } from './dto/create-report-publication.dto'
 import { UpdateReportPublicationDto } from './dto/update-report-publication.dto';
 import { CreateChangeOfStateDto } from './dto/change-of-state.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('report-publication')
 export class ReportPublicationController {
   constructor(private readonly reportPublicationService: ReportPublicationService) { }
 
   @Post('create')
-    @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   createReportPublication(@Body() createReportPublicationDto: CreateReportPublicationDto) {
     return this.reportPublicationService.createReportPublication(createReportPublicationDto);
   }
 
   @Get('getAll')
-  @UseGuards(JwtAuthGuard)
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   getAllReportPublication() {
     return this.reportPublicationService.getAllReportPublication();
   }
 
   @Get('byId/:id')
-  @UseGuards(JwtAuthGuard)
-  // @UseGuards(JwtAuthGuard, RolesGuard) 
-  // @Roles('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   getReportPublicationById(@Param('id') id: string) {
     return this.reportPublicationService.getReportPublicationById(+id);
   }
@@ -54,7 +55,8 @@ export class ReportPublicationController {
   }
 
   @Patch('update-state')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   async updateReportsByState(@Body() createChangeOfStateDto: CreateChangeOfStateDto) {
     return this.reportPublicationService.updateReportsByAction(createChangeOfStateDto);
   }

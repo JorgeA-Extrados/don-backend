@@ -340,9 +340,6 @@ export class UserService {
       };
 
     } catch (error) {
-      console.log('===============error=====================');
-      console.log(error);
-      console.log('====================================');
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
