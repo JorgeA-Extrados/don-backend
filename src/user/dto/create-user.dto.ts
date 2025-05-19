@@ -49,4 +49,8 @@ export class CreateUserDto {
 
     @IsBoolean()
     usr_over: boolean;
+
+    @IsBoolean()
+    @IsOptional()
+    isSocialAuth?: boolean
 }

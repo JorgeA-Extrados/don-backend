@@ -191,9 +191,14 @@ export class ProfessionalService {
     }
   }
 
-  async searchProfessionals(searchProfessionalDto: SearchProfessionalDto) {
+  async searchProfessionals(searchProfessionalDto: SearchProfessionalDto, req) {
     try {
-      const searchProfessional = await this.professionalDao.searchProfessionals(searchProfessionalDto);
+      
+      const { userId } = req.user
+
+      const profesional = await this.professionalDao.getProfessionalByUsrId(userId)
+      
+      const searchProfessional = await this.professionalDao.searchProfessionals(searchProfessionalDto, profesional?.pro_id);
 
       if (searchProfessional.length === 0) {
         return {

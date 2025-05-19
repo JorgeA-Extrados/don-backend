@@ -60,4 +60,12 @@ export class PublicationController {
   getPublicationByUserId(@Param('id') id: string) {
     return this.publicationService.getPublicationByUserId(+id);
   }
+
+  @Get('byUserIdReport/:id')
+  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard) 
+  // @Roles('admin')
+  getPublicationByUserIdReport(@Param('id') id: string) {
+    return this.publicationService.getPublicationByUserIdReport(+id);
+  }
 }

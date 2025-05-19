@@ -76,6 +76,44 @@ export class ProfessionalDao {
         }
     }
 
+    async getProfessionalByUsrId(usrID: number) {
+        try {
+            const professional = await this.professionalRepository.findOne({
+                where: {
+                    user: {usr_id: usrID},
+                    pro_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    pro_id: true,
+                    pro_firstName: true,
+                    pro_lastName: true,
+                    pro_latitude: true,
+                    pro_longitude: true,
+                    pro_profilePicture: true,
+                    pro_creditDON: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
+                }
+            })
+
+            return professional
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     async getAllProfessional() {
         try {
             const professional = await this.professionalRepository.find({
@@ -155,7 +193,7 @@ export class ProfessionalDao {
             });
     }
 
-    async searchProfessionals(searchProfessionalDto: SearchProfessionalDto): Promise<Professional[]> {
+    async searchProfessionals(searchProfessionalDto: SearchProfessionalDto, proID): Promise<Professional[]> {
         const { hea_id, lat, lng, radius = 10 } = searchProfessionalDto;
 
         const professionals = await this.professionalRepository
@@ -185,6 +223,11 @@ export class ProfessionalDao {
                     qb.setParameter('lat', lat);
                     qb.setParameter('lng', lng);
                     qb.setParameter('radius', radius);
+                }
+
+                if (proID) {
+                    wheres.push('professional.pro_id != :proID');
+                    qb.setParameter('proID', proID);
                 }
 
                 return wheres.length ? wheres.join(' AND ') : '1=1';

@@ -81,10 +81,12 @@ export class User {
     usr_verified: boolean;
 
     @Column({
-        name: 'usr_verification_code'
+        name: 'usr_verification_code',
+        nullable: true
     })
     @IsNumber()
-    usr_verification_code: number;
+    @IsOptional()
+    usr_verification_code?: number;
 
     @Column({
         name: 'usr_terms',

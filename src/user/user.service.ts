@@ -13,6 +13,7 @@ import { ProfessionalDao } from 'src/infrastructure/database/dao/professional.da
 import { ServicesSearchDao } from 'src/infrastructure/database/dao/services_search.dao';
 import { SupplierDao } from 'src/infrastructure/database/dao/supplier.dao';
 import { CreateAllUserDto } from './dto/all-user.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -28,6 +29,7 @@ export class UserService {
     private readonly professionalDao: ProfessionalDao,
     private readonly servicesSearchDao: ServicesSearchDao,
     private readonly supplierDao: SupplierDao,
+    private readonly authService: AuthService,
   ) {
     // this.client = Twilio(
     //   process.env.TWILIO_ACCOUNT_SID,
@@ -49,24 +51,27 @@ export class UserService {
       });
     }
 
-    if (usr_password != usr_passwordConfir) {
-      throw new ConflictException({
-        statusCode: HttpStatus.CONFLICT,
-        message: 'Las contraseñas deben coincidir',
-      });
-    }
-
-    if (usr_password) {
-      // Validación de contraseña segura
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-      if (!passwordRegex.test(usr_password)) {
+    if (!createUserDto.isSocialAuth) {
+      if (usr_password != usr_passwordConfir) {
         throw new ConflictException({
           statusCode: HttpStatus.CONFLICT,
-          message:
-            'La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial',
+          message: 'Las contraseñas deben coincidir',
         });
       }
+
+      if (usr_password) {
+        // Validación de contraseña segura
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        if (!passwordRegex.test(usr_password)) {
+          throw new ConflictException({
+            statusCode: HttpStatus.CONFLICT,
+            message:
+              'La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial',
+          });
+        }
+      }
     }
+
 
     if (usr_user_code) {
       const userCredits = await this.userDao.getUserByInvitationCode(usr_user_code)
@@ -82,38 +87,62 @@ export class UserService {
       }
     }
 
-    const numericalCode = Math.floor(100000 + Math.random() * 900000);
-    const uniqueCode = await this.generateUniqueInvitationCode();
+    let newUser
 
-    const createUser = {
-      usr_email,
-      usr_password,
-      usr_phone,
-      usr_verification_code: numericalCode,
-      usr_over,
-      usr_terms,
-      usr_invitationCode: uniqueCode
-    }
+    if (!createUserDto.isSocialAuth) {
+      const numericalCode = Math.floor(100000 + Math.random() * 900000);
+      const uniqueCode = await this.generateUniqueInvitationCode();
 
+      const createUser = {
+        usr_email,
+        usr_password,
+        usr_phone,
+        usr_verification_code: numericalCode,
+        usr_over,
+        usr_terms,
+        usr_invitationCode: uniqueCode
+      }
 
-    const newUser = await this.userDao.createUser(createUser);
+      newUser = await this.userDao.createUser(createUser);
 
+      // Registrar el intento de verificación
+      await this.userVerificationAttemptsDao.createForgotPasswordAttempts(newUser.usr_id);
 
-    // Registrar el intento de verificación
-    await this.userVerificationAttemptsDao.createForgotPasswordAttempts(newUser.usr_id);
+      try {
+        await this.emailRepository.sendVerificationEmail(newUser.usr_email, newUser.usr_verification_code);
+      } catch (error) {
+        return {
+          message: 'Error al enviar el código de verificación.',
+          statusCode: HttpStatus.NOT_FOUND,
+        };
+      }
+    } else {
+      const uniqueCode = await this.generateUniqueInvitationCode();
+      const dto = {
+        usr_email,
+        usr_password,
+        isSocialAuth: createUserDto.isSocialAuth,
+        isSignup: true,
+        usr_phone,
+        usr_over,
+        usr_terms,
+        usr_invitationCode: uniqueCode
+      }
+      newUser = await this.userDao.createUser(dto);
 
-    // try {
-    //   await this.sendMessage(newUser.usr_verification_code, newUser.usr_phone)
-    // } catch (error) {
-    //   throw new UnauthorizedException('Error al enviar el código de verificación.')
-    // }
+      const log = {
+        usr_email,
+        usr_password
+      }
 
-    try {
-      await this.emailRepository.sendVerificationEmail(newUser.usr_email, newUser.usr_verification_code);
-    } catch (error) {
+      const login = await this.authService.login(log)
+
       return {
-        message: 'Error al enviar el código de verificación.',
-        statusCode: HttpStatus.NOT_FOUND,
+        access_token: login.access_token,
+        refreshToken: login.refreshToken,
+        expires_in: 180,
+        token_type: "Bearer",
+        usr_id: login.usr_id,
       };
     }
 
@@ -430,7 +459,9 @@ export class UserService {
       await this.userVerificationAttemptsDao.createForgotPasswordAttempts(user.usr_id);
 
       try {
-        await this.emailRepository.sendVerificationEmail(user.usr_email, user.usr_verification_code);
+        if (user.usr_verification_code) {
+          await this.emailRepository.sendVerificationEmail(user.usr_email, user.usr_verification_code);
+        }
       } catch (error) {
         return {
           message: 'Error al enviar el código de verificación.',
@@ -502,10 +533,10 @@ export class UserService {
 
   private extractUserFields(dto: any) {
     const fields: any = {};
-    
+
     if (dto.usr_name != null) fields.usr_name = dto.usr_name;
     if (dto.usr_phone != null) fields.usr_phone = dto.usr_phone;
-  
+
     return fields;
   }
 
@@ -519,7 +550,7 @@ export class UserService {
     if (dto.usr_address != null) fields.pro_address = dto.usr_address;
     if (dto.usr_profilePicture != null) fields.pro_profilePicture = dto.usr_profilePicture;
     if (dto.usr_description != null) fields.pro_description = dto.usr_description;
-  
+
     return fields;
   }
 
@@ -533,7 +564,7 @@ export class UserService {
     if (dto.usr_address != null) fields.sea_address = dto.usr_address;
     if (dto.usr_profilePicture != null) fields.sea_profilePicture = dto.usr_profilePicture;
     if (dto.usr_description != null) fields.sea_description = dto.usr_description;
-  
+
     return fields;
   }
 
@@ -547,7 +578,7 @@ export class UserService {
     if (dto.usr_address != null) fields.sup_address = dto.usr_address;
     if (dto.usr_profilePicture != null) fields.sup_profilePicture = dto.usr_profilePicture;
     if (dto.usr_description != null) fields.sup_description = dto.usr_description;
-  
+
     return fields;
   }
 

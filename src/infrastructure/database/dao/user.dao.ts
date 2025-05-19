@@ -25,7 +25,34 @@ export class UserDao {
 
             let user;
 
-            if (usr_password) {
+            if (createUserDto.isSocialAuth && createUserDto.isSignup) {
+                const hashedPassword = await getHashedPassword(usr_password);
+                user = this.userRepository.create({
+                    usr_email: newEmail,
+                    usr_password: hashedPassword,
+                    usr_phone,
+                    usr_create: new Date(),
+                    usr_over,
+                    usr_terms,
+                    usr_invitationCode,
+                    usr_verified: true,
+                })
+            }
+
+            if (createUserDto.isSocialAuth && !createUserDto.isSignup) {
+                const hashedPassword = await getHashedPassword(usr_password);
+                user = this.userRepository.create({
+                    usr_email: newEmail,
+                    usr_password: hashedPassword,
+                    usr_create: new Date(),
+                    usr_over: true,
+                    usr_terms: true,
+                    usr_verified: true,
+                    usr_invitationCode
+                })
+            }
+
+            if (usr_password && !createUserDto.isSocialAuth) {
                 const hashedPassword = await getHashedPassword(usr_password);
                 user = this.userRepository.create({
                     usr_email: newEmail,
@@ -37,19 +64,7 @@ export class UserDao {
                     usr_terms,
                     usr_invitationCode
                 })
-            } else {
-                // Si la contraseña es nula (usuario de Google), guárdala como nula 
-                user = this.userRepository.create({
-                    usr_email: newEmail,
-                    usr_phone,
-                    usr_create: new Date(),
-                    usr_verification_code,
-                    usr_over,
-                    usr_terms,
-                    usr_invitationCode
-                });
             }
-
             return await this.userRepository.save(user, { reload: true })
 
         } catch (error) {
@@ -104,7 +119,7 @@ export class UserDao {
                         sea_address: true,
                         sea_description: true,
                     }
-                }, 
+                },
                 relations: {
                     professional: true,
                     supplier: true,
@@ -329,7 +344,7 @@ export class UserDao {
             });
     }
 
-    
+
     async getUserByInvitationCode(code: string) {
         try {
             const user = await this.userRepository.findOne({

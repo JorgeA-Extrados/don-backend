@@ -19,14 +19,13 @@ import { EmailRepository } from 'src/infrastructure/utils/email/email.repository
 export class AuthService {
 
   constructor(
-    private readonly userService: UserService,
     private readonly userDao: UserDao,
     private jwtService: JwtService,
     private configService: ConfigService,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly forgotPasswordDao: ForgotPasswordDao,
     private readonly forgotPasswordAttemptsDao: ForgotPasswordAttemptsDao,
-        private readonly emailRepository: EmailRepository,
+    private readonly emailRepository: EmailRepository,
   ) { }
 
 
@@ -64,20 +63,32 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     try {
+      let isNewUser
 
       if (loginDto.isSocialAuth === true) {
         if (loginDto.usr_email) {
           const authUser = await this.userDao.getUserByEmail(loginDto.usr_email);
-          const passwordValid: boolean = await bcrypt.compare(
-            loginDto.usr_password,
-            authUser?.usr_password,
-          );
-          if (!passwordValid) {
-            throw new UnauthorizedException('Ya tienes una cuenta creada con ese correo electrónico.');
+
+          if (!authUser) {
+            const dto = {
+              usr_email: loginDto.usr_email,
+              usr_password: loginDto.usr_password,
+              isSocialAuth: loginDto.isSocialAuth
+            }
+            const newUser = await this.userDao.createUser(dto)
+            if (newUser) {
+              isNewUser = true
+            }
+          } else {
+            const passwordValid: boolean = await bcrypt.compare(
+              loginDto.usr_password,
+              authUser?.usr_password,
+            );
+            if (!passwordValid) {
+              throw new UnauthorizedException('Ya tienes una cuenta creada con ese correo electrónico.');
+            }
           }
-          // if (authUser) {
-          //   throw new NotAcceptableException('You already have an account created with that email.');
-          // }    
+
         }
       }
 
@@ -92,9 +103,13 @@ export class AuthService {
       const validateAccount = await this.userDao.isConfirmUser(user.usr_id);
 
       if (!validateAccount) {
-        throw new UnauthorizedException(
-          'Su cuenta no es válida, debe validar su cuenta con el código.',
-        );
+        // throw new UnauthorizedException(
+        //   'Su cuenta fue validada, debe ingresar el código de verificación.',
+        // );
+        throw new UnauthorizedException({
+          message: 'Su cuenta no fue validada, debe ingresar el código de verificación.',
+          usrID: user.usr_id,
+        });
       }
 
       const payload = { userId: usr_id, email: usr_email, rol: usr_role };
@@ -114,6 +129,7 @@ export class AuthService {
         expires_in: 180,
         token_type: "Bearer",
         usr_id: user.usr_id,
+        isNewUser
       };
     } catch (error) {
       if (
@@ -195,7 +211,7 @@ export class AuthService {
           error: 'Demasiados intentos',
         });
       }
-  
+
       // Si está dentro del límite, se incrementan los intentos
       await this.forgotPasswordAttemptsDao.incrementAttempts(existingRequest.fpa_id);
     }
@@ -302,7 +318,7 @@ export class AuthService {
         statusCode: HttpStatus.FORBIDDEN,
       };
     }
-    
+
     const { newPassword, newPasswordRepeat } = changePasswordDto
 
     const user = await this.userDao.getUserById(userId)

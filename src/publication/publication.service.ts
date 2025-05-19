@@ -216,6 +216,83 @@ export class PublicationService {
         };
       }
   
+      // // Primero, filtramos y mapeamos
+      // const publicacionesFiltradas = publications
+      //   .filter(pub => {
+      //     if (pub.pub_delete !== null && pub.pub_reason_for_deletion === null) {
+      //       return false;
+      //     }
+      //     return true;
+      //   })
+      //   .map(pub => {
+      //     if (pub.pub_delete !== null && pub.pub_reason_for_deletion !== null) {
+      //       return {
+      //         pub_id: pub.pub_id,
+      //         pub_reason_for_deletion: pub.pub_reason_for_deletion,
+      //         pub_create: pub.pub_create,
+      //       };
+      //     }
+      //     return pub;
+      //   });
+  
+      // Luego, transformamos solo si es una publicación completa
+      const transformed = publications.map((publication) => {
+        // Si la publicación no tiene propiedad "user", la devolvemos tal cual (es reducida)
+        if (!('user' in publication)) {
+          return publication;
+        }
+  
+        const { user } = publication;
+  
+        const usr_profilePicture =
+          user?.professional?.pro_profilePicture ??
+          user?.supplier?.sup_profilePicture ??
+          null;
+  
+        return {
+          ...publication,
+          user: {
+            usr_id: user.usr_id,
+            usr_email: user.usr_email,
+            usr_invitationCode: user.usr_invitationCode,
+            usr_name: user.usr_name,
+            usr_role: user.usr_role,
+            usr_phone: user.usr_phone,
+            usr_profilePicture,
+          },
+        };
+      });
+  
+      return {
+        message: 'Todas las publicaciones del usuario',
+        statusCode: HttpStatus.OK,
+        data: transformed,
+      };
+  
+    } catch (error) {
+      if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
+        throw error;
+      }
+  
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code || ''} ${error.detail || ''} ${error.message || 'Error desconocido'}`,
+        error: `Error interno`,
+      });
+    }
+  }
+
+  async getPublicationByUserIdReport(id: number) {
+    try {
+      const publications = await this.publicationDao.getPublicationByUserIdReport(id);
+  
+      if (!publications || publications.length === 0) {
+        return {
+          message: 'El usuario no tiene ninguna publicación',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
+      }
+  
       // Primero, filtramos y mapeamos
       const publicacionesFiltradas = publications
         .filter(pub => {
@@ -264,7 +341,7 @@ export class PublicationService {
       });
   
       return {
-        message: 'Todas las publicaciones del usuario',
+        message: 'Todas las publicaciones del usuario incluidas las reportadas por el administrador',
         statusCode: HttpStatus.OK,
         data: transformed,
       };
