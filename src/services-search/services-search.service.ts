@@ -21,6 +21,15 @@ export class ServicesSearchService {
 
     const { usr_name, usr_id } = createServicesSearchDto
     if (usr_name) {
+      const name = await this.userDao.getUserByName(usr_name)
+
+      if (name) {
+        return {
+          message: 'El nombre de usuario ya se encuentra en uso.',
+          statusCode: HttpStatus.NOT_FOUND,
+        };
+      }
+
       const update = {
         usr_name
       }

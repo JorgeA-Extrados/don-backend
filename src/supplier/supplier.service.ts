@@ -20,6 +20,15 @@ export class SupplierService {
 
     const { usr_name, usr_id } = createSupplierDto
     if (usr_name) {
+      const name = await this.userDao.getUserByName(usr_name)
+
+      if (name) {
+        return {
+          message: 'El nombre de usuario ya se encuentra en uso.',
+          statusCode: HttpStatus.NOT_FOUND,
+        };
+      }
+
       const update = {
         usr_name
       }

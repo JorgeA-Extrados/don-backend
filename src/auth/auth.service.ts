@@ -237,8 +237,11 @@ export class AuthService {
       }
 
       return {
-        message: 'Código para cambiar contraseña.',
+        message: 'Se envió el código para cambiar contraseña.',
         statusCode: HttpStatus.OK,
+        data: {
+          userId: user.usr_id
+        }
       };
     } catch (error) {
       throw new BadRequestException({
