@@ -80,7 +80,7 @@ export class ProfessionalDao {
         try {
             const professional = await this.professionalRepository.findOne({
                 where: {
-                    user: {usr_id: usrID},
+                    user: { usr_id: usrID },
                     pro_delete: IsNull()
                 },
                 relations: {
@@ -194,7 +194,7 @@ export class ProfessionalDao {
     }
 
     async searchProfessionals(searchProfessionalDto: SearchProfessionalDto, proID): Promise<Professional[]> {
-        const { hea_id, lat, lng, radius = 10 } = searchProfessionalDto;
+        const { hea_id, lat, lng, radius = 10, searchText } = searchProfessionalDto;
 
         const professionals = await this.professionalRepository
             .createQueryBuilder('professional')
@@ -228,6 +228,24 @@ export class ProfessionalDao {
                 if (proID) {
                     wheres.push('professional.pro_id != :proID');
                     qb.setParameter('proID', proID);
+                }
+
+                if (searchText) {
+                    const normalizedSearch = searchText
+                        .toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, ''); // elimina acentos
+
+                    const searchCondition = `
+                        (
+                        LOWER(heading.hea_name) LIKE :search OR
+                        LOWER(user.usr_name) LIKE :search OR
+                        LOWER(user.usr_phone) LIKE :search OR
+                        LOWER(professional.pro_firstName) LIKE :search
+                        )
+                    `;
+                    wheres.push(searchCondition);
+                    qb.setParameter('search', `%${normalizedSearch}%`);
                 }
 
                 return wheres.length ? wheres.join(' AND ') : '1=1';

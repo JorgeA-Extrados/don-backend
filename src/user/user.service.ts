@@ -41,6 +41,15 @@ export class UserService {
 
     const { usr_email, usr_password, usr_phone, usr_passwordConfir, usr_over, usr_terms, usr_user_code } = createUserDto
 
+    const deletedUser = await this.userDao.getUserByEmailDelete(usr_email)
+
+    if (deletedUser?.usr_delete) {
+      // Renombrar el correo para que se pueda crear uno nuevo con el mismo
+      deletedUser.usr_email_original = deletedUser.usr_email;
+      deletedUser.usr_email = `${deletedUser.usr_email}_deleted_${Date.now()}`;
+
+      await this.userDao.updateUser(deletedUser.usr_id, deletedUser);
+    }
 
     const user = await this.userDao.getUserByEmail(usr_email)
 

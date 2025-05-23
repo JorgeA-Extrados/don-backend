@@ -216,6 +216,25 @@ export class UserDao {
         }
     }
 
+    async getUserByEmailDelete(email: string) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    usr_email: email,
+                }
+            })
+
+            return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     async getUserByName(name: string) {
         try {
             const user = await this.userRepository.findOne({
@@ -355,6 +374,21 @@ export class UserDao {
             })
 
             return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
+    async userRemove(user) {
+        try {
+            await this.userRepository.remove(user); // Eliminación física
+
+            return "Usuario eliminado"
 
         } catch (error) {
             throw new BadRequestException({

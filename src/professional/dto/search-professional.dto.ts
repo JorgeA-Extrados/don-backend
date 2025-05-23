@@ -22,5 +22,10 @@ export class SearchProfessionalDto {
     @Type(() => Number)
     @IsNumber()
     radius?: number; // en kilómetros
+  
+    @IsOptional()
+    @Type(() => String)
+    @IsString()
+    searchText?: string; 
   }
   

@@ -126,6 +126,11 @@ export class User {
     @IsDateString()
     usr_delete?: Date;
 
+    @Column({ name: 'usr_email_original', nullable: true })
+    @IsOptional()
+    @IsEmail()
+    usr_email_original?: string;
+
     @OneToOne(() => RefreshToken, refresh => refresh.user)
     refreshToken: RefreshToken;
 
