@@ -72,7 +72,8 @@ export class CreditsDonDao {
         try {
             const creditsDon = await this.creditsDonRepository.find({
                 where: {
-                    cre_delete: IsNull()
+                    cre_delete: IsNull(),
+                    cre_isAdmin: true,
                 },
                 relations: {
                     assigningUser: {
@@ -80,6 +81,35 @@ export class CreditsDonDao {
                         supplier: true
                     },
                     creditsReason: true,
+                },
+                select: {
+                    cre_id: true,
+                    cre_amount: true,
+                    cre_isCredits: true,
+                    cre_isAdmin: true,
+                    creditsReason: {
+                        crs_id: true,
+                        crs_reason: true,
+                    },
+                    assigningUser: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_role: true,
+                        usr_phone: true,
+                        professional: {
+                            pro_id: true,
+                            pro_firstName: true,
+                            pro_lastName: true,
+                            pro_profilePicture: true,
+                        },
+                        supplier: {
+                            sup_id: true,
+                            sup_firstName: true,
+                            sup_lastName: true,
+                            sup_profilePicture: true,
+                        }
+                    }
                 }
             })
 

@@ -17,6 +17,10 @@ export class CreateProfessionalDto {
     @IsString()
     pro_longitude: string;
 
+    @IsNotEmpty()
+    @IsString()
+    pro_address: string;
+
     @IsOptional()
     @IsString()
     pro_profilePicture?: string;

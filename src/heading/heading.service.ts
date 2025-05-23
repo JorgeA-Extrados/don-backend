@@ -27,7 +27,10 @@ export class HeadingService {
       const heading = await this.headingDao.getHeadingById(id);
 
       if (!heading) {
-        throw new UnauthorizedException('Rubro no encontrado')
+        return {
+          message: 'Rubro no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -36,10 +39,6 @@ export class HeadingService {
         data: heading,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -53,7 +52,10 @@ export class HeadingService {
       const heading = await this.headingDao.getAllHeadingProfessional();
 
       if (heading.length === 0) {
-        throw new UnauthorizedException('Rubro no encontrado')
+        return {
+          message: 'Rubro no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -62,11 +64,6 @@ export class HeadingService {
         data: heading,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -80,7 +77,10 @@ export class HeadingService {
       const heading = await this.headingDao.getAllHeadingSupplier();
 
       if (heading.length === 0) {
-        throw new UnauthorizedException('Rubro no encontrado')
+        return {
+          message: 'Rubro no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
 
@@ -90,11 +90,6 @@ export class HeadingService {
         data: heading,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -108,7 +103,10 @@ export class HeadingService {
       const heading = await this.headingDao.getHeadingById(id)
 
       if (!heading) {
-        throw new UnauthorizedException('Rubro no encontrado')
+        return {
+          message: 'Rubro no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.headingDao.deleteHeading(id)
@@ -118,11 +116,6 @@ export class HeadingService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -135,11 +128,12 @@ export class HeadingService {
     try {
       const heading = await this.headingDao.getHeadingById(id)
 
-
       if (!heading) {
-        throw new UnauthorizedException('Rubro no encontrado')
+        return {
+          message: 'Rubro no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
-
 
       await this.headingDao.updateHeading(id, updateHeadingDto)
 
@@ -152,11 +146,6 @@ export class HeadingService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

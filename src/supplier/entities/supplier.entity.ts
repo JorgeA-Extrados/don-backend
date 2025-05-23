@@ -42,6 +42,13 @@ export class Supplier {
     sup_longitude: string;
 
     @Column({
+        name: 'sup_address'
+    })
+    @IsNotEmpty()
+    @IsString()
+    sup_address: string;
+
+    @Column({
         name: 'sup_profilePicture',
         nullable: true,
         type: 'varchar',

@@ -23,7 +23,10 @@ export class ProfessionalService {
       const name = await this.userDao.getUserByName(usr_name)
 
       if (name) {
-        throw new UnauthorizedException('El nombre de usuario ya se encuentra en uso')
+        return {
+          message: 'El nombre de usuario ya se encuentra en uso.',
+          statusCode: HttpStatus.NOT_FOUND,
+        };
       }
 
       const update = {
@@ -52,7 +55,10 @@ export class ProfessionalService {
       const professional = await this.professionalDao.getProfessionalById(pro_id);
 
       if (!professional) {
-        throw new UnauthorizedException('Profesional no encontrado')
+        return {
+          message: 'Profesional no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       const imageUrl = await this.firebaseService.uploadFile(file, pro_id);
@@ -60,7 +66,6 @@ export class ProfessionalService {
       const updateImg = {
         pro_profilePicture: imageUrl
       }
-
 
       await this.professionalDao.updateProfessional(pro_id, updateImg)
 
@@ -72,12 +77,6 @@ export class ProfessionalService {
         data: newProfessional
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -91,7 +90,10 @@ export class ProfessionalService {
       const professional = await this.professionalDao.getProfessionalById(id);
 
       if (!professional) {
-        throw new UnauthorizedException('Profesional no encontrado')
+        return {
+          message: 'Profesional no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -100,12 +102,6 @@ export class ProfessionalService {
         data: professional,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -119,7 +115,10 @@ export class ProfessionalService {
       const professional = await this.professionalDao.getAllProfessional();
 
       if (professional.length === 0) {
-        throw new UnauthorizedException('Profesional no encontrado')
+        return {
+          message: 'Profesionales no encontrados.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -128,12 +127,6 @@ export class ProfessionalService {
         data: professional,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -147,7 +140,10 @@ export class ProfessionalService {
       const professional = await this.professionalDao.getProfessionalById(id)
 
       if (!professional) {
-        throw new UnauthorizedException('Profesional no encontrado')
+        return {
+          message: 'Profesional no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.professionalDao.deleteProfessional(id)
@@ -157,11 +153,6 @@ export class ProfessionalService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -174,9 +165,11 @@ export class ProfessionalService {
     try {
       const professional = await this.professionalDao.getProfessionalById(id)
 
-
       if (!professional) {
-        throw new UnauthorizedException('Profesional no encontrado')
+        return {
+          message: 'Profesional no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.professionalDao.updateProfessional(id, updateProfessionalDto)
@@ -190,11 +183,6 @@ export class ProfessionalService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -203,9 +191,14 @@ export class ProfessionalService {
     }
   }
 
-  async searchProfessionals(searchProfessionalDto: SearchProfessionalDto) {
+  async searchProfessionals(searchProfessionalDto: SearchProfessionalDto, req) {
     try {
-      const searchProfessional = await this.professionalDao.searchProfessionals(searchProfessionalDto);
+      
+      const { userId } = req.user
+
+      const profesional = await this.professionalDao.getProfessionalByUsrId(userId)
+      
+      const searchProfessional = await this.professionalDao.searchProfessionals(searchProfessionalDto, profesional?.pro_id);
 
       if (searchProfessional.length === 0) {
         return {
@@ -220,12 +213,6 @@ export class ProfessionalService {
         data: searchProfessional,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

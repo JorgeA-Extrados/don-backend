@@ -18,6 +18,10 @@ export class CreateSupplierDto {
     @IsString()
     sup_longitude: string;
 
+    @IsNotEmpty()
+    @IsString()
+    sup_address: string;
+
     @IsOptional()
     @IsString()
     sup_profilePicture?: string;

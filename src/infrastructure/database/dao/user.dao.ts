@@ -25,7 +25,34 @@ export class UserDao {
 
             let user;
 
-            if (usr_password) {
+            if (createUserDto.isSocialAuth && createUserDto.isSignup) {
+                const hashedPassword = await getHashedPassword(usr_password);
+                user = this.userRepository.create({
+                    usr_email: newEmail,
+                    usr_password: hashedPassword,
+                    usr_phone,
+                    usr_create: new Date(),
+                    usr_over,
+                    usr_terms,
+                    usr_invitationCode,
+                    usr_verified: true,
+                })
+            }
+
+            if (createUserDto.isSocialAuth && !createUserDto.isSignup) {
+                const hashedPassword = await getHashedPassword(usr_password);
+                user = this.userRepository.create({
+                    usr_email: newEmail,
+                    usr_password: hashedPassword,
+                    usr_create: new Date(),
+                    usr_over: true,
+                    usr_terms: true,
+                    usr_verified: true,
+                    usr_invitationCode
+                })
+            }
+
+            if (usr_password && !createUserDto.isSocialAuth) {
                 const hashedPassword = await getHashedPassword(usr_password);
                 user = this.userRepository.create({
                     usr_email: newEmail,
@@ -37,19 +64,7 @@ export class UserDao {
                     usr_terms,
                     usr_invitationCode
                 })
-            } else {
-                // Si la contraseña es nula (usuario de Google), guárdala como nula 
-                user = this.userRepository.create({
-                    usr_email: newEmail,
-                    usr_phone,
-                    usr_create: new Date(),
-                    usr_verification_code,
-                    usr_over,
-                    usr_terms,
-                    usr_invitationCode
-                });
             }
-
             return await this.userRepository.save(user, { reload: true })
 
         } catch (error) {
@@ -72,17 +87,68 @@ export class UserDao {
                     usr_id: true,
                     usr_email: true,
                     usr_invitationCode: true,
-                    //usr_firstName: true,
-                    //usr_lastName: true,
-                    //usr_address: true,
-                    // usr_name: true,
                     usr_role: true,
-                    //usr_profilePicture: true,
                     usr_phone: true,
-                    //usr_creditDON: true,
-                    // usr_active: true,
                     usr_verification_code: true,
-                    usr_verified: true
+                    usr_verified: true,
+                    usr_name: true,
+                    professional: {
+                        pro_id: true,
+                        pro_firstName: true,
+                        pro_lastName: true,
+                        pro_latitude: true,
+                        pro_longitude: true,
+                        pro_address: true,
+                        pro_description: true,
+                    },
+                    supplier: {
+                        sup_id: true,
+                        sup_firstName: true,
+                        sup_lastName: true,
+                        sup_latitude: true,
+                        sup_longitude: true,
+                        sup_address: true,
+                        sup_description: true,
+                    },
+                    servicesSearch: {
+                        sea_id: true,
+                        sea_firstName: true,
+                        sea_lastName: true,
+                        sea_latitude: true,
+                        sea_longitude: true,
+                        sea_address: true,
+                        sea_description: true,
+                    }
+                },
+                relations: {
+                    professional: true,
+                    supplier: true,
+                    servicesSearch: true
+                }
+            })
+
+            return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
+    async getUserProfileById(usrId: number) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    usr_id: usrId,
+                    usr_delete: IsNull()
+                },
+                relations: {
+                    professional: true,
+                    servicesSearch: true,
+                    supplier: true
                 }
             })
 
@@ -136,6 +202,25 @@ export class UserDao {
                 where: {
                     usr_email: email,
                     usr_delete: IsNull()
+                }
+            })
+
+            return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
+    async getUserByEmailDelete(email: string) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    usr_email: email,
                 }
             })
 
@@ -278,7 +363,7 @@ export class UserDao {
             });
     }
 
-    
+
     async getUserByInvitationCode(code: string) {
         try {
             const user = await this.userRepository.findOne({
@@ -289,6 +374,21 @@ export class UserDao {
             })
 
             return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
+    async userRemove(user) {
+        try {
+            await this.userRepository.remove(user); // Eliminación física
+
+            return "Usuario eliminado"
 
         } catch (error) {
             throw new BadRequestException({

@@ -41,6 +41,13 @@ export class ServicesSearch {
     sea_longitude: string;
 
     @Column({
+        name: 'sea_address'
+    })
+    @IsNotEmpty()
+    @IsString()
+    sea_address: string;
+
+    @Column({
         name: 'sea_profilePicture',
         nullable: true,
         type: 'varchar',

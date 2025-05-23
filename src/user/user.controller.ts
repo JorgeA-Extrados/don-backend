@@ -4,6 +4,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateAllUserDto } from './dto/all-user.dto';
 
 
 @Controller('user')
@@ -30,9 +31,9 @@ export class UserController {
   }
 
   @Patch('update/:id')
-  // @UseGuards(JwtAuthGuard)
-  updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateUser(+id, updateUserDto);
+  @UseGuards(JwtAuthGuard)
+  updateUser(@Param('id') id: string, @Body() createAllUserDto: CreateAllUserDto) {
+    return this.userService.updateUser(+id, createAllUserDto);
   }
 
 }

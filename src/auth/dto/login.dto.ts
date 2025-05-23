@@ -10,8 +10,8 @@ export class LoginDto {
   usr_name?: string;
 
   @IsString()
-  @IsOptional()
-  usr_password?: string;
+  @IsNotEmpty()
+  usr_password: string;
 
   @IsBoolean()
   @IsOptional()

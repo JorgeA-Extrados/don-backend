@@ -40,6 +40,13 @@ export class Professional {
     @IsString()
     pro_longitude: string;
 
+    @Column({
+        name: 'pro_address'
+    })
+    @IsNotEmpty()
+    @IsString()
+    pro_address: string;
+
     // @Column({
     //     name: 'pro_address'
     // })

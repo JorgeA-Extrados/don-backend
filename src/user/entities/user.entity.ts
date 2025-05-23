@@ -36,9 +36,9 @@ export class User {
         name: 'usr_password',
         nullable: true,
     })
-    @IsOptional()
+    @IsNotEmpty()
     @IsString()
-    usr_password?: string;
+    usr_password: string;
 
     @Column({
         name: 'usr_invitationCode',
@@ -81,10 +81,12 @@ export class User {
     usr_verified: boolean;
 
     @Column({
-        name: 'usr_verification_code'
+        name: 'usr_verification_code',
+        nullable: true
     })
     @IsNumber()
-    usr_verification_code: number;
+    @IsOptional()
+    usr_verification_code?: number;
 
     @Column({
         name: 'usr_terms',
@@ -123,6 +125,11 @@ export class User {
     @IsOptional()
     @IsDateString()
     usr_delete?: Date;
+
+    @Column({ name: 'usr_email_original', nullable: true })
+    @IsOptional()
+    @IsEmail()
+    usr_email_original?: string;
 
     @OneToOne(() => RefreshToken, refresh => refresh.user)
     refreshToken: RefreshToken;

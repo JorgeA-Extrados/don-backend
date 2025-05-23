@@ -76,6 +76,44 @@ export class ProfessionalDao {
         }
     }
 
+    async getProfessionalByUsrId(usrID: number) {
+        try {
+            const professional = await this.professionalRepository.findOne({
+                where: {
+                    user: { usr_id: usrID },
+                    pro_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    pro_id: true,
+                    pro_firstName: true,
+                    pro_lastName: true,
+                    pro_latitude: true,
+                    pro_longitude: true,
+                    pro_profilePicture: true,
+                    pro_creditDON: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
+                }
+            })
+
+            return professional
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     async getAllProfessional() {
         try {
             const professional = await this.professionalRepository.find({
@@ -155,8 +193,8 @@ export class ProfessionalDao {
             });
     }
 
-    async searchProfessionals(searchProfessionalDto: SearchProfessionalDto): Promise<Professional[]> {
-        const { hea_id, lat, lng, radius = 10 } = searchProfessionalDto;
+    async searchProfessionals(searchProfessionalDto: SearchProfessionalDto, proID): Promise<Professional[]> {
+        const { hea_id, lat, lng, radius = 10, searchText } = searchProfessionalDto;
 
         const professionals = await this.professionalRepository
             .createQueryBuilder('professional')
@@ -185,6 +223,29 @@ export class ProfessionalDao {
                     qb.setParameter('lat', lat);
                     qb.setParameter('lng', lng);
                     qb.setParameter('radius', radius);
+                }
+
+                if (proID) {
+                    wheres.push('professional.pro_id != :proID');
+                    qb.setParameter('proID', proID);
+                }
+
+                if (searchText) {
+                    const normalizedSearch = searchText
+                        .toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, ''); // elimina acentos
+
+                    const searchCondition = `
+                        (
+                        LOWER(heading.hea_name) LIKE :search OR
+                        LOWER(user.usr_name) LIKE :search OR
+                        LOWER(user.usr_phone) LIKE :search OR
+                        LOWER(professional.pro_firstName) LIKE :search
+                        )
+                    `;
+                    wheres.push(searchCondition);
+                    qb.setParameter('search', `%${normalizedSearch}%`);
                 }
 
                 return wheres.length ? wheres.join(' AND ') : '1=1';

@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Query, UseGuards, Request } from '@nestjs/common';
 import { ProfessionalService } from './professional.service';
 import { CreateProfessionalDto } from './dto/create-professional.dto';
 import { UpdateProfessionalDto } from './dto/update-professional.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SearchProfessionalDto } from './dto/search-professional.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('professional')
 export class ProfessionalController {
@@ -47,7 +48,8 @@ export class ProfessionalController {
   }
 
   @Get('search')
-  async searchProfessionals(@Query() searchProfessionalDto: SearchProfessionalDto) {
-    return await this.professionalService.searchProfessionals(searchProfessionalDto);
+  @UseGuards(JwtAuthGuard)
+  async searchProfessionals(@Query() searchProfessionalDto: SearchProfessionalDto, @Request() req) {
+    return await this.professionalService.searchProfessionals(searchProfessionalDto, req);
   }
 }

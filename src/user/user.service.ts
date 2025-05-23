@@ -9,6 +9,11 @@ import { ConfigService } from '@nestjs/config';
 import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
 import { CreditsDonDao } from 'src/infrastructure/database/dao/credits_don.dao';
 import { UserVerificationAttemptsDao } from 'src/infrastructure/database/dao/user_verification_attempts.dao';
+import { ProfessionalDao } from 'src/infrastructure/database/dao/professional.dao';
+import { ServicesSearchDao } from 'src/infrastructure/database/dao/services_search.dao';
+import { SupplierDao } from 'src/infrastructure/database/dao/supplier.dao';
+import { CreateAllUserDto } from './dto/all-user.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -21,6 +26,10 @@ export class UserService {
     private readonly emailRepository: EmailRepository,
     private readonly creditsDonDao: CreditsDonDao,
     private readonly userVerificationAttemptsDao: UserVerificationAttemptsDao,
+    private readonly professionalDao: ProfessionalDao,
+    private readonly servicesSearchDao: ServicesSearchDao,
+    private readonly supplierDao: SupplierDao,
+    private readonly authService: AuthService,
   ) {
     // this.client = Twilio(
     //   process.env.TWILIO_ACCOUNT_SID,
@@ -32,6 +41,15 @@ export class UserService {
 
     const { usr_email, usr_password, usr_phone, usr_passwordConfir, usr_over, usr_terms, usr_user_code } = createUserDto
 
+    const deletedUser = await this.userDao.getUserByEmailDelete(usr_email)
+
+    if (deletedUser?.usr_delete) {
+      // Renombrar el correo para que se pueda crear uno nuevo con el mismo
+      deletedUser.usr_email_original = deletedUser.usr_email;
+      deletedUser.usr_email = `${deletedUser.usr_email}_deleted_${Date.now()}`;
+
+      await this.userDao.updateUser(deletedUser.usr_id, deletedUser);
+    }
 
     const user = await this.userDao.getUserByEmail(usr_email)
 
@@ -42,24 +60,27 @@ export class UserService {
       });
     }
 
-    if (usr_password != usr_passwordConfir) {
-      throw new ConflictException({
-        statusCode: HttpStatus.CONFLICT,
-        message: 'Las contraseñas deben coincidir',
-      });
-    }
-
-    if (usr_password) {
-      // Validación de contraseña segura
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-      if (!passwordRegex.test(usr_password)) {
+    if (!createUserDto.isSocialAuth) {
+      if (usr_password != usr_passwordConfir) {
         throw new ConflictException({
           statusCode: HttpStatus.CONFLICT,
-          message:
-            'La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial',
+          message: 'Las contraseñas deben coincidir',
         });
       }
+
+      if (usr_password) {
+        // Validación de contraseña segura
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        if (!passwordRegex.test(usr_password)) {
+          throw new ConflictException({
+            statusCode: HttpStatus.CONFLICT,
+            message:
+              'La contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula, un número y un carácter especial',
+          });
+        }
+      }
     }
+
 
     if (usr_user_code) {
       const userCredits = await this.userDao.getUserByInvitationCode(usr_user_code)
@@ -68,42 +89,70 @@ export class UserService {
           cre_amount: 1,
           cre_isCredits: false,
           usr_id: userCredits.usr_id,
-          crs_id: 1
+          crs_id: 1,
+          cre_isAdmin: false
         }
         const newCredits = await this.creditsDonDao.createCreditsDON(credits)
       }
     }
 
-    const numericalCode = Math.floor(100000 + Math.random() * 900000);
-    const uniqueCode = await this.generateUniqueInvitationCode();
+    let newUser
 
-    const createUser = {
-      usr_email,
-      usr_password,
-      usr_phone,
-      usr_verification_code: numericalCode,
-      usr_over,
-      usr_terms,
-      usr_invitationCode: uniqueCode
-    }
+    if (!createUserDto.isSocialAuth) {
+      const numericalCode = Math.floor(100000 + Math.random() * 900000);
+      const uniqueCode = await this.generateUniqueInvitationCode();
 
+      const createUser = {
+        usr_email,
+        usr_password,
+        usr_phone,
+        usr_verification_code: numericalCode,
+        usr_over,
+        usr_terms,
+        usr_invitationCode: uniqueCode
+      }
 
-    const newUser = await this.userDao.createUser(createUser);
+      newUser = await this.userDao.createUser(createUser);
 
+      // Registrar el intento de verificación
+      await this.userVerificationAttemptsDao.createForgotPasswordAttempts(newUser.usr_id);
 
-    // Registrar el intento de verificación
-    await this.userVerificationAttemptsDao.createForgotPasswordAttempts(newUser.usr_id);
+      try {
+        await this.emailRepository.sendVerificationEmail(newUser.usr_email, newUser.usr_verification_code);
+      } catch (error) {
+        return {
+          message: 'Error al enviar el código de verificación.',
+          statusCode: HttpStatus.NOT_FOUND,
+        };
+      }
+    } else {
+      const uniqueCode = await this.generateUniqueInvitationCode();
+      const dto = {
+        usr_email,
+        usr_password,
+        isSocialAuth: createUserDto.isSocialAuth,
+        isSignup: true,
+        usr_phone,
+        usr_over,
+        usr_terms,
+        usr_invitationCode: uniqueCode
+      }
+      newUser = await this.userDao.createUser(dto);
 
-    // try {
-    //   await this.sendMessage(newUser.usr_verification_code, newUser.usr_phone)
-    // } catch (error) {
-    //   throw new UnauthorizedException('Error al enviar el código de verificación.')
-    // }
+      const log = {
+        usr_email,
+        usr_password
+      }
 
-    try {
-      await this.emailRepository.sendVerificationEmail(newUser.usr_email, newUser.usr_verification_code);
-    } catch (error) {
-      throw new UnauthorizedException('Error al enviar el código de verificación.')
+      const login = await this.authService.login(log)
+
+      return {
+        access_token: login.access_token,
+        refreshToken: login.refreshToken,
+        expires_in: 180,
+        token_type: "Bearer",
+        usr_id: login.usr_id,
+      };
     }
 
     return {
@@ -117,24 +166,68 @@ export class UserService {
 
   async getUserById(id: number) {
     try {
-      const user = await this.userDao.getUserById(id);
+      const user = await this.userDao.getUserProfileById(id);
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
+
+      const { professional, servicesSearch, supplier } = user
+
+      const usr_profilePicture =
+        professional?.pro_profilePicture ??
+        supplier?.sup_profilePicture ??
+        servicesSearch?.sea_profilePicture ??
+        null;
+
+      const usr_firstName =
+        professional?.pro_firstName ??
+        supplier?.sup_firstName ??
+        servicesSearch?.sea_firstName ??
+        null;
+
+      const usr_lastName =
+        professional?.pro_lastName ??
+        supplier?.sup_lastName ??
+        servicesSearch?.sea_lastName ??
+        null;
+
+      const usr_address =
+        professional?.pro_address ??
+        supplier?.sup_address ??
+        servicesSearch?.sea_address ??
+        null;
+
+      const usr_description =
+        professional?.pro_description ??
+        supplier?.sup_description ??
+        servicesSearch?.sea_description ??
+        null;
+
+      const newUser = {
+        usr_id: user.usr_id,
+        usr_email: user.usr_email,
+        usr_invitationCode: user.usr_invitationCode,
+        usr_name: user.usr_name,
+        usr_role: user.usr_role,
+        usr_phone: user.usr_phone,
+        usr_profilePicture,
+        usr_firstName,
+        usr_lastName,
+        usr_address,
+        usr_description
+      }
+
 
       return {
         message: 'Usuario',
         statusCode: HttpStatus.OK,
-        data: user,
+        data: newUser,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -148,7 +241,10 @@ export class UserService {
       const user = await this.userDao.getAllUser();
 
       if (user.length === 0) {
-        throw new UnauthorizedException('Usuarios no encontrado.')
+        return {
+          message: 'Usuarios no encontrados.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -157,12 +253,6 @@ export class UserService {
         data: user,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -176,17 +266,17 @@ export class UserService {
       const user = await this.userDao.getUserByEmail(email);
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return user
 
-    } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
 
+
+    } catch (error) {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -200,19 +290,15 @@ export class UserService {
       const user = await this.userDao.getUserByName(name);
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return user
 
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -228,7 +314,10 @@ export class UserService {
       const user = await this.userDao.getUserById(userId)
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       const refresh = await this.refreshTokenService.findRefreshTokenbyUser(userId)
@@ -244,11 +333,6 @@ export class UserService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -257,17 +341,31 @@ export class UserService {
     }
   }
 
-  async updateUser(id, updateUserDto: UpdateUserDto) {
+  async updateUser(id, createAllUserDto: CreateAllUserDto) {
     try {
       const user = await this.userDao.getUserById(id)
 
-
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
+      // Actualizamos el usuario base (campos que pertenezcan a la entidad User)
+      const userFields = this.extractUserFields(createAllUserDto);
+      await this.userDao.updateUser(id, userFields);
 
-
-      await this.userDao.updateUser(id, updateUserDto)
+      // Dependiendo del rol o subperfil relacionado, actualizamos el subperfil correspondiente
+      if (user.professional) {
+        const proFields = this.mapToProfessionalFields(createAllUserDto);
+        await this.professionalDao.updateProfessional(user.professional.pro_id, proFields);
+      } else if (user.servicesSearch) {
+        const seaFields = this.mapToServicesSearchFields(createAllUserDto);
+        await this.servicesSearchDao.updateServicesSearch(user.servicesSearch.sea_id, seaFields);
+      } else if (user.supplier) {
+        const supFields = this.mapToSupplierFields(createAllUserDto);
+        await this.supplierDao.updateSupplier(user.supplier.sup_id, supFields);
+      }
 
       const newUser = await this.userDao.getUserById(id)
 
@@ -280,11 +378,6 @@ export class UserService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -299,7 +392,10 @@ export class UserService {
       const user = await this.userDao.getUserById(id)
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       if (code === user.usr_verification_code) {
@@ -330,11 +426,6 @@ export class UserService {
         };
       }
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -349,18 +440,27 @@ export class UserService {
       const user = await this.userDao.getUserById(id)
 
       if (!user) {
-        throw new UnauthorizedException('Usuario no encontrado.')
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       if (user.usr_verified === true) {
-        throw new UnauthorizedException('Usuario ya verificado.')
+        return {
+          message: 'Usuario ya verificado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       // Verificar cuántos intentos de verificación tiene el usuario
       const attempts = await this.userVerificationAttemptsDao.getActiveAttempts(user.usr_id);
 
       if (attempts >= 2) {
-        throw new UnauthorizedException('Ya has alcanzado el máximo número de intentos de verificación.');
+        return {
+          message: 'Ya has alcanzado el máximo número de intentos de verificación.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
 
@@ -368,9 +468,14 @@ export class UserService {
       await this.userVerificationAttemptsDao.createForgotPasswordAttempts(user.usr_id);
 
       try {
-        await this.emailRepository.sendVerificationEmail(user.usr_email, user.usr_verification_code);
+        if (user.usr_verification_code) {
+          await this.emailRepository.sendVerificationEmail(user.usr_email, user.usr_verification_code);
+        }
       } catch (error) {
-        throw new UnauthorizedException('Error al enviar el código de verificación.')
+        return {
+          message: 'Error al enviar el código de verificación.',
+          statusCode: HttpStatus.NOT_FOUND,
+        };
       }
 
       return {
@@ -378,12 +483,6 @@ export class UserService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -438,6 +537,58 @@ export class UserService {
     }
 
     return code;
+  }
+
+
+  private extractUserFields(dto: any) {
+    const fields: any = {};
+
+    if (dto.usr_name != null) fields.usr_name = dto.usr_name;
+    if (dto.usr_phone != null) fields.usr_phone = dto.usr_phone;
+
+    return fields;
+  }
+
+  private mapToProfessionalFields(dto: any) {
+    const fields: any = {};
+
+    if (dto.usr_firstName != null) fields.pro_firstName = dto.usr_firstName;
+    if (dto.usr_lastName != null) fields.pro_lastName = dto.usr_lastName;
+    if (dto.usr_latitude != null) fields.pro_latitude = dto.usr_latitude;
+    if (dto.usr_longitude != null) fields.pro_longitude = dto.usr_longitude;
+    if (dto.usr_address != null) fields.pro_address = dto.usr_address;
+    if (dto.usr_profilePicture != null) fields.pro_profilePicture = dto.usr_profilePicture;
+    if (dto.usr_description != null) fields.pro_description = dto.usr_description;
+
+    return fields;
+  }
+
+  private mapToServicesSearchFields(dto: any) {
+    const fields: any = {};
+
+    if (dto.usr_firstName != null) fields.sea_firstName = dto.usr_firstName;
+    if (dto.usr_lastName != null) fields.sea_lastName = dto.usr_lastName;
+    if (dto.usr_latitude != null) fields.sea_latitude = dto.usr_latitude;
+    if (dto.usr_longitude != null) fields.sea_longitude = dto.usr_longitude;
+    if (dto.usr_address != null) fields.sea_address = dto.usr_address;
+    if (dto.usr_profilePicture != null) fields.sea_profilePicture = dto.usr_profilePicture;
+    if (dto.usr_description != null) fields.sea_description = dto.usr_description;
+
+    return fields;
+  }
+
+  private mapToSupplierFields(dto: any) {
+    const fields: any = {};
+
+    if (dto.usr_firstName != null) fields.sup_firstName = dto.usr_firstName;
+    if (dto.usr_lastName != null) fields.sup_lastName = dto.usr_lastName;
+    if (dto.usr_latitude != null) fields.sup_latitude = dto.usr_latitude;
+    if (dto.usr_longitude != null) fields.sup_longitude = dto.usr_longitude;
+    if (dto.usr_address != null) fields.sup_address = dto.usr_address;
+    if (dto.usr_profilePicture != null) fields.sup_profilePicture = dto.usr_profilePicture;
+    if (dto.usr_description != null) fields.sup_description = dto.usr_description;
+
+    return fields;
   }
 
 }

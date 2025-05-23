@@ -14,7 +14,10 @@ export class CreditsDonService {
     const { cre_amount } = createCreditsDonDto
 
     if (cre_amount <= 0) {
-      throw new UnauthorizedException('La cantidad de Creditos DON debe ser mayor a 0')
+      return {
+        message: 'La cantidad de Creditos DON debe ser mayor a 0.',
+        statusCode: HttpStatus.NO_CONTENT,
+      };
     }
 
     const creditsDon = await this.creditsDonDao.createCreditsDON(createCreditsDonDto);
@@ -31,7 +34,10 @@ export class CreditsDonService {
       const creditsDon = await this.creditsDonDao.getCreditsDonById(id);
 
       if (!creditsDon) {
-        throw new UnauthorizedException('Credito DON no encontrada')
+        return {
+          message: 'Credito DON no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -40,11 +46,6 @@ export class CreditsDonService {
         data: creditsDon,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -58,7 +59,10 @@ export class CreditsDonService {
       const creditsDon = await this.creditsDonDao.getCreditsDonByUsrId(id);
 
       if (creditsDon.historial.length === 0) {
-        throw new UnauthorizedException('El usuario no existe o no posee créditos DON');
+        return {
+          message: 'El usuario no existe o no posee créditos DON.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -67,11 +71,6 @@ export class CreditsDonService {
         data: creditsDon,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -97,11 +96,6 @@ export class CreditsDonService {
         data: creditsDon,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -115,7 +109,10 @@ export class CreditsDonService {
       const creditsDon = await this.creditsDonDao.getAllCreditsDon();
 
       if (creditsDon.length === 0) {
-        throw new UnauthorizedException('Credito DON no encontradas')
+        return {
+          message: 'Credito DON no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -124,10 +121,6 @@ export class CreditsDonService {
         data: creditsDon,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -141,7 +134,10 @@ export class CreditsDonService {
       const creditsDon = await this.creditsDonDao.getCreditsDonById(id)
 
       if (!creditsDon) {
-        throw new UnauthorizedException('Credito DON no encontrado')
+        return {
+          message: 'Credito DON no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.creditsDonDao.deleteCreditsDon(id)
@@ -151,11 +147,6 @@ export class CreditsDonService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -168,9 +159,11 @@ export class CreditsDonService {
     try {
       const creditsDon = await this.creditsDonDao.getCreditsDonById(id)
 
-
       if (!creditsDon) {
-        throw new UnauthorizedException('Credito DON no encontrada')
+        return {
+          message: 'Credito DON no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.creditsDonDao.updateCreditsDon(id, updateCreditsDonDto)
@@ -184,11 +177,6 @@ export class CreditsDonService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,

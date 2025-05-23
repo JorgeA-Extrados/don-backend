@@ -8,7 +8,7 @@ export class CreateUserDto {
     @IsEmail()
     usr_email: string;
 
-    @IsOptional()
+    @IsNotEmpty()
     @IsString()
     @MinLength(passwordMinLength, {
         message: `Password is shorter than the minimum allowed length ${passwordMinLength}`,
@@ -16,7 +16,7 @@ export class CreateUserDto {
     @MaxLength(passwordMaxLength, {
         message: `Password is higher than the maximum allowed length ${passwordMaxLength}`,
     })
-    usr_password?: string;
+    usr_password: string;
 
     @IsOptional()
     @IsString()
@@ -49,4 +49,8 @@ export class CreateUserDto {
 
     @IsBoolean()
     usr_over: boolean;
+
+    @IsBoolean()
+    @IsOptional()
+    isSocialAuth?: boolean
 }

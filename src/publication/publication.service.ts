@@ -29,7 +29,10 @@ export class PublicationService {
       const publication = await this.publicationDao.getPublicationById(pub_id);
 
       if (!publication) {
-        throw new UnauthorizedException('Publicación no encontrada')
+        return {
+          message: 'Publicación no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       const imageUrl = await this.firebaseService.uploadFile(file, pub_id);
@@ -49,12 +52,6 @@ export class PublicationService {
         data: newPublication
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -68,7 +65,10 @@ export class PublicationService {
       const publication = await this.publicationDao.getPublicationById(id);
 
       if (!publication) {
-        throw new UnauthorizedException('Publicación no encontrada')
+        return {
+          message: 'Publicación no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       const { user } = publication;
@@ -97,12 +97,6 @@ export class PublicationService {
         data: transformed,
       };
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -116,7 +110,10 @@ export class PublicationService {
       const publication = await this.publicationDao.getAllPublication();
 
       if (publication.length === 0) {
-        throw new UnauthorizedException('Publicaciones no encontradas')
+        return {
+          message: 'No hay publicaciones disponibles',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       const transformed = publication.map((pub) => {
@@ -142,11 +139,6 @@ export class PublicationService {
         data: transformed,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -160,7 +152,10 @@ export class PublicationService {
       const publication = await this.publicationDao.getPublicationById(id)
 
       if (!publication) {
-        throw new UnauthorizedException('Publicación no encontrado')
+        return {
+          message: 'Publicación no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.publicationDao.deletePublication(id)
@@ -170,11 +165,6 @@ export class PublicationService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -189,7 +179,10 @@ export class PublicationService {
 
 
       if (!publication) {
-        throw new UnauthorizedException('Publicación no encontrada')
+        return {
+          message: 'Publicación no encontradas',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.publicationDao.updatePublication(id, updatePublicationDto)
@@ -203,11 +196,6 @@ export class PublicationService {
       };
 
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -215,4 +203,160 @@ export class PublicationService {
       });
     }
   }
+
+
+  async getPublicationByUserId(id: number) {
+    try {
+      const publications = await this.publicationDao.getPublicationByUserId(id);
+  
+      if (!publications || publications.length === 0) {
+        return {
+          message: 'El usuario no tiene ninguna publicación',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
+      }
+  
+      // // Primero, filtramos y mapeamos
+      // const publicacionesFiltradas = publications
+      //   .filter(pub => {
+      //     if (pub.pub_delete !== null && pub.pub_reason_for_deletion === null) {
+      //       return false;
+      //     }
+      //     return true;
+      //   })
+      //   .map(pub => {
+      //     if (pub.pub_delete !== null && pub.pub_reason_for_deletion !== null) {
+      //       return {
+      //         pub_id: pub.pub_id,
+      //         pub_reason_for_deletion: pub.pub_reason_for_deletion,
+      //         pub_create: pub.pub_create,
+      //       };
+      //     }
+      //     return pub;
+      //   });
+  
+      // Luego, transformamos solo si es una publicación completa
+      const transformed = publications.map((publication) => {
+        // Si la publicación no tiene propiedad "user", la devolvemos tal cual (es reducida)
+        if (!('user' in publication)) {
+          return publication;
+        }
+  
+        const { user } = publication;
+  
+        const usr_profilePicture =
+          user?.professional?.pro_profilePicture ??
+          user?.supplier?.sup_profilePicture ??
+          null;
+  
+        return {
+          ...publication,
+          user: {
+            usr_id: user.usr_id,
+            usr_email: user.usr_email,
+            usr_invitationCode: user.usr_invitationCode,
+            usr_name: user.usr_name,
+            usr_role: user.usr_role,
+            usr_phone: user.usr_phone,
+            usr_profilePicture,
+          },
+        };
+      });
+  
+      return {
+        message: 'Todas las publicaciones del usuario',
+        statusCode: HttpStatus.OK,
+        data: transformed,
+      };
+  
+    } catch (error) {
+      if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
+        throw error;
+      }
+  
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code || ''} ${error.detail || ''} ${error.message || 'Error desconocido'}`,
+        error: `Error interno`,
+      });
+    }
+  }
+
+  async getPublicationByUserIdReport(id: number) {
+    try {
+      const publications = await this.publicationDao.getPublicationByUserIdReport(id);
+  
+      if (!publications || publications.length === 0) {
+        return {
+          message: 'El usuario no tiene ninguna publicación',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
+      }
+  
+      // Primero, filtramos y mapeamos
+      const publicacionesFiltradas = publications
+        .filter(pub => {
+          if (pub.pub_delete !== null && pub.pub_reason_for_deletion === null) {
+            return false;
+          }
+          return true;
+        })
+        .map(pub => {
+          if (pub.pub_delete !== null && pub.pub_reason_for_deletion !== null) {
+            return {
+              pub_id: pub.pub_id,
+              pub_reason_for_deletion: pub.pub_reason_for_deletion,
+              pub_create: pub.pub_create,
+            };
+          }
+          return pub;
+        });
+  
+      // Luego, transformamos solo si es una publicación completa
+      const transformed = publicacionesFiltradas.map((publication) => {
+        // Si la publicación no tiene propiedad "user", la devolvemos tal cual (es reducida)
+        if (!('user' in publication)) {
+          return publication;
+        }
+  
+        const { user } = publication;
+  
+        const usr_profilePicture =
+          user?.professional?.pro_profilePicture ??
+          user?.supplier?.sup_profilePicture ??
+          null;
+  
+        return {
+          ...publication,
+          user: {
+            usr_id: user.usr_id,
+            usr_email: user.usr_email,
+            usr_invitationCode: user.usr_invitationCode,
+            usr_name: user.usr_name,
+            usr_role: user.usr_role,
+            usr_phone: user.usr_phone,
+            usr_profilePicture,
+          },
+        };
+      });
+  
+      return {
+        message: 'Todas las publicaciones del usuario incluidas las reportadas por el administrador',
+        statusCode: HttpStatus.OK,
+        data: transformed,
+      };
+  
+    } catch (error) {
+      if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
+        throw error;
+      }
+  
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code || ''} ${error.detail || ''} ${error.message || 'Error desconocido'}`,
+        error: `Error interno`,
+      });
+    }
+  }
+  
 }

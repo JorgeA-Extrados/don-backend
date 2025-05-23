@@ -28,7 +28,10 @@ export class ReportPublicationService {
       const reportPublication = await this.reportPublicationDao.getReportPublicationById(id);
 
       if (!reportPublication) {
-        throw new UnauthorizedException('Reporte de publicación no encontrada')
+        return {
+          message: 'Reporte de publicación no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -37,11 +40,6 @@ export class ReportPublicationService {
         data: reportPublication,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -55,7 +53,10 @@ export class ReportPublicationService {
       const reportPublication = await this.reportPublicationDao.getAllReportPublication();
 
       if (reportPublication.length === 0) {
-        throw new UnauthorizedException('Reportes de publicaciones no encontradas')
+        return {
+          message: 'Reporte de publicación no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       return {
@@ -64,11 +65,6 @@ export class ReportPublicationService {
         data: reportPublication,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -82,7 +78,10 @@ export class ReportPublicationService {
       const reportPublication = await this.reportPublicationDao.getReportPublicationById(id)
 
       if (!reportPublication) {
-        throw new UnauthorizedException('Reporte Publicación no encontrado')
+        return {
+          message: 'Reporte de publicación no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.reportPublicationDao.deleteReportPublication(id)
@@ -92,11 +91,6 @@ export class ReportPublicationService {
         statusCode: HttpStatus.OK,
       };
     } catch (error) {
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -109,9 +103,11 @@ export class ReportPublicationService {
     try {
       const reportPublication = await this.reportPublicationDao.getReportPublicationById(id)
 
-
       if (!reportPublication) {
-        throw new UnauthorizedException('Reporte de publicación no encontrada')
+        return {
+          message: 'Reporte de publicación no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
       }
 
       await this.reportPublicationDao.updateReportPublication(id, updateReportPublicationDto)
@@ -125,12 +121,6 @@ export class ReportPublicationService {
       };
 
     } catch (error) {
-
-      // Si ya es una excepción de Nest, la volvemos a lanzar tal cual
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -146,7 +136,7 @@ export class ReportPublicationService {
       if (!reports.length) {
         return {
           message: 'No tiene reportes esta publicación',
-          statusCode: HttpStatus.OK,
+          statusCode: HttpStatus.NO_CONTENT,
           data: {
             pub_id: id,
             pub_image: null,
@@ -206,7 +196,6 @@ export class ReportPublicationService {
   async updateReportsByAction(createChangeOfStateDto: CreateChangeOfStateDto) {
     try {
       const { pub_id, state, rea_id, reason } = createChangeOfStateDto
-
 
       if (state === 'aprobado') {
         const finalReason = {
