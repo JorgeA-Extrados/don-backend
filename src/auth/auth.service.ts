@@ -26,6 +26,7 @@ export class AuthService {
     private readonly forgotPasswordDao: ForgotPasswordDao,
     private readonly forgotPasswordAttemptsDao: ForgotPasswordAttemptsDao,
     private readonly emailRepository: EmailRepository,
+    private readonly userService: UserService,
   ) { }
 
 
@@ -75,7 +76,7 @@ export class AuthService {
               usr_password: loginDto.usr_password,
               isSocialAuth: loginDto.isSocialAuth
             }
-            const newUser = await this.userDao.createUser(dto)
+            const newUser = await this.userService.createUser(dto)
             if (newUser) {
               isNewUser = true
             }

@@ -78,7 +78,7 @@ import { KeepAliveService } from './keep-alive.service';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
-        synchronize: false, // ⚠️ Desactiva en producción
+        synchronize: true, // ⚠️ Desactiva en producción
         extra: {
           keepAlive: true,
           connectTimeout: 10000, // 10 segundos

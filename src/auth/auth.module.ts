@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -28,10 +28,20 @@ import { ProfessionalDao } from 'src/infrastructure/database/dao/professional.da
 import { Professional } from 'src/professional/entities/professional.entity';
 import { ServicesSearch } from 'src/services-search/entities/services-search.entity';
 import { Supplier } from 'src/supplier/entities/supplier.entity';
+import { ExperienceDao } from 'src/infrastructure/database/dao/experiences.dao';
+import { UserHeadingDao } from 'src/infrastructure/database/dao/userHeading.dao';
+import { PublicationDao } from 'src/infrastructure/database/dao/publication.dao';
+import { Experience } from 'src/experiences/entities/experience.entity';
+import { UserHeading } from 'src/user-heading/entities/user-heading.entity';
+import { Publication } from 'src/publication/entities/publication.entity';
+import { Category } from 'src/categories/entities/category.entity';
+import { Heading } from 'src/heading/entities/heading.entity';
+import { SubHeading } from 'src/sub-heading/entities/sub-heading.entity';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, ForgotPasswordAttempts, UserVerificationAttempts, Professional, ServicesSearch, Supplier ]),
+    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, ForgotPasswordAttempts, UserVerificationAttempts, Professional, ServicesSearch, Supplier, Experience, UserHeading, Publication, Category, Heading, SubHeading ]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -40,9 +50,12 @@ import { Supplier } from 'src/supplier/entities/supplier.entity';
         secret: configService.get('jwt.jwt_secret'),
         signOptions: { expiresIn: configService.get('jwt.jwt_expires')}
       })
-    })
+    }),
+    forwardRef(() => UserModule),
   ],
   controllers: [AuthController, RefreshTokenController],
-  providers: [AuthService, UserService, UserDao,  RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository, CreditsDonDao, ForgotPasswordAttemptsDao, UserVerificationAttemptsDao, ProfessionalDao, ServicesSearchDao, SupplierDao ],
+  providers: [AuthService, RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository, CreditsDonDao, ForgotPasswordAttemptsDao, UserVerificationAttemptsDao, ProfessionalDao, ServicesSearchDao, SupplierDao, ExperienceDao, UserHeadingDao, PublicationDao, UserDao, UserService],
+  exports: [AuthService, RefreshTokenService], 
+  
 })
 export class AuthModule {}

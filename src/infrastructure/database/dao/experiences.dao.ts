@@ -82,6 +82,26 @@ export class ExperienceDao {
         }
     }
 
+    async getAllExperienceByUserID( userId: number) {
+        try {
+            const experience = await this.experienceRepository.find({
+                where: {
+                    exp_delete: IsNull(),
+                    usr_id: {usr_id: userId}
+                }
+            })
+
+            return experience
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     async deleteExperience(expId: number) {
         return await this.experienceRepository
             .update({ exp_id: expId }, {

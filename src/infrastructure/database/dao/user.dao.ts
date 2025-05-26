@@ -32,8 +32,8 @@ export class UserDao {
                     usr_password: hashedPassword,
                     usr_phone,
                     usr_create: new Date(),
-                    usr_over,
-                    usr_terms,
+                    usr_over: true,
+                    usr_terms: true,
                     usr_invitationCode,
                     usr_verified: true,
                 })
@@ -60,8 +60,8 @@ export class UserDao {
                     usr_phone,
                     usr_create: new Date(),
                     usr_verification_code,
-                    usr_over,
-                    usr_terms,
+                    usr_over: true,
+                    usr_terms: true,
                     usr_invitationCode
                 })
             }

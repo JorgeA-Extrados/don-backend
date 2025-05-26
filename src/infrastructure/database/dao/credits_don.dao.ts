@@ -256,4 +256,25 @@ export class CreditsDonDao {
         }
     }
     
+    
+    async getCreditsDonByUsrIdDelete(usrID: number) {
+        try {
+            const creditsDon = await this.creditsDonRepository.find({
+                where: {
+                    assigningUser: { usr_id: usrID },
+                    cre_delete: IsNull()
+                },
+            });
+    
+            return creditsDon
+    
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+    
 }

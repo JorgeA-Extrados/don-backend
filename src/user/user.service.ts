@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, forwardRef, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDao } from 'src/infrastructure/database/dao/user.dao';
@@ -13,6 +13,10 @@ import { ProfessionalDao } from 'src/infrastructure/database/dao/professional.da
 import { ServicesSearchDao } from 'src/infrastructure/database/dao/services_search.dao';
 import { SupplierDao } from 'src/infrastructure/database/dao/supplier.dao';
 import { CreateAllUserDto } from './dto/all-user.dto';
+
+import { ExperienceDao } from 'src/infrastructure/database/dao/experiences.dao';
+import { UserHeadingDao } from 'src/infrastructure/database/dao/userHeading.dao';
+import { PublicationDao } from 'src/infrastructure/database/dao/publication.dao';
 import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
@@ -29,7 +33,11 @@ export class UserService {
     private readonly professionalDao: ProfessionalDao,
     private readonly servicesSearchDao: ServicesSearchDao,
     private readonly supplierDao: SupplierDao,
+    @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    private readonly experienceDao: ExperienceDao,
+    private readonly userHeadingDao: UserHeadingDao,
+    private readonly publicationDao: PublicationDao,
   ) {
     // this.client = Twilio(
     //   process.env.TWILIO_ACCOUNT_SID,
@@ -324,6 +332,56 @@ export class UserService {
 
       if (refresh) {
         await this.refreshTokenService.deleteRefreshToken(refresh.rft_token)
+      }
+
+      const servicesSearch = await this.servicesSearchDao.getServicesSearchByUsrId(userId)
+
+      if (servicesSearch) {
+        await this.servicesSearchDao.deleteServicesSearch(servicesSearch.sea_id)
+      }
+
+      const supplier = await this.supplierDao.getSupplierByUserId(userId)
+
+      if (supplier) {
+        await this.supplierDao.deleteSupplier(supplier.sup_id)
+      }
+
+      const professional = await this.professionalDao.getProfessionalByUsrId(userId)
+
+      if (professional) {
+        await this.professionalDao.deleteProfessional(professional.pro_id)
+      }
+
+      const experience = await this.experienceDao.getAllExperienceByUserID(userId)
+
+      if (experience.length > 0) {
+        experience.map(async (expt) => {
+          await this.experienceDao.deleteExperience(expt.exp_id)
+        })
+      }
+
+      const userHeading = await this.userHeadingDao.getUserHeadingByUserId(userId)
+
+      if (userHeading.length > 0) {
+        userHeading.map(async (userHea) => {
+          await this.userHeadingDao.deleteUserHeading(userHea.ush_id)
+        })
+      }
+
+      const publication = await this.publicationDao.getPublicationByUserId(userId)
+
+      if (publication.length > 0) {
+        publication.map(async (pub) => {
+          await this.publicationDao.deletePublication(pub.pub_id)
+        })
+      }
+
+      const creditsDon = await this.creditsDonDao.getCreditsDonByUsrIdDelete(userId)
+
+      if (creditsDon.length > 0) {
+        creditsDon.map(async (cred) => {
+          await this.creditsDonDao.deleteCreditsDon(cred.cre_id)
+        })
       }
 
       await this.userDao.deleteUser(userId)
