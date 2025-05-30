@@ -1,4 +1,4 @@
-import { BadRequestException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
 import { FirebaseService } from 'src/infrastructure/config/firebase.service';
@@ -23,9 +23,9 @@ export class PublicationService {
     };
   }
 
-  async uploadPublicationPicture(pub_id: number, file: Express.Multer.File) {
-
+  async uploadPublicationPicture(pub_id: number, file: Express.Multer.File, req) {
     try {
+      const { rol } = req.user
       const publication = await this.publicationDao.getPublicationById(pub_id);
 
       if (!publication) {
@@ -34,6 +34,24 @@ export class PublicationService {
           statusCode: HttpStatus.NO_CONTENT,
         };
       }
+
+      if (!file || !file.originalname) {
+        throw new BadRequestException('Archivo inválido o no proporcionado');
+      }
+
+      // Validar extensión para videos
+      const videoExtensions = ['mp4', 'mov', 'avi', 'webm'];
+      const fileExtension = file?.originalname?.split('.').pop()?.toLowerCase();
+
+      if (fileExtension) {
+        if (videoExtensions.includes(fileExtension)) {
+          if (rol !== 'admin') {
+            await this.publicationDao.deletePublicationFisicaById(pub_id)
+            throw new ForbiddenException('Solo los usuarios con rol admin pueden subir videos');
+          }
+        }
+      }
+
 
       const imageUrl = await this.firebaseService.uploadFile(file, pub_id);
 
@@ -52,6 +70,7 @@ export class PublicationService {
         data: newPublication
       };
     } catch (error) {
+       if (error instanceof HttpException) throw error;
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -208,14 +227,14 @@ export class PublicationService {
   async getPublicationByUserId(id: number) {
     try {
       const publications = await this.publicationDao.getPublicationByUserId(id);
-  
+
       if (!publications || publications.length === 0) {
         return {
           message: 'El usuario no tiene ninguna publicación',
           statusCode: HttpStatus.NO_CONTENT,
         };
       }
-  
+
       // // Primero, filtramos y mapeamos
       // const publicacionesFiltradas = publications
       //   .filter(pub => {
@@ -234,21 +253,21 @@ export class PublicationService {
       //     }
       //     return pub;
       //   });
-  
+
       // Luego, transformamos solo si es una publicación completa
       const transformed = publications.map((publication) => {
         // Si la publicación no tiene propiedad "user", la devolvemos tal cual (es reducida)
         if (!('user' in publication)) {
           return publication;
         }
-  
+
         const { user } = publication;
-  
+
         const usr_profilePicture =
           user?.professional?.pro_profilePicture ??
           user?.supplier?.sup_profilePicture ??
           null;
-  
+
         return {
           ...publication,
           user: {
@@ -262,18 +281,18 @@ export class PublicationService {
           },
         };
       });
-  
+
       return {
         message: 'Todas las publicaciones del usuario',
         statusCode: HttpStatus.OK,
         data: transformed,
       };
-  
+
     } catch (error) {
       if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
         throw error;
       }
-  
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code || ''} ${error.detail || ''} ${error.message || 'Error desconocido'}`,
@@ -285,14 +304,14 @@ export class PublicationService {
   async getPublicationByUserIdReport(id: number) {
     try {
       const publications = await this.publicationDao.getPublicationByUserIdReport(id);
-  
+
       if (!publications || publications.length === 0) {
         return {
           message: 'El usuario no tiene ninguna publicación',
           statusCode: HttpStatus.NO_CONTENT,
         };
       }
-  
+
       // Primero, filtramos y mapeamos
       const publicacionesFiltradas = publications
         .filter(pub => {
@@ -311,21 +330,21 @@ export class PublicationService {
           }
           return pub;
         });
-  
+
       // Luego, transformamos solo si es una publicación completa
       const transformed = publicacionesFiltradas.map((publication) => {
         // Si la publicación no tiene propiedad "user", la devolvemos tal cual (es reducida)
         if (!('user' in publication)) {
           return publication;
         }
-  
+
         const { user } = publication;
-  
+
         const usr_profilePicture =
           user?.professional?.pro_profilePicture ??
           user?.supplier?.sup_profilePicture ??
           null;
-  
+
         return {
           ...publication,
           user: {
@@ -339,18 +358,18 @@ export class PublicationService {
           },
         };
       });
-  
+
       return {
         message: 'Todas las publicaciones del usuario incluidas las reportadas por el administrador',
         statusCode: HttpStatus.OK,
         data: transformed,
       };
-  
+
     } catch (error) {
       if (error instanceof UnauthorizedException || error instanceof BadRequestException) {
         throw error;
       }
-  
+
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code || ''} ${error.detail || ''} ${error.message || 'Error desconocido'}`,
@@ -358,5 +377,5 @@ export class PublicationService {
       });
     }
   }
-  
+
 }

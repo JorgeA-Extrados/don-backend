@@ -1,16 +1,12 @@
-import {  IsOptional, IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 import { passwordMaxLength, passwordMinLength } from "../user.constants";
 
 
 export class CreateAllUserDto {
 
-    @IsOptional()
-    @IsString()
-    usr_name?: string;
-
-    @IsOptional()
-    @IsString()
-    usr_phone?: string;
+    // @IsOptional()
+    // @IsString()
+    // usr_name?: string;
 
     @IsOptional()
     @IsString()
@@ -34,7 +30,7 @@ export class CreateAllUserDto {
 
     @IsOptional()
     @IsString()
-    usr_profilePicture?: string;
+    usr_phone?: string;
 
     @IsOptional()
     @IsString()

@@ -21,6 +21,7 @@ import { ReportReasonModule } from './report-reason/report-reason.module';
 import { CreditsDonModule } from './credits-don/credits-don.module';
 import { CreditsReasonModule } from './credits-reason/credits-reason.module';
 import { KeepAliveService } from './keep-alive.service';
+import { ProfessionalRecommendationModule } from './professional_recommendation/professional_recommendation.module';
 
 @Module({
   imports: [
@@ -78,7 +79,7 @@ import { KeepAliveService } from './keep-alive.service';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
-        synchronize: true, // ⚠️ Desactiva en producción
+        synchronize: false, // ⚠️ Desactiva en producción
         extra: {
           keepAlive: true,
           connectTimeout: 10000, // 10 segundos
@@ -101,6 +102,7 @@ import { KeepAliveService } from './keep-alive.service';
     ReportReasonModule,
     CreditsDonModule,
     CreditsReasonModule,
+    ProfessionalRecommendationModule,
   ],
   controllers: [AppController],
   providers: [AppService, KeepAliveService],

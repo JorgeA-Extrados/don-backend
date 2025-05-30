@@ -18,10 +18,10 @@ export class PublicationDao {
 
     async createPublication(createPublicationDto) {
         try {
-            const {usr_id} = createPublicationDto
+            const { usr_id } = createPublicationDto
             const publication = await this.publicationRepository.create({
                 ...createPublicationDto,
-                user: await this.userRepository.create({usr_id}),
+                user: await this.userRepository.create({ usr_id }),
                 pub_create: new Date(),
             })
 
@@ -87,7 +87,7 @@ export class PublicationDao {
         try {
             const publication = await this.publicationRepository.find({
                 where: {
-                    user: {usr_id: usrID},
+                    user: { usr_id: usrID },
                     pub_delete: IsNull()
                 },
                 relations: {
@@ -138,7 +138,7 @@ export class PublicationDao {
         try {
             const publication = await this.publicationRepository.find({
                 where: {
-                    user: {usr_id: usrID},
+                    user: { usr_id: usrID },
                     // pub_delete: IsNull()
                 },
                 relations: {
@@ -190,7 +190,7 @@ export class PublicationDao {
             const publication = await this.publicationRepository.find({
                 where: {
                     pub_delete: IsNull()
-                }, 
+                },
                 relations: {
                     user: {
                         professional: true,
@@ -273,6 +273,14 @@ export class PublicationDao {
                     error: 'Error Interno del Servidor',
                 });
             });
+    }
+
+    async deletePublicationFisicaById(pub_id: number): Promise<void> {
+        try {
+            await this.publicationRepository.delete(pub_id);
+        } catch (error) {
+            throw new Error(`Error eliminando la publicación con id ${pub_id}: ${error.message}`);
+        }
     }
 
 }

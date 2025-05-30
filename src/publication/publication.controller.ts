@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, UseGuards, Request } from '@nestjs/common';
 import { PublicationService } from './publication.service';
 import { CreatePublicationDto } from './dto/create-publication.dto';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
@@ -18,8 +18,8 @@ export class PublicationController {
   @Post(':pub_id/upload')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
-  async uploadPublicationPicture(@Param('pub_id') pub_id: number, @UploadedFile() file: Express.Multer.File) {
-    return await this.publicationService.uploadPublicationPicture(pub_id, file);
+  async uploadPublicationPicture(@Param('pub_id') pub_id: number, @UploadedFile() file: Express.Multer.File, @Request() req) {
+    return await this.publicationService.uploadPublicationPicture(pub_id, file, req);
   }
 
   @Get('getAll')

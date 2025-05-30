@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
 
 
 export class CreatePublicationDto {
@@ -9,6 +9,7 @@ export class CreatePublicationDto {
 
     @IsOptional()
     @IsString()
+    @MaxLength(250, { message: 'La descripción no puede superar los 250 caracteres.' })
     pub_description?: string;
 
     @IsOptional()

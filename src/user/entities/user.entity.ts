@@ -6,6 +6,7 @@ import { UserVerificationAttempts } from "src/auth/entities/user_verification_at
 import { CreditsDon } from "src/credits-don/entities/credits-don.entity";
 import { Experience } from "src/experiences/entities/experience.entity";
 import { Professional } from "src/professional/entities/professional.entity";
+import { ProfessionalRecommendation } from "src/professional_recommendation/entities/professional_recommendation.entity";
 import { Publication } from "src/publication/entities/publication.entity";
 import { ReportPublication } from "src/report-publication/entities/report-publication.entity";
 import { ServicesSearch } from "src/services-search/entities/services-search.entity";
@@ -166,6 +167,12 @@ export class User {
 
     @OneToMany(() => ForgotPasswordAttempts, forgotPasswordAttempts => forgotPasswordAttempts.user)
     forgotPasswordAttempts: ForgotPasswordAttempts;
+
+    @OneToMany(() => ProfessionalRecommendation, professionalRecommendation => professionalRecommendation.from)
+    professionalRecommendationFrom: ProfessionalRecommendation;
+
+    @OneToMany(() => ProfessionalRecommendation, professionalRecommendation => professionalRecommendation.to)
+    professionalRecommendationTo: ProfessionalRecommendation;
 
 }
 

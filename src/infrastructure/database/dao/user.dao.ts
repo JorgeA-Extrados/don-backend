@@ -148,7 +148,11 @@ export class UserDao {
                 relations: {
                     professional: true,
                     servicesSearch: true,
-                    supplier: true
+                    supplier: true,
+                    userHeading: {
+                        heading: true,
+                        //subHeading: true
+                    }
                 }
             })
 

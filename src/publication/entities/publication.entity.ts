@@ -1,4 +1,4 @@
-import { IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsDateString, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { ReportPublication } from "src/report-publication/entities/report-publication.entity";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
@@ -24,10 +24,14 @@ export class Publication {
     pub_image?: string;
 
     @Column({
-        name: 'pub_description'
+        name: 'pub_description',
+        nullable: true,
+        type: 'varchar',
+        length: 250,
     })
     @IsOptional()
     @IsString()
+    @MaxLength(250, { message: 'La descripción no puede superar los 250 caracteres.' })
     pub_description?: string;
 
     @Column({

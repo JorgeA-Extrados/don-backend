@@ -5,6 +5,7 @@ import { User } from "src/user/entities/user.entity";
 import { Publication } from "src/publication/entities/publication.entity";
 import { ReportPublication } from "src/report-publication/entities/report-publication.entity";
 import { ReportReason } from "src/report-reason/entities/report-reason.entity";
+import { CreateReportPublicationDto } from "src/report-publication/dto/create-report-publication.dto";
 
 
 
@@ -22,19 +23,22 @@ export class ReportPublicationDao {
         private reportReasonRepository: Repository<ReportReason>,
     ) { }
 
-    async createReportPublication(createReportPublicationDto) {
+    async createReportPublication(createReportPublicationDto: CreateReportPublicationDto): Promise<ReportPublication> {
         try {
-            const { usr_id, pub_id, rea_id } = createReportPublicationDto
+            const { usr_id, pub_id, rea_id } = createReportPublicationDto;
+
             const reportPublication = await this.reportPublicationRepository.create({
                 ...createReportPublicationDto,
-                rep_state: "pendiente",
+                rep_state: 'pendiente',
                 publication: await this.publicationRepository.create({ pub_id }),
                 whoReported: await this.userRepository.create({ usr_id }),
                 reportReason: await this.reportReasonRepository.create({ rea_id }),
                 rep_create: new Date(),
-            })
+            });
 
-            return await this.reportPublicationRepository.save(reportPublication, { reload: true })
+            const saved = await this.reportPublicationRepository.save(reportPublication, { reload: true });
+
+            return saved;
 
         } catch (error) {
 

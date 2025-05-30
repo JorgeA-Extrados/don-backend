@@ -18,19 +18,22 @@ export class SupplierService {
 
     const supplier = await this.supplierDao.createSupplier(createSupplierDto);
 
-    const { usr_name, usr_id } = createSupplierDto
-    if (usr_name) {
-      const name = await this.userDao.getUserByName(usr_name)
-
-      if (name) {
-        return {
-          message: 'El nombre de usuario ya se encuentra en uso.',
-          statusCode: HttpStatus.NOT_FOUND,
-        };
+    const { usr_name, usr_id, usr_phone } = createSupplierDto
+    if (usr_name || usr_phone) {
+      if (usr_name) {
+        const name = await this.userDao.getUserByName(usr_name)
+  
+        if (name) {
+          return {
+            message: 'El nombre de usuario ya se encuentra en uso.',
+            statusCode: HttpStatus.NOT_FOUND,
+          };
+        }
       }
 
       const update = {
-        usr_name
+        usr_name,
+        usr_phone
       }
       await this.userDao.updateUser(usr_id, update)
     }

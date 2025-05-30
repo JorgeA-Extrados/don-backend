@@ -176,7 +176,7 @@ export class ProfessionalDao {
         return await this.professionalRepository
             .update(
                 { pro_id: proID },
-                updateProfessionalDto
+                updateProfessionalDto,
             )
             .then(() => {
                 return {
@@ -239,6 +239,7 @@ export class ProfessionalDao {
                     const searchCondition = `
                         (
                         LOWER(heading.hea_name) LIKE :search OR
+                        LOWER(subHeading.sbh_name) LIKE :search OR
                         LOWER(user.usr_name) LIKE :search OR
                         LOWER(user.usr_phone) LIKE :search OR
                         LOWER(professional.pro_firstName) LIKE :search

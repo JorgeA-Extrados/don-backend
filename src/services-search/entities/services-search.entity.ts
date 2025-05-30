@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
@@ -61,10 +61,11 @@ export class ServicesSearch {
         name: 'sea_description',
         nullable: true,
         type: 'varchar',
-        length: 140,
+        length: 160,
     })
     @IsOptional()
     @IsString()
+    @MaxLength(160, { message: 'La descripción no puede superar los 160 caracteres.' })
     sea_description?: string;
 
     // @Column({
