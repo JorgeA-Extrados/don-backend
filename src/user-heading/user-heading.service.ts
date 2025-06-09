@@ -203,28 +203,134 @@ export class UserHeadingService {
     }
   }
 
-  async updateUserHeading(id, updateUserHeadingDto: UpdateUserHeadingDto) {
+  async updateUserHeading(updateUserHeadingDto: UpdateUserHeadingDto) {
     try {
-      const userHeading = await this.userHeadingDao.getUserHeadingById(id)
+      // const userHeading = await this.userHeadingDao.getUserHeadingById(id)
 
 
-      if (!userHeading) {
-        return {
-          message: 'Usuario-rubro no encontrado',
-          statusCode: HttpStatus.NO_CONTENT,
-        };
+      // if (!userHeading) {
+      //   return {
+      //     message: 'Usuario-rubro no encontrado',
+      //     statusCode: HttpStatus.NO_CONTENT,
+      //   };
+      // }
+
+
+      // await this.userHeadingDao.updateUserHeading(id, updateUserHeadingDto)
+
+      // const newUserHeading = await this.userHeadingDao.getUserHeadingById(id)
+
+      // return {
+      //   message: 'Usuario-rubro actualizado',
+      //   statusCode: HttpStatus.OK,
+      //   data: newUserHeading
+      // };
+
+      const { usr_id, hea_id, sbh_id = [] } = updateUserHeadingDto;
+
+      if (!hea_id || hea_id.length === 0) {
+        throw new BadRequestException('Debe incluir al menos un rubro');
       }
 
+      // Validamos que no supere los 3 rubros
+      if (hea_id.length > 3) {
+        throw new BadRequestException('Solo se pueden asignar hasta 3 rubros por usuario');
+      }
 
-      await this.userHeadingDao.updateUserHeading(id, updateUserHeadingDto)
+      if (usr_id) {
+        const existentes = await this.userHeadingDao.getUserHeadingByUserId(usr_id);
+        const nuevosUserHeadings: any[] = [];
+        const usadosSubIds: number[] = [];
 
-      const newUserHeading = await this.userHeadingDao.getUserHeadingById(id)
+        const nuevasCombinaciones: { hea_id: number; sbh_id: number | null }[] = [];
 
-      return {
-        message: 'Usuario-rubro actualizado',
-        statusCode: HttpStatus.OK,
-        data: newUserHeading
-      };
+        // Armamos las combinaciones nuevas
+        for (const hea of hea_id) {
+          let subAsociado = false;
+
+          for (const sub of sbh_id) {
+            const subHeading = await this.subHeadingDao.getSubHeadingById(sub);
+            if (!subHeading || subHeading.heading.hea_id !== hea) continue;
+
+            nuevasCombinaciones.push({ hea_id: hea, sbh_id: sub });
+            usadosSubIds.push(sub);
+            subAsociado = true;
+          }
+
+          if (!subAsociado) {
+            nuevasCombinaciones.push({ hea_id: hea, sbh_id: null });
+          }
+        }
+
+        // Eliminamos relaciones antiguas que ya no están
+        const combinacionesExistentes = existentes.map(e => ({
+          hea_id: e.heading.hea_id,
+          sbh_id: e.subHeading?.sbh_id || null,
+          ush_id: e.ush_id,
+        }));
+
+        const combinacionKey = (obj: { hea_id: number, sbh_id: number | null }) => `${obj.hea_id}-${obj.sbh_id ?? 'null'}`;
+
+        const nuevasKeys = nuevasCombinaciones.map(combinacionKey);
+        const existentesKeys = combinacionesExistentes.map(combinacionKey);
+
+        const aEliminar = combinacionesExistentes.filter(e => !nuevasKeys.includes(combinacionKey(e)));
+        const aMantener = combinacionesExistentes.filter(e => nuevasKeys.includes(combinacionKey(e)));
+        const aCrear = nuevasCombinaciones.filter(n => !existentesKeys.includes(combinacionKey(n)));
+
+        for (const old of aEliminar) {
+          await this.deleteUserHeading(old.ush_id);
+        }
+
+        for (const nuevo of aCrear) {
+          const creado = await this.userHeadingDao.createUserHeading({
+            usr_id,
+            hea_id: nuevo.hea_id,
+            sbh_id: nuevo.sbh_id,
+          });
+          nuevosUserHeadings.push(creado);
+        }
+
+        const sbhUsados = new Set(usadosSubIds);
+        const sbhSinUsar = sbh_id.filter(id => !sbhUsados.has(id));
+
+        if (sbhSinUsar.length > 0) {
+          throw new BadRequestException(
+            `Los sub-rubros ${sbhSinUsar.join(', ')} no pudieron asociarse correctamente`
+          );
+        }
+
+        const mantenidosCompletos = await Promise.all(
+          aMantener.map(async (m) => {
+            const encontrado = existentes.find(e => e.ush_id === m.ush_id);
+            return encontrado;
+          })
+        );
+
+        const finalData = [...nuevosUserHeadings, ...mantenidosCompletos].map((item) => ({
+          ush_id: item.ush_id,
+          ush_create: item.ush_create,
+          ush_update: item.ush_update,
+          ush_delete: item.ush_delete,
+          user: {
+            usr_id: item.user?.usr_id,
+          },
+          heading: {
+            hea_id: item.heading?.hea_id,
+          },
+          subHeading: item.subHeading
+            ? {
+              sbh_id: item.subHeading.sbh_id,
+            }
+            : null,
+        }));
+
+        return {
+          message: 'Usuario-rubro editados correctamente',
+          statusCode: HttpStatus.OK,
+          data: finalData,
+        };
+      }
 
     } catch (error) {
       throw new BadRequestException({

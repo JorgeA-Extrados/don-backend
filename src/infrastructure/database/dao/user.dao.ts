@@ -143,7 +143,10 @@ export class UserDao {
             const user = await this.userRepository.findOne({
                 where: {
                     usr_id: usrId,
-                    usr_delete: IsNull()
+                    usr_delete: IsNull(),
+                    userHeading: {
+                        ush_delete: IsNull()
+                    }
                 },
                 relations: {
                     professional: true,

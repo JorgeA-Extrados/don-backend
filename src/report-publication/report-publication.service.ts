@@ -31,7 +31,7 @@ export class ReportPublicationService {
       : null;
 
     const emailReport = {
-      pub_image: report?.publication.pub_image,
+      pub_image: report?.publication.publicationMultimedia[0].pmt_file,
       pub_description: report?.publication.pub_description,
       rep_create: formattedDate,
       rea_reason: report?.reportReason.rea_reason
@@ -175,7 +175,8 @@ export class ReportPublicationService {
         };
       }
 
-      const { pub_id, pub_image } = reports[0].publication;
+      //const { pub_id, pub_image } = reports[0].publication;
+      const { pub_id, publicationMultimedia } = reports[0].publication;
 
       const groupedReasons = new Map();
 
@@ -208,7 +209,7 @@ export class ReportPublicationService {
         statusCode: HttpStatus.OK,
         data: {
           pub_id,
-          pub_image,
+          publicationMultimedia: publicationMultimedia,
           totalReports: reports.length,
           reasons,
         },

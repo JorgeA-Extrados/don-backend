@@ -3,9 +3,9 @@ import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-valida
 
 export class CreatePublicationDto {
 
-    @IsOptional()
-    @IsString()
-    pub_image?: string;
+    // @IsOptional()
+    // @IsString()
+    // pub_image?: string;
 
     @IsOptional()
     @IsString()

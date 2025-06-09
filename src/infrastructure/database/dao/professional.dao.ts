@@ -205,6 +205,10 @@ export class ProfessionalDao {
             .where(qb => {
                 const wheres: string[] = [];
 
+                // Filtro por que no estén eliminados
+                wheres.push('user.usr_delete IS NULL');
+                wheres.push('professional.pro_delete IS NULL');
+
                 if (hea_id) {
                     wheres.push('heading.hea_id = :hea_id');
                     qb.setParameter('hea_id', hea_id);

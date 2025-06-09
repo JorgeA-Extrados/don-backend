@@ -3,6 +3,8 @@ import { CreatePublicationDto } from './dto/create-publication.dto';
 import { UpdatePublicationDto } from './dto/update-publication.dto';
 import { FirebaseService } from 'src/infrastructure/config/firebase.service';
 import { PublicationDao } from 'src/infrastructure/database/dao/publication.dao';
+import { PublicationMultimediaDao } from 'src/infrastructure/database/dao/publication_multimedia.dao';
+import { ReportPublicationDao } from 'src/infrastructure/database/dao/reportPublication.dao';
 
 @Injectable()
 export class PublicationService {
@@ -10,6 +12,8 @@ export class PublicationService {
   constructor(
     private readonly publicationDao: PublicationDao,
     private readonly firebaseService: FirebaseService,
+    private readonly publicationMultimediaDao: PublicationMultimediaDao,
+    private readonly reportPublicationDao: ReportPublicationDao,
   ) { }
 
   async createPublication(createPublicationDto: CreatePublicationDto) {
@@ -46,21 +50,40 @@ export class PublicationService {
       if (fileExtension) {
         if (videoExtensions.includes(fileExtension)) {
           if (rol !== 'admin') {
-            await this.publicationDao.deletePublicationFisicaById(pub_id)
+            await this.deletePublicationPhysics(pub_id)
             throw new ForbiddenException('Solo los usuarios con rol admin pueden subir videos');
           }
         }
       }
 
+      let imageUrl: string;
 
-      const imageUrl = await this.firebaseService.uploadFile(file, pub_id);
+
+      try {
+        imageUrl = await this.firebaseService.uploadFile(file, pub_id);
+      } catch (error) {
+        // Si falla por validación de archivo, eliminamos la publicación
+        if (
+          error instanceof BadRequestException ||
+          error.message?.includes?.('no válido') ||
+          error.message?.includes?.('Tamaño máximo') ||
+          error.message?.includes?.('Tipo de archivo no soportado')
+        ) {
+          await this.deletePublicationPhysics(pub_id);
+          throw new BadRequestException(error.message);
+        }
+
+        throw error; // otro error (como Firebase)
+      }
 
       const updateImg = {
-        pub_image: imageUrl
+        pmt_type: fileExtension || "",
+        pmt_file: imageUrl,
+        pub_id: pub_id
       }
 
 
-      await this.publicationDao.updatePublication(pub_id, updateImg)
+      await this.publicationMultimediaDao.createPublicationMultimedia(updateImg)
 
       const newPublication = await this.publicationDao.getPublicationById(pub_id)
 
@@ -70,7 +93,7 @@ export class PublicationService {
         data: newPublication
       };
     } catch (error) {
-       if (error instanceof HttpException) throw error;
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
@@ -142,7 +165,7 @@ export class PublicationService {
 
         return {
           pub_id: pub.pub_id,
-          pub_image: pub.pub_image,
+          publicationMultimedia: pub.publicationMultimedia,
           pub_description: pub.pub_description,
           pub_create: pub.pub_create,
           user: {
@@ -178,6 +201,52 @@ export class PublicationService {
       }
 
       await this.publicationDao.deletePublication(id)
+
+      return {
+        message: 'Publicación eliminada',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
+    }
+  }
+
+  async deletePublicationPhysics(id) {
+    try {
+      const publication = await this.publicationDao.getPublicationById(id)
+
+      if (!publication) {
+        return {
+          message: 'Publicación no encontrada',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
+      }
+
+      const publicationMultimedia = await this.publicationMultimediaDao.getPUblicationImageByPubID(publication.pub_id)
+
+      if (publicationMultimedia.length > 0) {
+        await Promise.all(
+          publicationMultimedia.map((multimedia) =>
+            this.publicationMultimediaDao.deletePublicationMultimediaPhysicsById(multimedia.pmt_id)
+          )
+        );
+      }
+
+      const report = await this.reportPublicationDao.getReportPublicationByPUBID(publication.pub_id)
+
+      if (report.length > 0) {
+        await Promise.all(
+          report.map((reporte) =>
+            this.reportPublicationDao.deleteReportPublicationFisicaById(reporte.rep_id)
+          )
+        );
+      }
+
+      await this.publicationDao.deletePublicationFisicaById(id)
 
       return {
         message: 'Publicación eliminada',

@@ -40,14 +40,18 @@ export class PublicationController {
 
   @Patch('delete/:id')
   @UseGuards(JwtAuthGuard)
-  // @UseGuards(JwtAuthGuard)
   deletePublication(@Param('id') id: string) {
     return this.publicationService.deletePublication(+id);
   }
 
+  @Delete('delete/physics/:id')
+  @UseGuards(JwtAuthGuard)
+  deletePublicationPhysics(@Param('id') id: string) {
+    return this.publicationService.deletePublicationPhysics(+id);
+  }
+
   @Patch('update/:id')
   @UseGuards(JwtAuthGuard)
-  // @UseGuards(JwtAuthGuard)
   updatePublication(@Param('id') id: string, @Body() updatePublicationDto: UpdatePublicationDto) {
     return this.publicationService.updatePublication(+id, updatePublicationDto);
   }

@@ -1,4 +1,5 @@
 import { IsDateString, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { PublicationMultimedia } from "src/publication-multimedia/entities/publication-multimedia.entity";
 import { ReportPublication } from "src/report-publication/entities/report-publication.entity";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
@@ -11,17 +12,6 @@ export class Publication {
     })
     @IsNumber()
     pub_id: number;
-
-
-    @Column({
-        name: 'pub_image',
-        nullable: true,
-        type: 'varchar',
-        length: 2083,
-    })
-    @IsOptional()
-    @IsString()
-    pub_image?: string;
 
     @Column({
         name: 'pub_description',
@@ -72,4 +62,7 @@ export class Publication {
 
     @OneToMany(() => ReportPublication, reportPublication => reportPublication.publication)
     reportPublication: ReportPublication;
+    
+    @OneToMany(() => PublicationMultimedia, publicationMultimedia => publicationMultimedia.publication)
+    publicationMultimedia: PublicationMultimedia;
 }

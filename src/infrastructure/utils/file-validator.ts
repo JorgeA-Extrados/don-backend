@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { Express } from 'express';
 
+
 type AllowedTypes = 'image' | 'video';
 
 const IMAGE_MIME_TYPES = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];

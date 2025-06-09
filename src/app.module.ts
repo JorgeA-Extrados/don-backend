@@ -22,6 +22,7 @@ import { CreditsDonModule } from './credits-don/credits-don.module';
 import { CreditsReasonModule } from './credits-reason/credits-reason.module';
 import { KeepAliveService } from './keep-alive.service';
 import { ProfessionalRecommendationModule } from './professional_recommendation/professional_recommendation.module';
+import { PublicationMultimediaModule } from './publication-multimedia/publication-multimedia.module';
 
 @Module({
   imports: [
@@ -103,6 +104,7 @@ import { ProfessionalRecommendationModule } from './professional_recommendation/
     CreditsDonModule,
     CreditsReasonModule,
     ProfessionalRecommendationModule,
+    PublicationMultimediaModule,
   ],
   controllers: [AppController],
   providers: [AppService, KeepAliveService],

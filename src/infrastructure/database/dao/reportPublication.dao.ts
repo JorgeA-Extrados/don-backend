@@ -6,6 +6,7 @@ import { Publication } from "src/publication/entities/publication.entity";
 import { ReportPublication } from "src/report-publication/entities/report-publication.entity";
 import { ReportReason } from "src/report-reason/entities/report-reason.entity";
 import { CreateReportPublicationDto } from "src/report-publication/dto/create-report-publication.dto";
+import { PublicationMultimedia } from "src/publication-multimedia/entities/publication-multimedia.entity";
 
 
 
@@ -17,6 +18,8 @@ export class ReportPublicationDao {
         private reportPublicationRepository: Repository<ReportPublication>,
         @InjectRepository(Publication)
         private publicationRepository: Repository<Publication>,
+        @InjectRepository(PublicationMultimedia)
+        private publicationMultimediaRepository: Repository<PublicationMultimedia>,
         @InjectRepository(User)
         private userRepository: Repository<User>,
         @InjectRepository(ReportReason)
@@ -52,48 +55,90 @@ export class ReportPublicationDao {
 
     async getReportPublicationById(repID: number) {
         try {
-            const reportPublication = await this.reportPublicationRepository.findOne({
-                where: {
-                    rep_id: repID,
-                    rep_delete: IsNull()
-                },
-                relations: {
-                    whoReported: {
-                        professional: true,
-                        supplier: true
-                    },
-                    publication: true,
-                    reportReason: true
-                },
-                select: {
-                    rep_id: true,
-                    rep_description: true,
-                    rep_create: true,
-                    whoReported: {
-                        usr_id: true,
-                        usr_email: true,
-                        usr_invitationCode: true,
-                        usr_name: true,
-                        usr_role: true,
-                        usr_phone: true,
-                        professional: {
-                            pro_profilePicture: true,
-                        },
-                        supplier: {
-                            sup_profilePicture: true
-                        }
-                    },
-                    publication: {
-                        pub_id: true,
-                        pub_description: true,
-                        pub_image: true
-                    },
-                    reportReason: {
-                        rea_id: true,
-                        rea_reason: true
-                    }
-                }
-            })
+            // const reportPublication = await this.reportPublicationRepository.findOne({
+            //     where: {
+            //         rep_id: repID,
+            //         rep_delete: IsNull()
+            //     },
+            //     relations: {
+            //         whoReported: {
+            //             professional: true,
+            //             supplier: true
+            //         },
+            //         publication: {
+            //             publicationMultimedia: true
+            //         },
+            //         reportReason: true
+            //     },
+            //     select: {
+            //         rep_id: true,
+            //         rep_description: true,
+            //         rep_create: true,
+            //         whoReported: {
+            //             usr_id: true,
+            //             usr_email: true,
+            //             usr_invitationCode: true,
+            //             usr_name: true,
+            //             usr_role: true,
+            //             usr_phone: true,
+            //             professional: {
+            //                 pro_profilePicture: true,
+            //             },
+            //             supplier: {
+            //                 sup_profilePicture: true
+            //             }
+            //         },
+            //         publication: {
+            //             pub_id: true,
+            //             pub_description: true,
+            //             publicationMultimedia: {
+            //                 pmt_file: true,
+            //                 pmt_type: true
+            //             }
+            //         },
+            //         reportReason: {
+            //             rea_id: true,
+            //             rea_reason: true
+            //         }
+            //     }
+            // })
+
+            const reportPublication = await this.reportPublicationRepository
+                .createQueryBuilder('reportPublication')
+                .leftJoinAndSelect('reportPublication.whoReported', 'whoReported')
+                .leftJoinAndSelect('whoReported.professional', 'professional')
+                .leftJoinAndSelect('whoReported.supplier', 'supplier')
+                .leftJoinAndSelect('reportPublication.publication', 'publication')
+                .leftJoinAndSelect('publication.publicationMultimedia', 'publicationMultimedia')
+                .leftJoinAndSelect('reportPublication.reportReason', 'reportReason')
+                .where('reportPublication.rep_id = :repID', { repID })
+                .andWhere('reportPublication.rep_delete IS NULL')
+                .select([
+                    'reportPublication.rep_id',
+                    'reportPublication.rep_description',
+                    'reportPublication.rep_create',
+
+                    'whoReported.usr_id',
+                    'whoReported.usr_email',
+                    'whoReported.usr_invitationCode',
+                    'whoReported.usr_name',
+                    'whoReported.usr_role',
+                    'whoReported.usr_phone',
+
+                    'professional.pro_profilePicture',
+                    'supplier.sup_profilePicture',
+
+                    'publication.pub_id',
+                    'publication.pub_description',
+
+                    'publicationMultimedia.pmt_file',
+                    'publicationMultimedia.pmt_type',
+
+                    'reportReason.rea_id',
+                    'reportReason.rea_reason'
+                ])
+                .getOne();
+
 
             return reportPublication
 
@@ -108,47 +153,89 @@ export class ReportPublicationDao {
 
     async getAllReportPublication() {
         try {
-            const reportPublication = await this.reportPublicationRepository.find({
-                where: {
-                    rep_delete: IsNull()
-                },
-                relations: {
-                    whoReported: {
-                        professional: true,
-                        supplier: true
-                    },
-                    publication: true,
-                    reportReason: true
-                },
-                select: {
-                    rep_id: true,
-                    rep_description: true,
-                    rep_create: true,
-                    whoReported: {
-                        usr_id: true,
-                        usr_email: true,
-                        usr_invitationCode: true,
-                        usr_name: true,
-                        usr_role: true,
-                        usr_phone: true,
-                        professional: {
-                            pro_profilePicture: true,
-                        },
-                        supplier: {
-                            sup_profilePicture: true
-                        }
-                    },
-                    publication: {
-                        pub_id: true,
-                        pub_description: true,
-                        pub_image: true
-                    },
-                    reportReason: {
-                        rea_id: true,
-                        rea_reason: true
-                    }
-                }
-            })
+            // const reportPublication = await this.reportPublicationRepository.find({
+            //     where: {
+            //         rep_delete: IsNull()
+            //     },
+            //     relations: {
+            //         whoReported: {
+            //             professional: true,
+            //             supplier: true
+            //         },
+            //         publication: {
+            //             publicationMultimedia: true
+            //         },
+            //         reportReason: true
+            //     },
+            //     select: {
+            //         rep_id: true,
+            //         rep_description: true,
+            //         rep_create: true,
+            //         whoReported: {
+            //             usr_id: true,
+            //             usr_email: true,
+            //             usr_invitationCode: true,
+            //             usr_name: true,
+            //             usr_role: true,
+            //             usr_phone: true,
+            //             professional: {
+            //                 pro_profilePicture: true,
+            //             },
+            //             supplier: {
+            //                 sup_profilePicture: true
+            //             }
+            //         },
+            //         publication: {
+            //             pub_id: true,
+            //             pub_description: true,
+            //             publicationMultimedia: {
+            //                 pmt_file: true,
+            //                 pmt_type: true
+            //             }
+            //         },
+            //         reportReason: {
+            //             rea_id: true,
+            //             rea_reason: true
+            //         }
+            //     }
+            // })
+
+            const reportPublication = await this.reportPublicationRepository
+                .createQueryBuilder('reportPublication')
+                .leftJoinAndSelect('reportPublication.whoReported', 'whoReported')
+                .leftJoinAndSelect('whoReported.professional', 'professional')
+                .leftJoinAndSelect('whoReported.supplier', 'supplier')
+                .leftJoinAndSelect('reportPublication.publication', 'publication')
+                .leftJoinAndSelect('publication.publicationMultimedia', 'publicationMultimedia')
+                .leftJoinAndSelect('reportPublication.reportReason', 'reportReason')
+                .where('reportPublication.rep_delete IS NULL')
+                .select([
+                    'reportPublication.rep_id',
+                    'reportPublication.rep_description',
+                    'reportPublication.rep_create',
+
+                    'whoReported.usr_id',
+                    'whoReported.usr_email',
+                    'whoReported.usr_invitationCode',
+                    'whoReported.usr_name',
+                    'whoReported.usr_role',
+                    'whoReported.usr_phone',
+
+                    'professional.pro_profilePicture',
+                    'supplier.sup_profilePicture',
+
+                    'publication.pub_id',
+                    'publication.pub_description',
+
+                    'publicationMultimedia.pmt_file',
+                    'publicationMultimedia.pmt_type',
+
+                    'reportReason.rea_id',
+                    'reportReason.rea_reason'
+                ])
+                .orderBy('reportPublication.rep_create', 'DESC') // opcional si querés orden
+                .getMany();
+
 
             return reportPublication
 
@@ -205,50 +292,91 @@ export class ReportPublicationDao {
 
     async getReportPublicationByPUBID(pubID: number) {
         try {
-            const reportPublication = await this.reportPublicationRepository.find({
-                where: {
-                    publication: { pub_id: pubID },
-                    // rep_state: 'pendiente',
-                    rep_delete: IsNull()
-                },
-                relations: {
-                    whoReported: {
-                        professional: true,
-                        supplier: true
-                    },
-                    publication: true,
-                    reportReason: true
-                },
-                select: {
-                    rep_id: true,
-                    rep_description: true,
-                    rep_create: true,
-                    rep_state: true,
-                    whoReported: {
-                        usr_id: true,
-                        usr_email: true,
-                        usr_invitationCode: true,
-                        usr_name: true,
-                        usr_role: true,
-                        usr_phone: true,
-                        professional: {
-                            pro_profilePicture: true,
-                        },
-                        supplier: {
-                            sup_profilePicture: true
-                        }
-                    },
-                    publication: {
-                        pub_id: true,
-                        pub_description: true,
-                        pub_image: true
-                    },
-                    reportReason: {
-                        rea_id: true,
-                        rea_reason: true
-                    }
-                }
-            })
+            // const reportPublication = await this.reportPublicationRepository.find({
+            //     where: {
+            //         publication: { pub_id: pubID },
+            //         rep_delete: IsNull()
+            //     },
+            //     relations: {
+            //         whoReported: {
+            //             professional: true,
+            //             supplier: true
+            //         },
+            //         publication: {
+            //             publicationMultimedia: true
+            //         },
+            //         reportReason: true
+            //     },
+            //     select: {
+            //         rep_id: true,
+            //         rep_description: true,
+            //         rep_create: true,
+            //         rep_state: true,
+            //         whoReported: {
+            //             usr_id: true,
+            //             usr_email: true,
+            //             usr_invitationCode: true,
+            //             usr_name: true,
+            //             usr_role: true,
+            //             usr_phone: true,
+            //             professional: {
+            //                 pro_profilePicture: true,
+            //             },
+            //             supplier: {
+            //                 sup_profilePicture: true
+            //             }
+            //         },
+            //         publication: {
+            //             pub_id: true,
+            //             pub_description: true,
+            //             publicationMultimedia: {
+            //                 pmt_file: true,
+            //                 pmt_type: true
+            //             }
+            //         },
+            //         reportReason: {
+            //             rea_id: true,
+            //             rea_reason: true
+            //         }
+            //     }
+            // })
+            const reportPublication = await this.reportPublicationRepository
+                .createQueryBuilder('reportPublication')
+                .leftJoinAndSelect('reportPublication.whoReported', 'whoReported')
+                .leftJoinAndSelect('whoReported.professional', 'professional')
+                .leftJoinAndSelect('whoReported.supplier', 'supplier')
+                .leftJoinAndSelect('reportPublication.publication', 'publication')
+                .leftJoinAndSelect('publication.publicationMultimedia', 'publicationMultimedia')
+                .leftJoinAndSelect('reportPublication.reportReason', 'reportReason')
+                .where('reportPublication.rep_delete IS NULL')
+                .andWhere('publication.pub_id = :pubID', { pubID })
+                .select([
+                    'reportPublication.rep_id',
+                    'reportPublication.rep_description',
+                    'reportPublication.rep_create',
+                    'reportPublication.rep_state',
+
+                    'whoReported.usr_id',
+                    'whoReported.usr_email',
+                    'whoReported.usr_invitationCode',
+                    'whoReported.usr_name',
+                    'whoReported.usr_role',
+                    'whoReported.usr_phone',
+
+                    'professional.pro_profilePicture',
+                    'supplier.sup_profilePicture',
+
+                    'publication.pub_id',
+                    'publication.pub_description',
+
+                    'publicationMultimedia.pmt_file',
+                    'publicationMultimedia.pmt_type',
+
+                    'reportReason.rea_id',
+                    'reportReason.rea_reason'
+                ])
+                .getMany();
+
 
             return reportPublication
 
@@ -285,6 +413,70 @@ export class ReportPublicationDao {
     }
 
     async getAllPendingReportedPublications() {
+        // const subQuery = this.reportPublicationRepository
+        //     .createQueryBuilder('r')
+        //     .innerJoin('r.publication', 'pub')
+        //     .innerJoin('r.reportReason', 'rea')
+        //     .where('r.rep_state = :state', { state: 'PENDIENTE' })
+        //     .andWhere('r.rep_delete IS NULL')
+        //     .select([
+        //         'pub.pub_id AS pub_id',
+        //         'rea.rea_id AS rea_id',
+        //         'rea.rea_reason AS rea_reason',
+        //         'COUNT(r.rep_id) AS cantidad'
+        //     ])
+        //     .groupBy('pub.pub_id, rea.rea_id');
+
+        // const rawMotivos = await subQuery.getRawMany();
+
+        // // Agrupamos los motivos por publicación
+        // const motivosMap = new Map<number, any[]>();
+        // rawMotivos.forEach(row => {
+        //     const pubId = row.pub_id;
+        //     const motivo = {
+        //         rea_id: row.rea_id,
+        //         rea_reason: row.rea_reason,
+        //         cantidad: Number(row.cantidad)
+        //     };
+
+        //     if (!motivosMap.has(pubId)) {
+        //         motivosMap.set(pubId, []);
+        //     }
+        //     const motivos = motivosMap.get(pubId)!; // ¡Safe!
+        //     motivos.push(motivo);
+        // });
+
+        // // Consulta principal por publicación
+        // const publicaciones = await this.reportPublicationRepository
+        //     .createQueryBuilder('report')
+        //     .innerJoin('report.publication', 'publication')
+        //     .leftJoinAndSelect('publication.publicationMultimedia', 'publicationMultimedia')
+        //     .where('report.rep_state = :state', { state: 'PENDIENTE' })
+        //     .andWhere('report.rep_delete IS NULL')
+        //     .select([
+        //         'publication.pub_id AS pub_id',
+        //         'publication.pub_description AS pub_description',
+        //         'publicationMultimedia.pmt_file AS pmt_file',
+        //         'publicationMultimedia.pmt_type AS pmt_type',
+        //         'COUNT(report.rep_id) AS total_reports'
+        //     ])
+        //     .groupBy('publication.pub_id')
+        //     .getRawMany();
+
+        // console.log('==========publicaciones==========================');
+        // console.log(publicaciones);
+        // console.log('====================================');
+
+        // // Armamos la respuesta final con los motivos agrupados
+        // return publicaciones.map(pub => ({
+        //     pub_id: pub.pub_id,
+        //     pub_description: pub.pub_description,
+        //     publicationMultimedia: pub.publicationMultimedia,
+        //     total_reports: Number(pub.total_reports),
+        //     motivos: motivosMap.get(pub.pub_id) || []
+        // }));
+
+        // Subquery de motivos
         const subQuery = this.reportPublicationRepository
             .createQueryBuilder('r')
             .innerJoin('r.publication', 'pub')
@@ -311,14 +503,11 @@ export class ReportPublicationDao {
                 cantidad: Number(row.cantidad)
             };
 
-            if (!motivosMap.has(pubId)) {
-                motivosMap.set(pubId, []);
-            }
-            const motivos = motivosMap.get(pubId)!; // ¡Safe!
-            motivos.push(motivo);
+            if (!motivosMap.has(pubId)) motivosMap.set(pubId, []);
+            motivosMap.get(pubId)!.push(motivo);
         });
 
-        // Consulta principal por publicación
+        // Publicaciones base
         const publicaciones = await this.reportPublicationRepository
             .createQueryBuilder('report')
             .innerJoin('report.publication', 'publication')
@@ -327,20 +516,51 @@ export class ReportPublicationDao {
             .select([
                 'publication.pub_id AS pub_id',
                 'publication.pub_description AS pub_description',
-                'publication.pub_image AS pub_image',
                 'COUNT(report.rep_id) AS total_reports'
             ])
             .groupBy('publication.pub_id')
             .getRawMany();
 
-        // Armamos la respuesta final con los motivos agrupados
+        // Multimedia por publicación (sin groupBy aquí)
+        const multimedia = await this.publicationMultimediaRepository
+            .createQueryBuilder('multimedia')
+            .innerJoin('multimedia.publication', 'publication')
+            .select([
+                'publication.pub_id AS pub_id',
+                'multimedia.pmt_file AS pmt_file',
+                'multimedia.pmt_type AS pmt_type'
+            ])
+            .getRawMany();
+
+        // Agrupamos multimedia por pub_id
+        const multimediaMap = new Map<number, any[]>();
+        multimedia.forEach(item => {
+            const pubId = item.pub_id;
+            const media = {
+                pmt_file: item.pmt_file,
+                pmt_type: item.pmt_type
+            };
+
+            if (!multimediaMap.has(pubId)) multimediaMap.set(pubId, []);
+            multimediaMap.get(pubId)!.push(media);
+        });
+
+        // Armamos la respuesta final
         return publicaciones.map(pub => ({
             pub_id: pub.pub_id,
             pub_description: pub.pub_description,
-            pub_image: pub.pub_image,
+            publicationMultimedia: multimediaMap.get(pub.pub_id) || [],
             total_reports: Number(pub.total_reports),
             motivos: motivosMap.get(pub.pub_id) || []
         }));
+    }
+
+    async deleteReportPublicationFisicaById(pubID: number): Promise<void> {
+        try {
+            await this.reportPublicationRepository.delete(pubID);
+        } catch (error) {
+            throw new Error(`Error eliminando el reporte con id ${pubID}: ${error.message}`);
+        }
     }
 
 

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { UserHeadingService } from './user-heading.service';
 import { CreateUserHeadingDto } from './dto/create-user-heading.dto';
 import { UpdateUserHeadingDto } from './dto/update-user-heading.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('user-heading')
 export class UserHeadingController {
@@ -39,9 +40,9 @@ export class UserHeadingController {
     return this.userHeadingService.deleteUserHeading(+id);
   }
 
-  @Patch('update/:id')
-  // @UseGuards(JwtAuthGuard)
-  updateUserHeading(@Param('id') id: string, @Body() updateUserHeadingDto: UpdateUserHeadingDto) {
-    return this.userHeadingService.updateUserHeading(+id, updateUserHeadingDto);
+  @Patch('update')
+  @UseGuards(JwtAuthGuard)
+  updateUserHeading(@Body() updateUserHeadingDto: UpdateUserHeadingDto) {
+    return this.userHeadingService.updateUserHeading(updateUserHeadingDto);
   }
 }
