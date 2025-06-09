@@ -74,6 +74,43 @@ export class ServicesSearchDao {
         }
     }
 
+    async getServicesSearchByUsrId(userID: number) {
+        try {
+            const servicesSearch = await this.servicesSearchRepository.findOne({
+                where: {
+                    user: {usr_id: userID},
+                    sea_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    sea_id: true,
+                    sea_firstName: true,
+                    sea_lastName: true,
+                    sea_latitude: true,
+                    sea_longitude: true,
+                    sea_profilePicture: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
+                }
+            })
+
+            return servicesSearch
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     async getAllServicesSearch() {
         try {
             const servicesSearch = await this.servicesSearchRepository.find({

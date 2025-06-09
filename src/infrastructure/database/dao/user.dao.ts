@@ -32,8 +32,8 @@ export class UserDao {
                     usr_password: hashedPassword,
                     usr_phone,
                     usr_create: new Date(),
-                    usr_over,
-                    usr_terms,
+                    usr_over: true,
+                    usr_terms: true,
                     usr_invitationCode,
                     usr_verified: true,
                 })
@@ -60,8 +60,8 @@ export class UserDao {
                     usr_phone,
                     usr_create: new Date(),
                     usr_verification_code,
-                    usr_over,
-                    usr_terms,
+                    usr_over: true,
+                    usr_terms: true,
                     usr_invitationCode
                 })
             }
@@ -143,12 +143,19 @@ export class UserDao {
             const user = await this.userRepository.findOne({
                 where: {
                     usr_id: usrId,
-                    usr_delete: IsNull()
+                    usr_delete: IsNull(),
+                    userHeading: {
+                        ush_delete: IsNull()
+                    }
                 },
                 relations: {
                     professional: true,
                     servicesSearch: true,
-                    supplier: true
+                    supplier: true,
+                    userHeading: {
+                        heading: true,
+                        //subHeading: true
+                    }
                 }
             })
 

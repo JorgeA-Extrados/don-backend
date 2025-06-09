@@ -4,17 +4,46 @@ import { UpdateReportPublicationDto } from './dto/update-report-publication.dto'
 import { ReportPublicationDao } from 'src/infrastructure/database/dao/reportPublication.dao';
 import { CreateChangeOfStateDto } from './dto/change-of-state.dto';
 import { PublicationDao } from 'src/infrastructure/database/dao/publication.dao';
+import { EmailRepository } from 'src/infrastructure/utils/email/email.repository';
 
 @Injectable()
 export class ReportPublicationService {
   constructor(
     private readonly reportPublicationDao: ReportPublicationDao,
     private readonly publicationDao: PublicationDao,
+    private readonly emailRepository: EmailRepository,
   ) { }
 
   async createReportPublication(createReportPublicationDto: CreateReportPublicationDto) {
 
-    const reportPublication = await this.reportPublicationDao.createReportPublication(createReportPublicationDto);
+    const reportPublication = (await this.reportPublicationDao.createReportPublication(createReportPublicationDto));
+
+    console.log('Type of reportPublication:', Array.isArray(reportPublication) ? 'array' : 'object');
+    console.log(reportPublication);
+
+
+    const report = await this.reportPublicationDao.getReportPublicationById(reportPublication.rep_id)
+
+    const iso = report?.rep_create?.toISOString();
+
+    const formattedDate = iso
+      ? iso.replace('T', ' ').substring(0, 19) // Quita la T y el .000Z dejando solo "YYYY-MM-DD HH:mm:ss"
+      : null;
+
+    const emailReport = {
+      pub_image: report?.publication.publicationMultimedia[0].pmt_file,
+      pub_description: report?.publication.pub_description,
+      rep_create: formattedDate,
+      rea_reason: report?.reportReason.rea_reason
+    }
+
+    try {
+      await this.emailRepository.reportPublicationEmail(emailReport);
+    } catch (error) {
+      throw new UnauthorizedException('Error al enviar el código de verificación.')
+    }
+
+
 
     return {
       message: 'Reporte realizado con éxito.',
@@ -146,7 +175,8 @@ export class ReportPublicationService {
         };
       }
 
-      const { pub_id, pub_image } = reports[0].publication;
+      //const { pub_id, pub_image } = reports[0].publication;
+      const { pub_id, publicationMultimedia } = reports[0].publication;
 
       const groupedReasons = new Map();
 
@@ -179,7 +209,7 @@ export class ReportPublicationService {
         statusCode: HttpStatus.OK,
         data: {
           pub_id,
-          pub_image,
+          publicationMultimedia: publicationMultimedia,
           totalReports: reports.length,
           reasons,
         },

@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
 
 export class CreateProfessionalDto {
     @IsNotEmpty()
@@ -27,11 +27,16 @@ export class CreateProfessionalDto {
 
     @IsOptional()
     @IsString()
+    @MaxLength(160, { message: 'La descripción no puede superar los 160 caracteres.' })
     pro_description?: string;
 
     @IsString()
     @IsOptional()
     usr_name?: string;
+    
+    @IsOptional()
+    @IsString()
+    usr_phone?: string;
 
     @IsNotEmpty()
     @IsInt()

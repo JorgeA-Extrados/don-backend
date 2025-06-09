@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { UserDao } from 'src/infrastructure/database/dao/user.dao';
@@ -24,10 +24,23 @@ import { AuthService } from 'src/auth/auth.service';
 import { ForgotPasswordDao } from 'src/infrastructure/database/dao/forgot_password.dao';
 import { ForgotPasswordAttemptsDao } from 'src/infrastructure/database/dao/forgot_password_attempts.dao';
 import { ForgotPasswordAttempts } from 'src/auth/entities/forgot_password_attempts.entity';
+import { ExperienceDao } from 'src/infrastructure/database/dao/experiences.dao';
+import { Experience } from 'src/experiences/entities/experience.entity';
+import { UserHeadingDao } from 'src/infrastructure/database/dao/userHeading.dao';
+import { UserHeading } from 'src/user-heading/entities/user-heading.entity';
+import { PublicationDao } from 'src/infrastructure/database/dao/publication.dao';
+import { Publication } from 'src/publication/entities/publication.entity';
+import { Category } from 'src/categories/entities/category.entity';
+import { Heading } from 'src/heading/entities/heading.entity';
+import { SubHeading } from 'src/sub-heading/entities/sub-heading.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports:[TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, UserVerificationAttempts, Professional, ServicesSearch, Supplier, ForgotPasswordAttempts])],
+  imports: [
+    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, UserVerificationAttempts, Professional, ServicesSearch, Supplier, ForgotPasswordAttempts, Experience, UserHeading, Publication, Category, Heading, SubHeading]),
+    forwardRef(() => AuthModule),
+  ],
   controllers: [UserController],
-  providers: [UserService, UserDao, RefreshTokenService, JwtService, EmailRepository, CreditsDonDao, UserVerificationAttemptsDao, ProfessionalDao, ServicesSearchDao, SupplierDao, AuthService, ForgotPasswordDao, ForgotPasswordAttemptsDao],
+  providers: [UserService, UserDao, RefreshTokenService, EmailRepository, CreditsDonDao, UserVerificationAttemptsDao, ProfessionalDao, ServicesSearchDao, SupplierDao, ForgotPasswordDao, ForgotPasswordAttemptsDao, ExperienceDao, UserHeadingDao, PublicationDao, JwtService],
 })
-export class UserModule {}
+export class UserModule { }

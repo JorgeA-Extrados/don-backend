@@ -74,6 +74,43 @@ export class SupplierDao {
         }
     }
 
+    async getSupplierByUserId(userID: number) {
+        try {
+            const supplier = await this.supplierRepository.findOne({
+                where: {
+                    user: {usr_id: userID},
+                    sup_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    sup_id: true,
+                    sup_firstName: true,
+                    sup_lastName: true,
+                    sup_latitude: true,
+                    sup_longitude: true,
+                    sup_profilePicture: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
+                }
+            })
+
+            return supplier
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     async getAllSupplier() {
         try {
             const supplier = await this.supplierRepository.find({

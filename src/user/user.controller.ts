@@ -30,10 +30,16 @@ export class UserController {
     return this.userService.deleteUser(req);
   }
 
-  @Patch('update/:id')
+  @Patch('update')
   @UseGuards(JwtAuthGuard)
-  updateUser(@Param('id') id: string, @Body() createAllUserDto: CreateAllUserDto) {
-    return this.userService.updateUser(+id, createAllUserDto);
+  updateUser(@Request() req, @Body() createAllUserDto: CreateAllUserDto) {
+    return this.userService.updateUser(req, createAllUserDto);
   }
+
+  // @Patch('updatePerfil/:id')
+  // @UseGuards(JwtAuthGuard)
+  // updatePerfil(@Param('id') id: string, @Body() createAllUserDto: CreateAllUserDto) {
+  //   return this.userService.updatePerfil(+id, createAllUserDto);
+  // }
 
 }

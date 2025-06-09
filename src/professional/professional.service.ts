@@ -18,19 +18,22 @@ export class ProfessionalService {
 
   async createProfessional(createProfessionalDto: CreateProfessionalDto) {
 
-    const { usr_name, usr_id } = createProfessionalDto
-    if (usr_name) {
-      const name = await this.userDao.getUserByName(usr_name)
+    const { usr_name, usr_id, usr_phone } = createProfessionalDto
+    if (usr_name || usr_phone) {
+      if (usr_name) {
+        const name = await this.userDao.getUserByName(usr_name)
 
-      if (name) {
-        return {
-          message: 'El nombre de usuario ya se encuentra en uso.',
-          statusCode: HttpStatus.NOT_FOUND,
-        };
+        if (name) {
+          return {
+            message: 'El nombre de usuario ya se encuentra en uso.',
+            statusCode: HttpStatus.NOT_FOUND,
+          };
+        }
       }
 
       const update = {
-        usr_name
+        usr_name,
+        usr_phone
       }
       await this.userDao.updateUser(usr_id, update)
     }
@@ -193,11 +196,11 @@ export class ProfessionalService {
 
   async searchProfessionals(searchProfessionalDto: SearchProfessionalDto, req) {
     try {
-      
+
       const { userId } = req.user
 
       const profesional = await this.professionalDao.getProfessionalByUsrId(userId)
-      
+
       const searchProfessional = await this.professionalDao.searchProfessionals(searchProfessionalDto, profesional?.pro_id);
 
       if (searchProfessional.length === 0) {

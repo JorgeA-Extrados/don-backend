@@ -176,7 +176,7 @@ export class ProfessionalDao {
         return await this.professionalRepository
             .update(
                 { pro_id: proID },
-                updateProfessionalDto
+                updateProfessionalDto,
             )
             .then(() => {
                 return {
@@ -204,6 +204,10 @@ export class ProfessionalDao {
             .leftJoinAndSelect('heading.subHeading', 'subHeading')
             .where(qb => {
                 const wheres: string[] = [];
+
+                // Filtro por que no estén eliminados
+                wheres.push('user.usr_delete IS NULL');
+                wheres.push('professional.pro_delete IS NULL');
 
                 if (hea_id) {
                     wheres.push('heading.hea_id = :hea_id');
@@ -239,6 +243,7 @@ export class ProfessionalDao {
                     const searchCondition = `
                         (
                         LOWER(heading.hea_name) LIKE :search OR
+                        LOWER(subHeading.sbh_name) LIKE :search OR
                         LOWER(user.usr_name) LIKE :search OR
                         LOWER(user.usr_phone) LIKE :search OR
                         LOWER(professional.pro_firstName) LIKE :search

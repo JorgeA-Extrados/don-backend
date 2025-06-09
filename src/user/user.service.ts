@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, forwardRef, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDao } from 'src/infrastructure/database/dao/user.dao';
@@ -13,6 +13,10 @@ import { ProfessionalDao } from 'src/infrastructure/database/dao/professional.da
 import { ServicesSearchDao } from 'src/infrastructure/database/dao/services_search.dao';
 import { SupplierDao } from 'src/infrastructure/database/dao/supplier.dao';
 import { CreateAllUserDto } from './dto/all-user.dto';
+
+import { ExperienceDao } from 'src/infrastructure/database/dao/experiences.dao';
+import { UserHeadingDao } from 'src/infrastructure/database/dao/userHeading.dao';
+import { PublicationDao } from 'src/infrastructure/database/dao/publication.dao';
 import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
@@ -29,7 +33,11 @@ export class UserService {
     private readonly professionalDao: ProfessionalDao,
     private readonly servicesSearchDao: ServicesSearchDao,
     private readonly supplierDao: SupplierDao,
+    @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
+    private readonly experienceDao: ExperienceDao,
+    private readonly userHeadingDao: UserHeadingDao,
+    private readonly publicationDao: PublicationDao,
   ) {
     // this.client = Twilio(
     //   process.env.TWILIO_ACCOUNT_SID,
@@ -175,7 +183,11 @@ export class UserService {
         };
       }
 
-      const { professional, servicesSearch, supplier } = user
+      const { professional, servicesSearch, supplier } = user;
+
+      const userHeading = (user.userHeading ?? []) as unknown as any[];
+
+      const usr_heading = userHeading.map((item) => item.heading?.hea_name).filter(Boolean);
 
       const usr_profilePicture =
         professional?.pro_profilePicture ??
@@ -194,6 +206,22 @@ export class UserService {
         supplier?.sup_lastName ??
         servicesSearch?.sea_lastName ??
         null;
+
+      // const processAddress = (address: string | null): string | null => {
+      //   if (!address) return null;
+
+      //   const parts = address.split(',');
+      //   return parts.length <= 1
+      //     ? address.trim()
+      //     : parts.slice(1).join(',').trim();
+      // };
+
+      // const usr_address = processAddress(
+      //   professional?.pro_address ??
+      //   supplier?.sup_address ??
+      //   servicesSearch?.sea_address ??
+      //   null
+      // );
 
       const usr_address =
         professional?.pro_address ??
@@ -218,9 +246,9 @@ export class UserService {
         usr_firstName,
         usr_lastName,
         usr_address,
-        usr_description
-      }
-
+        usr_description,
+        usr_heading
+      };
 
       return {
         message: 'Usuario',
@@ -235,6 +263,7 @@ export class UserService {
       });
     }
   }
+
 
   async getAllUser() {
     try {
@@ -326,6 +355,56 @@ export class UserService {
         await this.refreshTokenService.deleteRefreshToken(refresh.rft_token)
       }
 
+      const servicesSearch = await this.servicesSearchDao.getServicesSearchByUsrId(userId)
+
+      if (servicesSearch) {
+        await this.servicesSearchDao.deleteServicesSearch(servicesSearch.sea_id)
+      }
+
+      const supplier = await this.supplierDao.getSupplierByUserId(userId)
+
+      if (supplier) {
+        await this.supplierDao.deleteSupplier(supplier.sup_id)
+      }
+
+      const professional = await this.professionalDao.getProfessionalByUsrId(userId)
+
+      if (professional) {
+        await this.professionalDao.deleteProfessional(professional.pro_id)
+      }
+
+      const experience = await this.experienceDao.getAllExperienceByUserID(userId)
+
+      if (experience.length > 0) {
+        experience.map(async (expt) => {
+          await this.experienceDao.deleteExperience(expt.exp_id)
+        })
+      }
+
+      const userHeading = await this.userHeadingDao.getUserHeadingByUserId(userId)
+
+      if (userHeading.length > 0) {
+        userHeading.map(async (userHea) => {
+          await this.userHeadingDao.deleteUserHeading(userHea.ush_id)
+        })
+      }
+
+      const publication = await this.publicationDao.getPublicationByUserId(userId)
+
+      if (publication.length > 0) {
+        publication.map(async (pub) => {
+          await this.publicationDao.deletePublication(pub.pub_id)
+        })
+      }
+
+      const creditsDon = await this.creditsDonDao.getCreditsDonByUsrIdDelete(userId)
+
+      if (creditsDon.length > 0) {
+        creditsDon.map(async (cred) => {
+          await this.creditsDonDao.deleteCreditsDon(cred.cre_id)
+        })
+      }
+
       await this.userDao.deleteUser(userId)
 
       return {
@@ -341,9 +420,11 @@ export class UserService {
     }
   }
 
-  async updateUser(id, createAllUserDto: CreateAllUserDto) {
+  async updateUser(req, createAllUserDto: CreateAllUserDto) {
     try {
-      const user = await this.userDao.getUserById(id)
+      const { userId } = req.user
+
+      const user = await this.userDao.getUserById(userId)
 
       if (!user) {
         return {
@@ -353,7 +434,7 @@ export class UserService {
       }
       // Actualizamos el usuario base (campos que pertenezcan a la entidad User)
       const userFields = this.extractUserFields(createAllUserDto);
-      await this.userDao.updateUser(id, userFields);
+      await this.userDao.updateUser(userId, userFields);
 
       // Dependiendo del rol o subperfil relacionado, actualizamos el subperfil correspondiente
       if (user.professional) {
@@ -367,10 +448,10 @@ export class UserService {
         await this.supplierDao.updateSupplier(user.supplier.sup_id, supFields);
       }
 
-      const newUser = await this.userDao.getUserById(id)
+      const newUser = await this.userDao.getUserById(userId)
 
       return {
-        message: 'Usuario eliminado',
+        message: 'Usuario actualizado',
         statusCode: HttpStatus.OK,
         data: {
           User: newUser
@@ -543,8 +624,8 @@ export class UserService {
   private extractUserFields(dto: any) {
     const fields: any = {};
 
-    if (dto.usr_name != null) fields.usr_name = dto.usr_name;
     if (dto.usr_phone != null) fields.usr_phone = dto.usr_phone;
+    fields.usr_update = new Date()
 
     return fields;
   }
@@ -557,8 +638,8 @@ export class UserService {
     if (dto.usr_latitude != null) fields.pro_latitude = dto.usr_latitude;
     if (dto.usr_longitude != null) fields.pro_longitude = dto.usr_longitude;
     if (dto.usr_address != null) fields.pro_address = dto.usr_address;
-    if (dto.usr_profilePicture != null) fields.pro_profilePicture = dto.usr_profilePicture;
     if (dto.usr_description != null) fields.pro_description = dto.usr_description;
+    fields.pro_update = new Date()
 
     return fields;
   }
@@ -571,8 +652,8 @@ export class UserService {
     if (dto.usr_latitude != null) fields.sea_latitude = dto.usr_latitude;
     if (dto.usr_longitude != null) fields.sea_longitude = dto.usr_longitude;
     if (dto.usr_address != null) fields.sea_address = dto.usr_address;
-    if (dto.usr_profilePicture != null) fields.sea_profilePicture = dto.usr_profilePicture;
     if (dto.usr_description != null) fields.sea_description = dto.usr_description;
+    fields.sea_update = new Date()
 
     return fields;
   }
@@ -585,8 +666,8 @@ export class UserService {
     if (dto.usr_latitude != null) fields.sup_latitude = dto.usr_latitude;
     if (dto.usr_longitude != null) fields.sup_longitude = dto.usr_longitude;
     if (dto.usr_address != null) fields.sup_address = dto.usr_address;
-    if (dto.usr_profilePicture != null) fields.sup_profilePicture = dto.usr_profilePicture;
     if (dto.usr_description != null) fields.sup_description = dto.usr_description;
+    fields.sup_update = new Date()
 
     return fields;
   }

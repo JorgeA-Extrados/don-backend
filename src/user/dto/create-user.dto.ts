@@ -45,10 +45,12 @@ export class CreateUserDto {
     usr_phone?: string;
 
     @IsBoolean()
-    usr_terms: boolean;
+    @IsOptional()
+    usr_terms?: boolean;
 
     @IsBoolean()
-    usr_over: boolean;
+    @IsOptional()
+    usr_over?: boolean;
 
     @IsBoolean()
     @IsOptional()
