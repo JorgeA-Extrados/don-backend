@@ -82,12 +82,31 @@ export class ExperienceDao {
         }
     }
 
-    async getAllExperienceByUserID( userId: number) {
+    async getAllExperienceByUserID(userId: number) {
         try {
             const experience = await this.experienceRepository.find({
                 where: {
                     exp_delete: IsNull(),
-                    usr_id: {usr_id: userId}
+                    usr_id: { usr_id: userId }
+                }
+            })
+
+            return experience
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
+    async getAllExperienceDeleteByUserID(userId: number) {
+        try {
+            const experience = await this.experienceRepository.find({
+                where: {
+                    exp_delete: IsNull()
                 }
             })
 
@@ -120,6 +139,18 @@ export class ExperienceDao {
                     error: 'Error Interno del Servidor',
                 });
             });
+    }
+
+    async deleteExperiencePhysicsById(expId: number): Promise<void> {
+        try {
+            await this.experienceRepository.delete(expId);
+        } catch (error) {
+             throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
     }
 
     async updateExperience(expId: number, updateExperienceDto) {

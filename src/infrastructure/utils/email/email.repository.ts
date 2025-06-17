@@ -133,7 +133,7 @@ export class EmailRepository {
                   </tr>
                   <tr>
                     <td> 
-                        <p style="font-size: 18px; font-weight: 700; margin-top: 40px; line-height: 1.6;  text-align: center; color:rgb(0, 0, 0);">Publicacion: ${reportInfo.pub_description} <br/> Motivo: ${reportInfo.rea_reason} <br/> Fecha de reporte: ${reportInfo.rep_create} </p>
+                        <p style="font-size: 18px; font-weight: 700; margin-top: 40px; line-height: 1.6;  text-align: center; color:rgb(0, 0, 0);">Publicacion: ${reportInfo.pub_description} <br/> Motivo: ${reportInfo.rea_reason} <br/> Fecha de reporte: ${reportInfo.rep_create} <br/> Usuario que denuncio: ${reportInfo.usr_reporto} <br/> Usuario reportado: ${reportInfo.usr_reportado} </p>
                     </td>
                   </tr>
                 </table>

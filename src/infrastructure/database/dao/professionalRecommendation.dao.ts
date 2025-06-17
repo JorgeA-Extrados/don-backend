@@ -49,4 +49,77 @@ export class ProfessionalRecommendationDao {
         });
     }
 
+    async deleteReportRecommendationsFisicaById(pubID: number): Promise<void> {
+        try {
+            await this.professionalRecommendationRepository.delete(pubID);
+        } catch (error) {
+             throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
+    }
+
+    async getProfessionalRecommendationByUsrID(usrID: number) {
+        try {
+            const profesionalRecommendation = await this.professionalRecommendationRepository
+                .createQueryBuilder('pr')
+                .leftJoinAndSelect('pr.from', 'fromUser')
+                .leftJoinAndSelect('pr.to', 'toUser')
+                .where('(fromUser.usr_id = :usrID OR toUser.usr_id = :usrID)', { usrID })
+                .andWhere('pr.prr_delete IS NULL')
+                .getMany();
+
+            return profesionalRecommendation;
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
+    }
+
+    async getProfessionalRecommendationDeleteByUsrID(usrID: number) {
+        try {
+            const profesionalRecommendation = await this.professionalRecommendationRepository
+                .createQueryBuilder('pr')
+                .leftJoinAndSelect('pr.from', 'fromUser')
+                .leftJoinAndSelect('pr.to', 'toUser')
+                .where('(fromUser.usr_id = :usrID OR toUser.usr_id = :usrID)', { usrID })
+                .getMany();
+
+            return profesionalRecommendation;
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
+    }
+
+    async delete(id: number) {
+        return await this.professionalRecommendationRepository
+            .update({ prr_id: id }, {
+                prr_delete: new Date(),
+            })
+            .then(() => {
+                return {
+                    message: 'Eliminado satisfactoriamente',
+                    statusCode: HttpStatus.CREATED,
+                };
+            })
+            .catch((error) => {
+                throw new BadRequestException({
+                    statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                    message: [`${error.message}`],
+                    error: 'Error Interno del Servidor',
+                });
+            });
+    }
+
 }

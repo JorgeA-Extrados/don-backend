@@ -13,11 +13,17 @@ import { ProfessionalDao } from 'src/infrastructure/database/dao/professional.da
 import { ServicesSearchDao } from 'src/infrastructure/database/dao/services_search.dao';
 import { SupplierDao } from 'src/infrastructure/database/dao/supplier.dao';
 import { CreateAllUserDto } from './dto/all-user.dto';
-
+import * as bcrypt from 'bcryptjs';
 import { ExperienceDao } from 'src/infrastructure/database/dao/experiences.dao';
 import { UserHeadingDao } from 'src/infrastructure/database/dao/userHeading.dao';
 import { PublicationDao } from 'src/infrastructure/database/dao/publication.dao';
 import { AuthService } from 'src/auth/auth.service';
+import { CreateDeletePhysicsDto } from './dto/deletePhysics.dto';
+import { PublicationMultimediaDao } from 'src/infrastructure/database/dao/publication_multimedia.dao';
+import { ReportPublicationDao } from 'src/infrastructure/database/dao/reportPublication.dao';
+import { ForgotPasswordAttemptsDao } from 'src/infrastructure/database/dao/forgot_password_attempts.dao';
+import { ForgotPasswordDao } from 'src/infrastructure/database/dao/forgot_password.dao';
+import { ProfessionalRecommendationDao } from 'src/infrastructure/database/dao/professionalRecommendation.dao';
 
 @Injectable()
 export class UserService {
@@ -38,6 +44,11 @@ export class UserService {
     private readonly experienceDao: ExperienceDao,
     private readonly userHeadingDao: UserHeadingDao,
     private readonly publicationDao: PublicationDao,
+    private readonly publicationMultimediaDao: PublicationMultimediaDao,
+    private readonly reportPublicationDao: ReportPublicationDao,
+    private readonly forgotPasswordAttemptsDao: ForgotPasswordAttemptsDao,
+    private readonly forgotPasswordDao: ForgotPasswordDao,
+    private readonly professionalRecommendationDao: ProfessionalRecommendationDao,
   ) {
     // this.client = Twilio(
     //   process.env.TWILIO_ACCOUNT_SID,
@@ -264,6 +275,31 @@ export class UserService {
     }
   }
 
+  async getUserInvitationCode(req) {
+    try {
+      const { userId } = req.user
+      const user = await this.userDao.getUserInvitationCode(userId);
+
+      if (!user) {
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
+      }
+
+      return {
+        message: 'Codigo de Invitación',
+        statusCode: HttpStatus.OK,
+        data: user,
+      };
+    } catch (error) {
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
+    }
+  }
 
   async getAllUser() {
     try {
@@ -355,6 +391,14 @@ export class UserService {
         await this.refreshTokenService.deleteRefreshToken(refresh.rft_token)
       }
 
+      const profesionalRecommendation = await this.professionalRecommendationDao.getProfessionalRecommendationByUsrID(user.usr_id)
+
+      if (profesionalRecommendation.length > 0) {
+        profesionalRecommendation.map(async (profesionalRecomment) => {
+          await this.professionalRecommendationDao.delete(profesionalRecomment.prr_id)
+        })
+      }
+
       const servicesSearch = await this.servicesSearchDao.getServicesSearchByUsrId(userId)
 
       if (servicesSearch) {
@@ -389,10 +433,23 @@ export class UserService {
         })
       }
 
-      const publication = await this.publicationDao.getPublicationByUserId(userId)
+
+      const publication = await this.publicationDao.getPublicationByUserId(user.usr_id)
 
       if (publication.length > 0) {
         publication.map(async (pub) => {
+          const publicImage = await this.publicationMultimediaDao.getPUblicationImageByPubID(pub.pub_id)
+
+          const report = await this.reportPublicationDao.getReportPublicationByPUBID(pub.pub_id)
+
+          report.map(async (reportes) => {
+            await this.reportPublicationDao.deleteReportPublication(reportes.rep_id)
+          })
+
+          publicImage.map(async (images) => {
+            await this.publicationMultimediaDao.deletePublicationMultimedia(images.pmt_id)
+          })
+
           await this.publicationDao.deletePublication(pub.pub_id)
         })
       }
@@ -415,6 +472,107 @@ export class UserService {
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,
         message: `${error.code} ${error.detail} ${error.message}`,
+        error: `Error interno`,
+      });
+    }
+  }
+
+  async deleteUserPhysics(createDeletePhysicsDto: CreateDeletePhysicsDto) {
+    try {
+      const { usr_email, usr_password } = createDeletePhysicsDto;
+
+      const user = await this.validateUser(usr_email, usr_password);
+
+      if (!user) {
+        return {
+          message: 'Usuario no encontrado.',
+          statusCode: HttpStatus.NO_CONTENT,
+        };
+      }
+
+      const promises: Promise<void>[] = [];
+
+      // Operaciones en paralelo
+      const refresh = await this.refreshTokenService.findRefreshTokenbyUser(user.usr_id);
+      if (refresh) {
+        promises.push(this.refreshTokenService.deleteRefreshToken(refresh.rft_token));
+      }
+
+      const forgotPasswordAttempts = await this.forgotPasswordAttemptsDao.getForgotPasswordAttemptsByUser(user.usr_id);
+      promises.push(...forgotPasswordAttempts.map(f =>
+        this.forgotPasswordAttemptsDao.deleteForgotPasswordAttemptsFisicaById(f.fpa_id)));
+
+      const forgotPassword = await this.forgotPasswordDao.getForgotPasswordDeleteByUserId(user.usr_id);
+      promises.push(...forgotPassword.map(f =>
+        this.forgotPasswordDao.deleteForgotPasswordFisicaById(f.fop_id)));
+
+      const userVerification = await this.userVerificationAttemptsDao.getUserVerification(user.usr_id);
+      promises.push(...userVerification.map(u =>
+        this.userVerificationAttemptsDao.deleteForgotPasswordAttemptsFisicaById(u.uva_id)));
+
+      const profesionalRecommendation = await this.professionalRecommendationDao.getProfessionalRecommendationDeleteByUsrID(user.usr_id);
+      promises.push(...profesionalRecommendation.map(p =>
+        this.professionalRecommendationDao.deleteReportRecommendationsFisicaById(p.prr_id)));
+
+      const servicesSearch = await this.servicesSearchDao.getServicesSearchDeleteByUsrId(user.usr_id);
+      if (servicesSearch) {
+        promises.push(this.servicesSearchDao.deleteServicesSearchPhysics(servicesSearch.sea_id));
+      }
+
+      const supplier = await this.supplierDao.getSupplierDeleteByUserId(user.usr_id);
+      if (supplier) {
+        promises.push(this.supplierDao.deleteSupplierPhysicsById(supplier.sup_id));
+      }
+
+      const professional = await this.professionalDao.getProfessionalDeleteByUsrId(user.usr_id);
+      if (professional) {
+        promises.push(this.professionalDao.deleteProfessionalPhysicsById(professional.pro_id));
+      }
+
+      const experience = await this.experienceDao.getAllExperienceDeleteByUserID(user.usr_id);
+      promises.push(...experience.map(e =>
+        this.experienceDao.deleteExperiencePhysicsById(e.exp_id)));
+
+      const userHeading = await this.userHeadingDao.getUserHeadingDeleteByUserId(user.usr_id);
+      promises.push(...userHeading.map(u =>
+        this.userHeadingDao.deleteUserHeadingPhysicsById(u.ush_id)));
+
+      const report = await this.reportPublicationDao.getReportPublicationByUsrID(user.usr_id);
+      promises.push(...report.map(r =>
+        this.reportPublicationDao.deleteReportPublicationFisicaById(r.rep_id)));
+
+      const creditsDon = await this.creditsDonDao.getCreditsDonDeleteByUsrIdDelete(user.usr_id);
+      promises.push(...creditsDon.map(c =>
+        this.creditsDonDao.deleteCreditsDonPhysics(c.cre_id)));
+
+      // Esperar todo lo anterior
+      await Promise.all(promises);
+
+      // Secuencial: eliminar imágenes de publicaciones y luego publicaciones
+      const publications = await this.publicationDao.getPublicationDeleteByUserId(user.usr_id);
+
+      for (const pub of publications) {
+        const images = await this.publicationMultimediaDao.getPUblicationImageByPubID(pub.pub_id);
+
+        for (const img of images) {
+          await this.publicationMultimediaDao.deletePublicationMultimediaPhysicsById(img.pmt_id);
+        }
+
+        await this.publicationDao.deletePublicationPhysics(pub.pub_id);
+      }
+
+      // Finalmente eliminamos el usuario
+      await this.userDao.userRemove(user.usr_id);
+
+      return {
+        message: 'Usuario eliminado',
+        statusCode: HttpStatus.OK,
+      };
+    } catch (error) {
+      console.error('Error al eliminar usuario físicamente:', error);
+      throw new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error.code || ''} ${error.detail || ''} ${error.message}`,
         error: `Error interno`,
       });
     }
@@ -620,7 +778,6 @@ export class UserService {
     return code;
   }
 
-
   private extractUserFields(dto: any) {
     const fields: any = {};
 
@@ -670,6 +827,34 @@ export class UserService {
     fields.sup_update = new Date()
 
     return fields;
+  }
+
+  async validateUser(email?: string, password?: string) {
+    if (!password) {
+      throw new UnauthorizedException('Contraseña no encontrada');
+    }
+
+    let user
+
+    if (email) {
+      user = await this.userDao.getUserByEmail(email);
+    }
+
+    if (!user) {
+      throw new UnauthorizedException('El correo electrónico, el nombre o la contraseña son incorrectos.');
+    }
+
+    const passwordValid: boolean = await bcrypt.compare(
+      password,
+      user.usr_password,
+    );
+
+    if (!passwordValid) {
+      throw new UnauthorizedException('El correo electrónico, el nombre o la contraseña son incorrectos.');
+    }
+
+
+    return user;
   }
 
 }

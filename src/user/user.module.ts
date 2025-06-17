@@ -34,13 +34,20 @@ import { Category } from 'src/categories/entities/category.entity';
 import { Heading } from 'src/heading/entities/heading.entity';
 import { SubHeading } from 'src/sub-heading/entities/sub-heading.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { PublicationMultimediaDao } from 'src/infrastructure/database/dao/publication_multimedia.dao';
+import { PublicationMultimedia } from 'src/publication-multimedia/entities/publication-multimedia.entity';
+import { ReportPublicationDao } from 'src/infrastructure/database/dao/reportPublication.dao';
+import { ProfessionalRecommendationDao } from 'src/infrastructure/database/dao/professionalRecommendation.dao';
+import { ProfessionalRecommendation } from 'src/professional_recommendation/entities/professional_recommendation.entity';
+import { ReportPublication } from 'src/report-publication/entities/report-publication.entity';
+import { ReportReason } from 'src/report-reason/entities/report-reason.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, UserVerificationAttempts, Professional, ServicesSearch, Supplier, ForgotPasswordAttempts, Experience, UserHeading, Publication, Category, Heading, SubHeading]),
+    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, UserVerificationAttempts, Professional, ServicesSearch, Supplier, ForgotPasswordAttempts, Experience, UserHeading, Publication, Category, Heading, SubHeading, PublicationMultimedia, ProfessionalRecommendation, ReportPublication, ReportReason]),
     forwardRef(() => AuthModule),
   ],
   controllers: [UserController],
-  providers: [UserService, UserDao, RefreshTokenService, EmailRepository, CreditsDonDao, UserVerificationAttemptsDao, ProfessionalDao, ServicesSearchDao, SupplierDao, ForgotPasswordDao, ForgotPasswordAttemptsDao, ExperienceDao, UserHeadingDao, PublicationDao, JwtService],
+  providers: [UserService, UserDao, RefreshTokenService, EmailRepository, CreditsDonDao, UserVerificationAttemptsDao, ProfessionalDao, ServicesSearchDao, SupplierDao, ForgotPasswordDao, ForgotPasswordAttemptsDao, ExperienceDao, UserHeadingDao, PublicationDao, JwtService, PublicationMultimediaDao, ReportPublicationDao, ProfessionalRecommendationDao]
 })
 export class UserModule { }

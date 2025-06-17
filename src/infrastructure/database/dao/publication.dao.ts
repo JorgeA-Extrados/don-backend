@@ -194,6 +194,46 @@ export class PublicationDao {
         }
     }
 
+    async getPublicationDeleteByUserId(usrID: number) {
+        try {
+            const publication = await this.publicationRepository
+                .createQueryBuilder('publication')
+                .leftJoinAndSelect('publication.user', 'user')
+                .leftJoinAndSelect('user.professional', 'professional')
+                .leftJoinAndSelect('user.supplier', 'supplier')
+                .leftJoinAndSelect('publication.publicationMultimedia', 'publicationMultimedia')
+                .where('user.usr_id = :usrID', { usrID })
+                .select([
+                    'publication.pub_id',
+                    'publication.pub_description',
+                    'publication.pub_create',
+                    'publication.pub_delete',
+                    'publication.pub_reason_for_deletion',
+                    'publicationMultimedia.pmt_file',
+                    'publicationMultimedia.pmt_type',
+                    'user.usr_id',
+                    'user.usr_email',
+                    'user.usr_invitationCode',
+                    'user.usr_name',
+                    'user.usr_role',
+                    'user.usr_phone',
+                    'professional.pro_profilePicture',
+                    'supplier.sup_profilePicture'
+                ])
+                .orderBy('publication.pub_create', 'DESC')
+                .getMany();
+
+            return publication
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     async getPublicationByUserIdReport(usrID: number) {
         try {
             // const publication = await this.publicationRepository.find({
@@ -374,6 +414,18 @@ export class PublicationDao {
             });
     }
 
+    async deletePublicationPhysics(pub: number): Promise<void> {
+        try {
+            await this.publicationRepository.delete(pub);
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
+    }
+
     async updatePublication(pubID: number, updatePublicationDto) {
 
         return await this.publicationRepository
@@ -400,7 +452,11 @@ export class PublicationDao {
         try {
             await this.publicationRepository.delete(pub_id);
         } catch (error) {
-            throw new Error(`Error eliminando la publicación con id ${pub_id}: ${error.message}`);
+             throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
         }
     }
 

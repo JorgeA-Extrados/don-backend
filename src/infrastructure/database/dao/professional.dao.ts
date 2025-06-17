@@ -113,6 +113,42 @@ export class ProfessionalDao {
             });
         }
     }
+    async getProfessionalDeleteByUsrId(usrID: number) {
+        try {
+            const professional = await this.professionalRepository.findOne({
+                where: {
+                    user: { usr_id: usrID }
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    pro_id: true,
+                    pro_firstName: true,
+                    pro_lastName: true,
+                    pro_latitude: true,
+                    pro_longitude: true,
+                    pro_profilePicture: true,
+                    pro_creditDON: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
+                }
+            })
+
+            return professional
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
 
     async getAllProfessional() {
         try {
@@ -169,6 +205,18 @@ export class ProfessionalDao {
                     error: 'Error Interno del Servidor',
                 });
             });
+    }
+
+    async deleteProfessionalPhysicsById(proID: number): Promise<void> {
+        try {
+            await this.professionalRepository.delete(proID);
+        } catch (error) {
+             throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
     }
 
     async updateProfessional(proID: number, updateProfessionalDto) {

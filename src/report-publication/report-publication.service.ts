@@ -18,10 +18,6 @@ export class ReportPublicationService {
 
     const reportPublication = (await this.reportPublicationDao.createReportPublication(createReportPublicationDto));
 
-    console.log('Type of reportPublication:', Array.isArray(reportPublication) ? 'array' : 'object');
-    console.log(reportPublication);
-
-
     const report = await this.reportPublicationDao.getReportPublicationById(reportPublication.rep_id)
 
     const iso = report?.rep_create?.toISOString();
@@ -34,9 +30,10 @@ export class ReportPublicationService {
       pub_image: report?.publication.publicationMultimedia[0].pmt_file,
       pub_description: report?.publication.pub_description,
       rep_create: formattedDate,
-      rea_reason: report?.reportReason.rea_reason
+      rea_reason: report?.reportReason.rea_reason,
+      usr_reportado: report?.publication.user.usr_email,
+      usr_reporto: report?.whoReported.usr_email
     }
-
     try {
       await this.emailRepository.reportPublicationEmail(emailReport);
     } catch (error) {
