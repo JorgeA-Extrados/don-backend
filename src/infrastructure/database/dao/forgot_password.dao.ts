@@ -162,7 +162,7 @@ export class ForgotPasswordDao {
         try {
             await this.forgotPasswordRepository.delete(fopId);
         } catch (error) {
-             throw new BadRequestException({
+            throw new BadRequestException({
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: [`${error.message}`],
                 error: 'Error Interno del Servidor',
