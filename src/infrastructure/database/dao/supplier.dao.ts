@@ -18,10 +18,10 @@ export class SupplierDao {
 
     async createSupplier(createSupplierDto) {
         try {
-            const {usr_id} = createSupplierDto
+            const { usr_id } = createSupplierDto
             const supplier = await this.supplierRepository.create({
                 ...createSupplierDto,
-                user: await this.userRepository.create({usr_id}),
+                user: await this.userRepository.create({ usr_id }),
                 sup_create: new Date(),
             })
 
@@ -78,8 +78,44 @@ export class SupplierDao {
         try {
             const supplier = await this.supplierRepository.findOne({
                 where: {
-                    user: {usr_id: userID},
+                    user: { usr_id: userID },
                     sup_delete: IsNull()
+                },
+                relations: {
+                    user: true
+                },
+                select: {
+                    sup_id: true,
+                    sup_firstName: true,
+                    sup_lastName: true,
+                    sup_latitude: true,
+                    sup_longitude: true,
+                    sup_profilePicture: true,
+                    user: {
+                        usr_id: true,
+                        usr_email: true,
+                        usr_name: true,
+                        usr_phone: true
+                    }
+                }
+            })
+
+            return supplier
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
+    async getSupplierDeleteByUserId(userID: number) {
+        try {
+            const supplier = await this.supplierRepository.findOne({
+                where: {
+                    user: { usr_id: userID }
                 },
                 relations: {
                     user: true
@@ -165,6 +201,18 @@ export class SupplierDao {
                     error: 'Error Interno del Servidor',
                 });
             });
+    }
+
+    async deleteSupplierPhysicsById(supID: number): Promise<void> {
+        try {
+            await this.supplierRepository.delete(supID);
+        } catch (error) {
+             throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
     }
 
     async updateSupplier(supID: number, updateSupplierDto) {

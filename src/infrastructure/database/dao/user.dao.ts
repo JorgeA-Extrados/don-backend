@@ -170,6 +170,30 @@ export class UserDao {
         }
     }
 
+    async getUserInvitationCode(usrId: number) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    usr_id: usrId,
+                    usr_delete: IsNull(),
+
+                },
+                select: {
+                    usr_invitationCode: true
+                }
+            })
+
+            return user
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     async getAllUser() {
         try {
             const user = await this.userRepository.find({
@@ -370,7 +394,6 @@ export class UserDao {
             });
     }
 
-
     async getUserByInvitationCode(code: string) {
         try {
             const user = await this.userRepository.findOne({
@@ -393,10 +416,7 @@ export class UserDao {
 
     async userRemove(user) {
         try {
-            await this.userRepository.remove(user); // Eliminación física
-
-            return "Usuario eliminado"
-
+            await this.userRepository.delete(user);
         } catch (error) {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,

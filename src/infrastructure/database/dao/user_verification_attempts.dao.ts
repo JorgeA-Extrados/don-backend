@@ -52,6 +52,22 @@ export class UserVerificationAttemptsDao {
         }
     }
 
+    async getUserVerification(usr_id) {
+        try {
+            return await this.userVerificationAttemptsRepository.find({
+                where: {
+                    user: { usr_id: usr_id },
+                },
+            });
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
     // Marcar los intentos de verificación como completados
     async completeVerificationAttempt(userId: number) {
         try {
@@ -70,6 +86,18 @@ export class UserVerificationAttemptsDao {
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
                 error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
+    async deleteForgotPasswordAttemptsFisicaById(pubID: number): Promise<void> {
+        try {
+            await this.userVerificationAttemptsRepository.delete(pubID);
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
             });
         }
     }

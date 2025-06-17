@@ -144,6 +144,18 @@ export class CreditsDonDao {
             });
     }
 
+    async deleteCreditsDonPhysics(pmtId: number): Promise<void> {
+        try {
+            await this.creditsDonRepository.delete(pmtId);
+        } catch (error) {
+           throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
+    }
+
     async updateCreditsDon(creID: number, updateCreditsDonDto) {
 
         return await this.creditsDonRepository
@@ -166,7 +178,7 @@ export class CreditsDonDao {
             });
     }
 
-    
+
     async getCreditsDonByUsrId(usrID: number) {
         try {
             const historial = await this.creditsDonRepository.find({
@@ -213,15 +225,15 @@ export class CreditsDonDao {
                     cre_create: 'DESC' // opcional: historial ordenado
                 }
             });
-    
+
             // Sumar los créditos
             const total = historial.reduce((acc, credit) => acc + credit.cre_amount, 0);
-    
+
             return {
                 total,
                 historial
             };
-    
+
         } catch (error) {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
@@ -230,7 +242,7 @@ export class CreditsDonDao {
             });
         }
     }
-    
+
     async getCreditsDonTotalByUsrId(usrID: number) {
         try {
             const historial = await this.creditsDonRepository.find({
@@ -239,14 +251,14 @@ export class CreditsDonDao {
                     cre_delete: IsNull()
                 },
             });
-    
+
             // Sumar los créditos
             const total = historial.reduce((acc, credit) => acc + credit.cre_amount, 0);
-    
+
             return {
                 total
             };
-    
+
         } catch (error) {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
@@ -255,8 +267,7 @@ export class CreditsDonDao {
             });
         }
     }
-    
-    
+
     async getCreditsDonByUsrIdDelete(usrID: number) {
         try {
             const creditsDon = await this.creditsDonRepository.find({
@@ -265,9 +276,9 @@ export class CreditsDonDao {
                     cre_delete: IsNull()
                 },
             });
-    
+
             return creditsDon
-    
+
         } catch (error) {
             throw new BadRequestException({
                 statusCode: HttpStatus.BAD_REQUEST,
@@ -276,5 +287,24 @@ export class CreditsDonDao {
             });
         }
     }
-    
+
+    async getCreditsDonDeleteByUsrIdDelete(usrID: number) {
+        try {
+            const creditsDon = await this.creditsDonRepository.find({
+                where: {
+                    assigningUser: { usr_id: usrID }
+                },
+            });
+
+            return creditsDon
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.BAD_REQUEST,
+                message: `${error.code} ${error.detail} ${error.message}`,
+                error: `Error Interno del Servidor`,
+            });
+        }
+    }
+
 }

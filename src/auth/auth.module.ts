@@ -38,10 +38,17 @@ import { Category } from 'src/categories/entities/category.entity';
 import { Heading } from 'src/heading/entities/heading.entity';
 import { SubHeading } from 'src/sub-heading/entities/sub-heading.entity';
 import { UserModule } from 'src/user/user.module';
+import { PublicationMultimediaDao } from 'src/infrastructure/database/dao/publication_multimedia.dao';
+import { PublicationMultimedia } from 'src/publication-multimedia/entities/publication-multimedia.entity';
+import { ReportReason } from 'src/report-reason/entities/report-reason.entity';
+import { ReportPublication } from 'src/report-publication/entities/report-publication.entity';
+import { ProfessionalRecommendation } from 'src/professional_recommendation/entities/professional_recommendation.entity';
+import { ProfessionalRecommendationDao } from 'src/infrastructure/database/dao/professionalRecommendation.dao';
+import { ReportPublicationDao } from 'src/infrastructure/database/dao/reportPublication.dao';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, ForgotPasswordAttempts, UserVerificationAttempts, Professional, ServicesSearch, Supplier, Experience, UserHeading, Publication, Category, Heading, SubHeading ]),
+    TypeOrmModule.forFeature([User, RefreshToken, ForgotPassword, CreditsDon, CreditsReason, ForgotPasswordAttempts, UserVerificationAttempts, Professional, ServicesSearch, Supplier, Experience, UserHeading, Publication, Category, Heading, SubHeading , PublicationMultimedia, ProfessionalRecommendation, ReportPublication, ReportReason]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -54,7 +61,7 @@ import { UserModule } from 'src/user/user.module';
     forwardRef(() => UserModule),
   ],
   controllers: [AuthController, RefreshTokenController],
-  providers: [AuthService, RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository, CreditsDonDao, ForgotPasswordAttemptsDao, UserVerificationAttemptsDao, ProfessionalDao, ServicesSearchDao, SupplierDao, ExperienceDao, UserHeadingDao, PublicationDao, UserDao, UserService],
+  providers: [AuthService, RefreshTokenService, JwtStrategy, ForgotPasswordDao, EmailRepository, CreditsDonDao, ForgotPasswordAttemptsDao, UserVerificationAttemptsDao, ProfessionalDao, ServicesSearchDao, SupplierDao, ExperienceDao, UserHeadingDao, PublicationDao, UserDao, UserService, PublicationMultimediaDao, ReportPublicationDao, ProfessionalRecommendationDao],
   exports: [AuthService, RefreshTokenService], 
   
 })

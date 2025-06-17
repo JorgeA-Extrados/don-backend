@@ -109,6 +109,7 @@ export class ReportPublicationDao {
                 .leftJoinAndSelect('whoReported.professional', 'professional')
                 .leftJoinAndSelect('whoReported.supplier', 'supplier')
                 .leftJoinAndSelect('reportPublication.publication', 'publication')
+                .leftJoinAndSelect('publication.user', 'user')
                 .leftJoinAndSelect('publication.publicationMultimedia', 'publicationMultimedia')
                 .leftJoinAndSelect('reportPublication.reportReason', 'reportReason')
                 .where('reportPublication.rep_id = :repID', { repID })
@@ -130,6 +131,8 @@ export class ReportPublicationDao {
 
                     'publication.pub_id',
                     'publication.pub_description',
+
+                    'user.usr_email',
 
                     'publicationMultimedia.pmt_file',
                     'publicationMultimedia.pmt_type',
@@ -463,10 +466,6 @@ export class ReportPublicationDao {
         //     .groupBy('publication.pub_id')
         //     .getRawMany();
 
-        // console.log('==========publicaciones==========================');
-        // console.log(publicaciones);
-        // console.log('====================================');
-
         // // Armamos la respuesta final con los motivos agrupados
         // return publicaciones.map(pub => ({
         //     pub_id: pub.pub_id,
@@ -559,7 +558,43 @@ export class ReportPublicationDao {
         try {
             await this.reportPublicationRepository.delete(pubID);
         } catch (error) {
-            throw new Error(`Error eliminando el reporte con id ${pubID}: ${error.message}`);
+             throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
+    }
+
+    async getReportPublicationByUsrID(usrID: number) {
+        try {
+            // const reportPublication = await this.reportPublicationRepository.find({
+            //     where: {
+            //         whoReported: {
+            //             usr_id: usrID
+            //         }
+            //     }
+            // })
+
+            const reportPublication = await this.reportPublicationRepository
+                .createQueryBuilder('report')
+                .leftJoinAndSelect('report.whoReported', 'whoReported')
+                .leftJoinAndSelect('report.publication', 'publication')
+                .leftJoinAndSelect('publication.user', 'publicationUser')
+                .leftJoinAndSelect('report.reportReason', 'reportReason')
+                .where('whoReported.usr_id = :usrID', { usrID })
+                .orWhere('publicationUser.usr_id = :usrID', { usrID })
+                .andWhere('report.rep_delete IS NULL')
+                .getMany();
+
+            return reportPublication;
+
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
         }
     }
 

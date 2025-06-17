@@ -34,7 +34,7 @@ export class ForgotPasswordDao {
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: `${error.code} ${error.detail} ${error.message}`,
                 error: `Error Interno del Servidor`,
-              });
+            });
         }
     }
 
@@ -114,6 +114,24 @@ export class ForgotPasswordDao {
         }
     }
 
+    async getForgotPasswordDeleteByUserId(userId: number) {
+        try {
+            const userCodes = await this.forgotPasswordRepository.find({
+                where: {
+                    usrID: { usr_id: userId },
+                }
+            });
+
+            return userCodes
+        } catch (error) {
+            throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
+    }
+
     async getForgotPasswordByUserIdAndChangeTime(changetime) {
         try {
             const { userId, newDate, currentDate } = changetime
@@ -133,6 +151,18 @@ export class ForgotPasswordDao {
             return code
         } catch (error) {
             throw new BadRequestException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: [`${error.message}`],
+                error: 'Error Interno del Servidor',
+            });
+        }
+    }
+
+    async deleteForgotPasswordFisicaById(fopId: number): Promise<void> {
+        try {
+            await this.forgotPasswordRepository.delete(fopId);
+        } catch (error) {
+             throw new BadRequestException({
                 statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
                 message: [`${error.message}`],
                 error: 'Error Interno del Servidor',
