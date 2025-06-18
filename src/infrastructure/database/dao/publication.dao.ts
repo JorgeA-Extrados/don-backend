@@ -318,45 +318,6 @@ export class PublicationDao {
 
     async getAllPublication() {
         try {
-            // const publication = await this.publicationRepository.find({
-            //     where: {
-            //         pub_delete: IsNull()
-            //     },
-            //     relations: {
-            //         user: {
-            //             professional: true,
-            //             supplier: true
-            //         },
-            //         publicationMultimedia: true
-            //     },
-            //     select: {
-            //         pub_id: true,
-            //         pub_description: true,
-            //         pub_create: true,
-            //         publicationMultimedia: {
-            //             pmt_file: true,
-            //             pmt_type: true
-            //         },
-            //         user: {
-            //             usr_id: true,
-            //             usr_email: true,
-            //             usr_invitationCode: true,
-            //             usr_name: true,
-            //             usr_role: true,
-            //             usr_phone: true,
-            //             professional: {
-            //                 pro_profilePicture: true,
-            //             },
-            //             supplier: {
-            //                 sup_profilePicture: true
-            //             }
-            //         }
-            //     },
-            //     order: {
-            //         pub_create: 'DESC' // opcional: historial ordenado
-            //     }
-            // })
-
             const publication = await this.publicationRepository
                 .createQueryBuilder('publication')
                 .leftJoinAndSelect('publication.user', 'user')

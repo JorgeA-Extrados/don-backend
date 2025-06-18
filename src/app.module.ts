@@ -80,7 +80,7 @@ import { PublicationMultimediaModule } from './publication-multimedia/publicatio
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
-        synchronize: true, // ⚠️ Desactiva en producción
+        synchronize: false, // ⚠️ Desactiva en producción
         extra: {
           keepAlive: true,
           connectTimeout: 10000, // 10 segundos
