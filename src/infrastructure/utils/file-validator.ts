@@ -8,7 +8,7 @@ const IMAGE_MIME_TYPES = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/web
 const VIDEO_MIME_TYPES = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/webp'];
 
 // Tamaños máximos
-const MAX_IMAGE_SIZE_MB = 2;  // ✅ nuevo límite para imágenes
+const MAX_IMAGE_SIZE_MB = 1.5;  // ✅ nuevo límite para imágenes
 const MAX_VIDEO_SIZE_MB = 20; // ✅ nuevo límite para videos
 
 export function validateFile(file: Express.Multer.File, type: AllowedTypes): void {

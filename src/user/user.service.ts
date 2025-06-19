@@ -100,18 +100,22 @@ export class UserService {
       }
     }
 
+    let isCodeUser
+
 
     if (usr_user_code) {
       const userCredits = await this.userDao.getUserByInvitationCode(usr_user_code)
       if (userCredits) {
         const credits = {
-          cre_amount: 1,
+          cre_amount: 2,
           cre_isCredits: false,
           usr_id: userCredits.usr_id,
           crs_id: 1,
           cre_isAdmin: false
         }
-        const newCredits = await this.creditsDonDao.createCreditsDON(credits)
+        await this.creditsDonDao.createCreditsDON(credits)
+
+        isCodeUser = true
       }
     }
 
@@ -132,6 +136,28 @@ export class UserService {
       }
 
       newUser = await this.userDao.createUser(createUser);
+
+      const myCredits = {
+        cre_amount: 3,
+        cre_isCredits: false,
+        usr_id: newUser.usr_id,
+        crs_id: 3,
+        cre_isAdmin: false
+      }
+
+      await this.creditsDonDao.createCreditsDON(myCredits)
+
+      if (isCodeUser) {
+        const myCredits = {
+          cre_amount: 1,
+          cre_isCredits: false,
+          usr_id: newUser.usr_id,
+          crs_id: 4,
+          cre_isAdmin: false
+        }
+
+        await this.creditsDonDao.createCreditsDON(myCredits)
+      }
 
       // Registrar el intento de verificación
       await this.userVerificationAttemptsDao.createForgotPasswordAttempts(newUser.usr_id);
@@ -157,6 +183,28 @@ export class UserService {
         usr_invitationCode: uniqueCode
       }
       newUser = await this.userDao.createUser(dto);
+
+      const myCredits = {
+        cre_amount: 3,
+        cre_isCredits: false,
+        usr_id: newUser.usr_id,
+        crs_id: 3,
+        cre_isAdmin: false
+      }
+
+      await this.creditsDonDao.createCreditsDON(myCredits)
+
+      if (isCodeUser) {
+        const myCredits = {
+          cre_amount: 1,
+          cre_isCredits: false,
+          usr_id: newUser.usr_id,
+          crs_id: 4,
+          cre_isAdmin: false
+        }
+
+        await this.creditsDonDao.createCreditsDON(myCredits)
+      }
 
       const log = {
         usr_email,
