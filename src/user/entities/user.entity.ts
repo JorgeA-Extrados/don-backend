@@ -12,6 +12,7 @@ import { ReportPublication } from "src/report-publication/entities/report-public
 import { ServicesSearch } from "src/services-search/entities/services-search.entity";
 import { Supplier } from "src/supplier/entities/supplier.entity";
 import { UserHeading } from "src/user-heading/entities/user-heading.entity";
+import { UserViewedAdminPublication } from "src/user_viewed_admin_publication/entities/user_viewed_admin_publication.entity";
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 
@@ -173,6 +174,9 @@ export class User {
 
     @OneToMany(() => ProfessionalRecommendation, professionalRecommendation => professionalRecommendation.to)
     professionalRecommendationTo: ProfessionalRecommendation;
+
+    @OneToMany(() => UserViewedAdminPublication, userViewedAdminPublication => userViewedAdminPublication.user)
+    userViewedAdminPublication: UserViewedAdminPublication;
 
 }
 

@@ -1,7 +1,8 @@
-import { IsDateString, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsDateString, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { PublicationMultimedia } from "src/publication-multimedia/entities/publication-multimedia.entity";
 import { ReportPublication } from "src/report-publication/entities/report-publication.entity";
 import { User } from "src/user/entities/user.entity";
+import { UserViewedAdminPublication } from "src/user_viewed_admin_publication/entities/user_viewed_admin_publication.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('publication')
@@ -33,6 +34,14 @@ export class Publication {
     pub_reason_for_deletion?: string;
 
     @Column({
+        name: 'pub_admin_publication ',
+        nullable: true,
+    })
+    @IsOptional()
+    @IsBoolean()
+    pub_admin_publication?: boolean;
+
+    @Column({
         name: 'pub_create',
         nullable: true,
     })
@@ -62,7 +71,10 @@ export class Publication {
 
     @OneToMany(() => ReportPublication, reportPublication => reportPublication.publication)
     reportPublication: ReportPublication;
-    
+
     @OneToMany(() => PublicationMultimedia, publicationMultimedia => publicationMultimedia.publication)
     publicationMultimedia: PublicationMultimedia;
+
+    @OneToMany(() => UserViewedAdminPublication, userViewedAdminPublication => userViewedAdminPublication.publication)
+    userViewedAdminPublication: UserViewedAdminPublication;
 }

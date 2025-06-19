@@ -23,6 +23,7 @@ import { CreditsReasonModule } from './credits-reason/credits-reason.module';
 import { KeepAliveService } from './keep-alive.service';
 import { ProfessionalRecommendationModule } from './professional_recommendation/professional_recommendation.module';
 import { PublicationMultimediaModule } from './publication-multimedia/publication-multimedia.module';
+import { UserViewedAdminPublicationModule } from './user_viewed_admin_publication/user_viewed_admin_publication.module';
 
 @Module({
   imports: [
@@ -80,7 +81,7 @@ import { PublicationMultimediaModule } from './publication-multimedia/publicatio
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
-        synchronize: false, // ⚠️ Desactiva en producción
+        synchronize: true, // ⚠️ Desactiva en producción
         extra: {
           keepAlive: true,
           connectTimeout: 10000, // 10 segundos
@@ -105,6 +106,7 @@ import { PublicationMultimediaModule } from './publication-multimedia/publicatio
     CreditsReasonModule,
     ProfessionalRecommendationModule,
     PublicationMultimediaModule,
+    UserViewedAdminPublicationModule,
   ],
   controllers: [AppController],
   providers: [AppService, KeepAliveService],

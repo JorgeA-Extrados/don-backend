@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
 
 
 export class CreatePublicationDto {
@@ -15,6 +15,10 @@ export class CreatePublicationDto {
     @IsOptional()
     @IsString()
     pub_reason_for_deletion?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    pub_admin_publication?: boolean;
 
     @IsNotEmpty()
     @IsInt()
